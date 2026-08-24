@@ -10,10 +10,12 @@ import { MerchantPolicyConfig } from '../domain/policy';
 
 export * from './orchestrator';
 
-let globalPipelineInstance: RevenuePipelineOrchestrator | null = null;
+const globalForPipeline = globalThis as unknown as {
+  __merchantPulsePipeline?: RevenuePipelineOrchestrator;
+};
 
 export function getGlobalPipeline(policyConfig?: Partial<MerchantPolicyConfig>): RevenuePipelineOrchestrator {
-  if (!globalPipelineInstance) {
+  if (!globalForPipeline.__merchantPulsePipeline) {
     const factStore = new RevenueFactStore();
     const detector = new RevenueOpportunityDetector(factStore);
     const strategyProvider = getStrategyProvider(true);
@@ -42,7 +44,7 @@ export function getGlobalPipeline(policyConfig?: Partial<MerchantPolicyConfig>):
       ...policyConfig,
     };
 
-    globalPipelineInstance = new RevenuePipelineOrchestrator({
+    globalForPipeline.__merchantPulsePipeline = new RevenuePipelineOrchestrator({
       factStore,
       detector,
       strategyProvider,
@@ -53,5 +55,6 @@ export function getGlobalPipeline(policyConfig?: Partial<MerchantPolicyConfig>):
     });
   }
 
-  return globalPipelineInstance;
+  return globalForPipeline.__merchantPulsePipeline;
 }
+

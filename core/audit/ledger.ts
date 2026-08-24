@@ -63,4 +63,12 @@ export class AuditLedger {
   }
 }
 
-export const globalAuditLedger = new AuditLedger();
+const globalForAudit = globalThis as unknown as {
+  __merchantPulseAuditLedger?: AuditLedger;
+};
+
+export const globalAuditLedger = globalForAudit.__merchantPulseAuditLedger || new AuditLedger();
+if (process.env.NODE_ENV !== 'production') {
+  globalForAudit.__merchantPulseAuditLedger = globalAuditLedger;
+}
+
