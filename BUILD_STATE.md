@@ -9,9 +9,9 @@
 ---
 
 ## Current Status
-- **Current Phase**: Phase 1 — Project Foundation (Completed)
-- **Active Task**: Phase 2 — Domain Model & Schemas
-- **Next Task**: Phase 3 — Deterministic Revenue Engine
+- **Current Phase**: Phase 2 — Domain Model & Schemas (Completed)
+- **Active Task**: Phase 3 — Deterministic Revenue Engine
+- **Next Task**: Phase 4 — AI Strategy Layer
 
 ---
 
@@ -21,8 +21,8 @@
 |---|---|---|---|
 | **Phase 0** | Research & Architecture | **COMPLETED** | Architecture docs, Razorpay capability mapping, evaluation methodology created |
 | **Phase 1** | Project Foundation | **COMPLETED** | Next.js 14, TypeScript, Tailwind CSS, Vitest, @google/genai, Zod installed and verified |
-| **Phase 2** | Domain Model & Schemas | **ACTIVE** | Zod schemas, payment/merchant/opportunity/policy/event types, unit tests |
-| **Phase 3** | Deterministic Revenue Engine | Queued | Anomaly detection, cohort analysis, opportunity identification, EV math, 100% deterministic tests |
+| **Phase 2** | Domain Model & Schemas | **COMPLETED** | Zod schemas, payment/merchant/opportunity/policy/event types, unit tests passing |
+| **Phase 3** | Deterministic Revenue Engine | **ACTIVE** | Anomaly detection, cohort analysis, opportunity identification, EV math, 100% deterministic tests |
 | **Phase 4** | AI Strategy Layer | Queued | Provider interface, `@google/genai` provider (`gemini-2.5-flash`/`gemini-2.0-flash`), Mock provider, strict schema validation, contract tests |
 | **Phase 5** | Policy Engine | Queued | Multi-rule evaluator (limits, approvals, frequency, permissions, evidence sufficiency), unit tests for every branch |
 | **Phase 6** | Event & Razorpay Gateway | Queued | Webhook ingestion, HMAC-SHA256 signature verification, idempotency ledger, out-of-order event handler, Razorpay client adapter |
