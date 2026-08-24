@@ -9,9 +9,9 @@
 ---
 
 ## Current Status
-- **Current Phase**: Phase 6 — Event & Razorpay Gateway (Completed)
-- **Active Task**: Phase 7 — Execution & Outcome Loop
-- **Next Task**: Phase 8 — High-Density Fintech Dashboard
+- **Current Phase**: Phase 7 — Execution & Outcome Loop (Completed)
+- **Active Task**: Phase 8 — High-Density Fintech Dashboard
+- **Next Task**: Phase 9 — Adversarial QA & Evaluation Suite
 
 ---
 
@@ -26,8 +26,8 @@
 | **Phase 4** | AI Strategy Layer | **COMPLETED** | Provider interface, `@google/genai` provider, Mock provider, strict schema validation, contract tests |
 | **Phase 5** | Policy Engine | **COMPLETED** | Multi-rule evaluator (limits, approvals, frequency, permissions, evidence sufficiency), unit tests for every branch |
 | **Phase 6** | Event & Razorpay Gateway | **COMPLETED** | Webhook ingestion, HMAC-SHA256 signature verification, idempotency ledger, out-of-order event handler, Razorpay client adapter |
-| **Phase 7** | Execution & Outcome Loop | **ACTIVE** | Action dispatcher (Payment Links, Customer Notifications, Routing recommendations), simulated/live outcome recorder, feedback loop |
-| **Phase 8** | Dashboard & UX | Queued | Financial terminal aesthetic, Overview KPIs, Opportunity Radar, Detail Drawer, Policy Inspector, Audit Trail, Human Review Queue |
+| **Phase 7** | Execution & Outcome Loop | **COMPLETED** | Action dispatcher (Payment Links, Customer Notifications, Routing recommendations), simulated/live outcome recorder, feedback loop |
+| **Phase 8** | Dashboard & UX | **ACTIVE** | Financial terminal aesthetic, Overview KPIs, Opportunity Radar, Detail Drawer, Policy Inspector, Audit Trail, Human Review Queue |
 | **Phase 9** | Adversarial QA & Evaluation | Queued | Multi-agent adversarial validation suite, evaluation test matrix execution (`docs/evaluation.md`), Playwright browser tests |
 | **Phase 10** | Polish, Documentation & Submission | Queued | Production build, seed scenarios, pitch narrative, demo video walkthrough |
 
