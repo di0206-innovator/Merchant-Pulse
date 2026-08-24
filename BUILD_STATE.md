@@ -9,9 +9,9 @@
 ---
 
 ## Current Status
-- **Current Phase**: Phase 0 — Research & Architecture (Complete, Awaiting Approval)
-- **Active Task**: Architecture review and Phase 1 initialization plan presentation
-- **Next Task**: Phase 1 — Foundation (Next.js 14/15, TypeScript, Tailwind CSS, Vitest, Zod, directory structure)
+- **Current Phase**: Phase 1 — Project Foundation (Completed)
+- **Active Task**: Phase 2 — Domain Model & Schemas
+- **Next Task**: Phase 3 — Deterministic Revenue Engine
 
 ---
 
@@ -20,8 +20,8 @@
 | Phase | Description | Status | Verification Gate |
 |---|---|---|---|
 | **Phase 0** | Research & Architecture | **COMPLETED** | Architecture docs, Razorpay capability mapping, evaluation methodology created |
-| **Phase 1** | Project Foundation | Pending approval | App boots, TypeScript passes, Vitest setup, Tailwind CSS theme configured |
-| **Phase 2** | Domain Model & Schemas | Queued | Zod schemas, payment/merchant/opportunity/policy/event types, unit tests |
+| **Phase 1** | Project Foundation | **COMPLETED** | Next.js 14, TypeScript, Tailwind CSS, Vitest, @google/genai, Zod installed and verified |
+| **Phase 2** | Domain Model & Schemas | **ACTIVE** | Zod schemas, payment/merchant/opportunity/policy/event types, unit tests |
 | **Phase 3** | Deterministic Revenue Engine | Queued | Anomaly detection, cohort analysis, opportunity identification, EV math, 100% deterministic tests |
 | **Phase 4** | AI Strategy Layer | Queued | Provider interface, `@google/genai` provider (`gemini-2.5-flash`/`gemini-2.0-flash`), Mock provider, strict schema validation, contract tests |
 | **Phase 5** | Policy Engine | Queued | Multi-rule evaluator (limits, approvals, frequency, permissions, evidence sufficiency), unit tests for every branch |
