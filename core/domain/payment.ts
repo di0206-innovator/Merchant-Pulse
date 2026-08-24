@@ -4,13 +4,26 @@ export const CurrencySchema = z.literal('INR');
 export type Currency = z.infer<typeof CurrencySchema>;
 
 export const PaymentMethodSchema = z.enum([
+  'upi',
   'card',
   'netbanking',
   'wallet',
   'emi',
-  'upi'
+  'subscription',
+  'bank_transfer',
 ]);
 export type PaymentMethod = z.infer<typeof PaymentMethodSchema>;
+
+export const CardNetworkSchema = z.enum([
+  'visa',
+  'mastercard',
+  'rupay',
+  'amex',
+  'diners',
+  'maestro',
+  'unknown'
+]);
+export type CardNetwork = z.infer<typeof CardNetworkSchema>;
 
 export const PaymentStatusSchema = z.enum([
   'created',
@@ -27,6 +40,7 @@ export const PaymentFailureDetailsSchema = z.object({
   source: z.string().optional(),
   step: z.string().optional(),
   reason: z.string().optional(),
+  declineCode: z.string().optional(),
 });
 export type PaymentFailureDetails = z.infer<typeof PaymentFailureDetailsSchema>;
 
@@ -37,9 +51,12 @@ export const PaymentEntitySchema = z.object({
   currency: CurrencySchema.default('INR'),
   status: PaymentStatusSchema,
   method: PaymentMethodSchema.optional(),
+  cardNetwork: CardNetworkSchema.optional(),
+  cardType: z.enum(['credit', 'debit', 'prepaid']).optional(),
   bank: z.string().nullable().optional(),
   wallet: z.string().nullable().optional(),
   vpa: z.string().nullable().optional(),
+  upiApp: z.string().optional(), // gpay, phonepe, paytm, cred
   email: z.string().email().optional().or(z.string()),
   contact: z.string().optional(),
   error: PaymentFailureDetailsSchema.optional(),
@@ -69,6 +86,7 @@ export const CustomerProfileSchema = z.object({
   totalOrders: z.number().int().nonnegative().default(0),
   failedOrders: z.number().int().nonnegative().default(0),
   ltvPaise: z.number().int().nonnegative().default(0),
-  lastContactedAt: z.number().int().optional(), // UNIX timestamp seconds
+  lastContactedAt: z.number().int().optional(),
+  preferredMethod: PaymentMethodSchema.optional(),
 });
 export type CustomerProfile = z.infer<typeof CustomerProfileSchema>;

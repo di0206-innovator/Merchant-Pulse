@@ -10,7 +10,8 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:eval": "vitest run tests/evaluation"
+    "test:eval": "vitest run tests/evaluation",
+    "test:stress": "vitest run tests/stress"
   },
   "dependencies": {
     "@google/genai": "^2.18.0",
