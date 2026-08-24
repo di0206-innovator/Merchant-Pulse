@@ -9,9 +9,9 @@
 ---
 
 ## Current Status
-- **Current Phase**: Phase 3 — Deterministic Revenue Engine (Completed)
-- **Active Task**: Phase 4 — AI Strategy Layer
-- **Next Task**: Phase 5 — Policy Engine
+- **Current Phase**: Phase 4 — AI Strategy Layer (Completed)
+- **Active Task**: Phase 5 — Policy Engine & Guardrails
+- **Next Task**: Phase 6 — Event & Razorpay Gateway
 
 ---
 
@@ -23,8 +23,8 @@
 | **Phase 1** | Project Foundation | **COMPLETED** | Next.js 14, TypeScript, Tailwind CSS, Vitest, @google/genai, Zod installed and verified |
 | **Phase 2** | Domain Model & Schemas | **COMPLETED** | Zod schemas, payment/merchant/opportunity/policy/event types, unit tests passing |
 | **Phase 3** | Deterministic Revenue Engine | **COMPLETED** | Anomaly detection, cohort analysis, opportunity identification, EV math, 100% deterministic tests |
-| **Phase 4** | AI Strategy Layer | **ACTIVE** | Provider interface, `@google/genai` provider (`gemini-2.5-flash`/`gemini-2.0-flash`), Mock provider, strict schema validation, contract tests |
-| **Phase 5** | Policy Engine | Queued | Multi-rule evaluator (limits, approvals, frequency, permissions, evidence sufficiency), unit tests for every branch |
+| **Phase 4** | AI Strategy Layer | **COMPLETED** | Provider interface, `@google/genai` provider, Mock provider, strict schema validation, contract tests |
+| **Phase 5** | Policy Engine | **ACTIVE** | Multi-rule evaluator (limits, approvals, frequency, permissions, evidence sufficiency), unit tests for every branch |
 | **Phase 6** | Event & Razorpay Gateway | Queued | Webhook ingestion, HMAC-SHA256 signature verification, idempotency ledger, out-of-order event handler, Razorpay client adapter |
 | **Phase 7** | Execution & Outcome Loop | Queued | Action dispatcher (Payment Links, Customer Notifications, Routing recommendations), simulated/live outcome recorder, feedback loop |
 | **Phase 8** | Dashboard & UX | Queued | Financial terminal aesthetic, Overview KPIs, Opportunity Radar, Detail Drawer, Policy Inspector, Audit Trail, Human Review Queue |
