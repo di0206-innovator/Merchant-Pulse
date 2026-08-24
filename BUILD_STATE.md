@@ -9,9 +9,9 @@
 ---
 
 ## Current Status
-- **Current Phase**: Phase 4 — AI Strategy Layer (Completed)
-- **Active Task**: Phase 5 — Policy Engine & Guardrails
-- **Next Task**: Phase 6 — Event & Razorpay Gateway
+- **Current Phase**: Phase 5 — Policy Engine & Guardrails (Completed)
+- **Active Task**: Phase 6 — Event & Razorpay Gateway
+- **Next Task**: Phase 7 — Execution & Outcome Loop
 
 ---
 
@@ -24,8 +24,8 @@
 | **Phase 2** | Domain Model & Schemas | **COMPLETED** | Zod schemas, payment/merchant/opportunity/policy/event types, unit tests passing |
 | **Phase 3** | Deterministic Revenue Engine | **COMPLETED** | Anomaly detection, cohort analysis, opportunity identification, EV math, 100% deterministic tests |
 | **Phase 4** | AI Strategy Layer | **COMPLETED** | Provider interface, `@google/genai` provider, Mock provider, strict schema validation, contract tests |
-| **Phase 5** | Policy Engine | **ACTIVE** | Multi-rule evaluator (limits, approvals, frequency, permissions, evidence sufficiency), unit tests for every branch |
-| **Phase 6** | Event & Razorpay Gateway | Queued | Webhook ingestion, HMAC-SHA256 signature verification, idempotency ledger, out-of-order event handler, Razorpay client adapter |
+| **Phase 5** | Policy Engine | **COMPLETED** | Multi-rule evaluator (limits, approvals, frequency, permissions, evidence sufficiency), unit tests for every branch |
+| **Phase 6** | Event & Razorpay Gateway | **ACTIVE** | Webhook ingestion, HMAC-SHA256 signature verification, idempotency ledger, out-of-order event handler, Razorpay client adapter |
 | **Phase 7** | Execution & Outcome Loop | Queued | Action dispatcher (Payment Links, Customer Notifications, Routing recommendations), simulated/live outcome recorder, feedback loop |
 | **Phase 8** | Dashboard & UX | Queued | Financial terminal aesthetic, Overview KPIs, Opportunity Radar, Detail Drawer, Policy Inspector, Audit Trail, Human Review Queue |
 | **Phase 9** | Adversarial QA & Evaluation | Queued | Multi-agent adversarial validation suite, evaluation test matrix execution (`docs/evaluation.md`), Playwright browser tests |
