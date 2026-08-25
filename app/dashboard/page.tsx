@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { MaterialAppLayout } from '@/components/layout/MaterialAppLayout';
 import { ProfileBar } from '@/components/dashboard/ProfileBar';
 import { SettingsDrawer } from '@/components/dashboard/SettingsDrawer';
 import { useAuth } from '@/lib/supabase/authContext';
@@ -175,36 +176,8 @@ export default function DashboardPage() {
   const escalatedCount = opportunities.filter(o => o.status === 'ESCALATED').length;
 
   return (
-    <div className="min-h-screen bg-[#070B12] text-slate-100 flex flex-col font-sans selection:bg-blue-600/30 selection:text-white">
-      {/* Top Navbar */}
-      <nav className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur sticky top-0 z-40 px-6 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800/60"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Landing Page</span>
-            </Link>
-
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-blue-500/20">
-              MP
-            </div>
-            <div>
-              <span className="font-bold text-sm tracking-tight text-white">MerchantPulse</span>
-              <span className="text-[11px] text-slate-400 ml-2 hidden sm:inline">
-                Revenue Terminal
-              </span>
-            </div>
-          </div>
-
-          <ProfileBar onOpenSettings={() => setIsSettingsOpen(true)} />
-        </div>
-      </nav>
-
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    <MaterialAppLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Overview Header & Controls */}
         <OverviewHeader
           onRunDemo={handleRunDemo}
@@ -333,7 +306,7 @@ export default function DashboardPage() {
             />
           </div>
         )}
-      </main>
+
 
       {/* Opportunity Detail Drawer */}
       <OpportunityDetailDrawer
@@ -352,16 +325,7 @@ export default function DashboardPage() {
         onClose={() => setIsSettingsOpen(false)}
         currentUser={currentUser}
       />
-
-      {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950/60 py-6 px-6 text-center text-xs text-slate-500 font-mono">
-        <p>
-          MerchantPulse • Razorpay Buildathon • AI Growth & Agentic Commerce
-        </p>
-        <p className="text-[11px] text-slate-600 mt-1">
-          Logged in as: <span className="text-slate-300 font-bold">{currentUser.name}</span> ({currentUser.role}) • Merchant ID: {currentUser.merchantId}
-        </p>
-      </footer>
-    </div>
+      </div>
+    </MaterialAppLayout>
   );
 }

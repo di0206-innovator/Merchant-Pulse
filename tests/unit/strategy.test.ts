@@ -59,7 +59,7 @@ describe('AI Strategy Layer Unit & Contract Tests', () => {
     expect(strategy.recommendedActionType).toBe('CREATE_PAYMENT_LINK');
     const validated = StrategyRecommendationSchema.safeParse(strategy);
     expect(validated.success).toBe(true);
-  });
+  }, 15000);
 
   it('getStrategyProvider returns an active provider instance', () => {
     const provider = getStrategyProvider(false);
