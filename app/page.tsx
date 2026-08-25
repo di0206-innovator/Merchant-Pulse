@@ -88,9 +88,9 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070B12] dark:bg-[#070B12] light:bg-[#F8FAFC] text-slate-100 dark:text-slate-100 light:text-slate-900 flex flex-col font-sans selection:bg-blue-600/30 selection:text-white relative overflow-hidden transition-colors duration-150">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#070B12] text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-blue-600/30 selection:text-white relative overflow-hidden transition-colors duration-200">
       {/* Standalone Header Navbar */}
-      <header className="sticky top-0 z-50 bg-[#0A0E1A]/90 dark:bg-[#0A0E1A]/90 light:bg-white/90 backdrop-blur-md border-b border-slate-800/80 dark:border-slate-800/80 light:border-slate-200 shadow-md">
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#0A0E1A]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           {/* Brand Logo */}
           <div className="flex items-center gap-3">
@@ -98,22 +98,22 @@ export default function LandingPage() {
               MP
             </div>
             <div>
-              <span className="font-extrabold text-base tracking-tight text-white dark:text-white light:text-slate-900">MerchantPulse</span>
-              <span className="text-[11px] text-blue-500 font-mono ml-2.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 hidden sm:inline">
+              <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white">MerchantPulse</span>
+              <span className="text-[11px] text-blue-600 dark:text-blue-400 font-mono ml-2.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 hidden sm:inline">
                 Razorpay Buildathon
               </span>
             </div>
           </div>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center gap-6 text-xs font-mono text-slate-400 dark:text-slate-400 light:text-slate-600">
-            <a href="#roi-calculator" className="hover:text-blue-500 transition-colors">
+          <div className="hidden md:flex items-center gap-6 text-xs font-mono text-slate-600 dark:text-slate-400">
+            <a href="#roi-calculator" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
               ROI Calculator
             </a>
-            <a href="#pipeline-simulator" className="hover:text-blue-500 transition-colors">
+            <a href="#pipeline-simulator" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
               Live Pipeline
             </a>
-            <a href="#features" className="hover:text-blue-500 transition-colors">
+            <a href="#features" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
               Architecture Creed
             </a>
           </div>
@@ -123,7 +123,7 @@ export default function LandingPage() {
             {/* Quick Theme Switcher Button */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl bg-slate-900 dark:bg-slate-900 light:bg-slate-100 border border-slate-800 dark:border-slate-800 light:border-slate-300 text-slate-300 dark:text-slate-300 light:text-slate-700 hover:text-white transition-colors"
+              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
               title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
             >
               {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
@@ -169,19 +169,19 @@ export default function LandingPage() {
         {/* Hero Section */}
         <section className="relative pt-12 sm:pt-20 pb-20 px-4 sm:px-6">
           <div className="max-w-5xl mx-auto text-center space-y-6 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 dark:bg-slate-900/90 light:bg-slate-100 border border-slate-800 dark:border-slate-800 light:border-slate-300 text-xs font-mono text-slate-300 dark:text-slate-300 light:text-slate-700 m3-elevation-1">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 text-xs font-mono text-slate-700 dark:text-slate-300 m3-elevation-1">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
               Razorpay AI Buildathon 2026 — Track 03: AI Revenue Recovery
             </div>
 
-            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white dark:text-white light:text-slate-900 leading-tight">
+            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
               Recover Payment Revenue Automatically —{' '}
-              <span className="bg-gradient-to-r from-blue-500 via-indigo-400 to-emerald-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-600 dark:from-blue-400 dark:via-indigo-300 dark:to-emerald-400 bg-clip-text text-transparent">
                 Without Letting AI Control Your Money.
               </span>
             </h1>
 
-            <p className="text-base sm:text-lg text-slate-300 dark:text-slate-300 light:text-slate-600 max-w-3xl mx-auto leading-relaxed font-sans">
+            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed font-sans">
               MerchantPulse finds failed payment revenue that is recoverable, chooses the highest-value bounded intervention, executes it through Razorpay primitives, and proves whether the intervention recovered money.
             </p>
 
@@ -196,9 +196,9 @@ export default function LandingPage() {
 
               <a
                 href="#roi-calculator"
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900/80 dark:bg-slate-900/80 light:bg-white hover:bg-slate-800/80 border border-slate-800 dark:border-slate-800 light:border-slate-300 text-slate-200 dark:text-slate-200 light:text-slate-800 font-bold text-xs font-mono transition-all m3-elevation-1"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs font-mono transition-all m3-elevation-1"
               >
-                <TrendingUp className="w-4 h-4 text-emerald-500" />
+                <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>Calculate Your Recoverable ROI</span>
               </a>
             </div>
@@ -208,45 +208,45 @@ export default function LandingPage() {
               className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-10 text-left"
               style={{ transform: `translateY(${scrollY * -0.08}px)` }}
             >
-              <div className="p-4 rounded-3xl bg-slate-900/70 dark:bg-slate-900/70 light:bg-white border border-slate-800/80 dark:border-slate-800/80 light:border-slate-200 backdrop-blur m3-elevation-2 space-y-1">
-                <div className="text-2xl font-extrabold text-white dark:text-white light:text-slate-900 font-mono">₹1.24 Cr</div>
-                <div className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-500 font-mono">Sample Merchant GMV</div>
+              <div className="p-4 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800/80 backdrop-blur m3-elevation-2 space-y-1">
+                <div className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono">₹1.24 Cr</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">Sample Merchant GMV</div>
               </div>
 
-              <div className="p-4 rounded-3xl bg-slate-900/70 dark:bg-slate-900/70 light:bg-white border border-emerald-500/30 backdrop-blur m3-elevation-2 space-y-1">
-                <div className="text-2xl font-extrabold text-emerald-500 font-mono">76.2%</div>
-                <div className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-500 font-mono">Attributed Recovery Rate</div>
+              <div className="p-4 rounded-3xl bg-white dark:bg-slate-900/70 border border-emerald-500/30 backdrop-blur m3-elevation-2 space-y-1">
+                <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">76.2%</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">Attributed Recovery Rate</div>
               </div>
 
-              <div className="p-4 rounded-3xl bg-slate-900/70 dark:bg-slate-900/70 light:bg-white border border-indigo-500/30 backdrop-blur m3-elevation-2 space-y-1">
-                <div className="text-2xl font-extrabold text-indigo-500 font-mono">41 / 41</div>
-                <div className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-500 font-mono">Automated Tests Passing</div>
+              <div className="p-4 rounded-3xl bg-white dark:bg-slate-900/70 border border-indigo-500/30 backdrop-blur m3-elevation-2 space-y-1">
+                <div className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 font-mono">41 / 41</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">Automated Tests Passing</div>
               </div>
 
-              <div className="p-4 rounded-3xl bg-slate-900/70 dark:bg-slate-900/70 light:bg-white border border-blue-500/30 backdrop-blur m3-elevation-2 space-y-1">
-                <div className="text-2xl font-extrabold text-blue-500 font-mono">500+ Req/s</div>
-                <div className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-500 font-mono">Concurrent Worker Scale</div>
+              <div className="p-4 rounded-3xl bg-white dark:bg-slate-900/70 border border-blue-500/30 backdrop-blur m3-elevation-2 space-y-1">
+                <div className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 font-mono">500+ Req/s</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">Concurrent Worker Scale</div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Live Interactive Pipeline Visualizer Section */}
-        <section id="pipeline-simulator" className="py-16 px-4 sm:px-6 bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-100 border-t border-slate-900 dark:border-slate-900 light:border-slate-200">
+        <section id="pipeline-simulator" className="py-16 px-4 sm:px-6 bg-slate-100 dark:bg-slate-950/60 border-t border-slate-200 dark:border-slate-900">
           <div className="max-w-5xl mx-auto space-y-8">
             <div className="text-center space-y-2">
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-white dark:text-white light:text-slate-900 tracking-tight">
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Live 4-Stage Autonomous Recovery Pipeline
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-400 light:text-slate-600 font-mono max-w-2xl mx-auto">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-mono max-w-2xl mx-auto">
                 Test how MerchantPulse processes a real-time failed payment webhook event from Razorpay.
               </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-900/80 dark:bg-slate-900/80 light:bg-white border border-slate-800 dark:border-slate-800 light:border-slate-200 m3-elevation-3 space-y-6 font-mono text-xs">
+            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 m3-elevation-3 space-y-6 font-mono text-xs">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 font-bold text-white dark:text-white light:text-slate-900">
-                  <Play className="w-4 h-4 text-blue-500 fill-blue-500" />
+                <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
+                  <Play className="w-4 h-4 text-blue-600 dark:text-blue-400 fill-blue-600 dark:fill-blue-400" />
                   <span>Pipeline Event Stream Simulator</span>
                 </div>
                 <button
@@ -262,12 +262,12 @@ export default function LandingPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className={`p-4 rounded-2xl border transition-all ${
                   simStep >= 1
-                    ? 'bg-blue-600/10 border-blue-500 text-blue-400'
-                    : 'bg-slate-950 dark:bg-slate-950 light:bg-slate-50 border-slate-800 text-slate-500'
+                    ? 'bg-blue-50 dark:bg-blue-600/10 border-blue-500 text-blue-700 dark:text-blue-400'
+                    : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-400'
                 }`}>
                   <div className="font-bold flex items-center justify-between">
                     <span>1. Detection & EV Math</span>
-                    {simStep >= 1 && <CheckCircle2 className="w-4 h-4 text-blue-400" />}
+                    {simStep >= 1 && <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
                   </div>
                   <p className="text-[11px] mt-1 opacity-80">
                     Calculated P(success)=0.74, Intervention Fee=₹130, Net EV=₹6,160.
@@ -276,12 +276,12 @@ export default function LandingPage() {
 
                 <div className={`p-4 rounded-2xl border transition-all ${
                   simStep >= 2
-                    ? 'bg-indigo-600/10 border-indigo-500 text-indigo-400'
-                    : 'bg-slate-950 dark:bg-slate-950 light:bg-slate-50 border-slate-800 text-slate-500'
+                    ? 'bg-indigo-50 dark:bg-indigo-600/10 border-indigo-500 text-indigo-700 dark:text-indigo-400'
+                    : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-400'
                 }`}>
                   <div className="font-bold flex items-center justify-between">
                     <span>2. Policy Evaluation</span>
-                    {simStep >= 2 && <CheckCircle2 className="w-4 h-4 text-indigo-400" />}
+                    {simStep >= 2 && <CheckCircle2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
                   </div>
                   <p className="text-[11px] mt-1 opacity-80">
                     GMV Cap ₹8.5k &lt; ₹25k limit. 24h Cooldown valid. Policy Passed.
@@ -290,12 +290,12 @@ export default function LandingPage() {
 
                 <div className={`p-4 rounded-2xl border transition-all ${
                   simStep >= 3
-                    ? 'bg-emerald-600/10 border-emerald-500 text-emerald-400'
-                    : 'bg-slate-950 dark:bg-slate-950 light:bg-slate-50 border-slate-800 text-slate-500'
+                    ? 'bg-emerald-50 dark:bg-emerald-600/10 border-emerald-500 text-emerald-700 dark:text-emerald-400'
+                    : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-400'
                 }`}>
                   <div className="font-bold flex items-center justify-between">
                     <span>3. Razorpay Dispatch</span>
-                    {simStep >= 3 && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+                    {simStep >= 3 && <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
                   </div>
                   <p className="text-[11px] mt-1 opacity-80">
                     Payment link generated: plink_Pz884422. SMS dispatched.
@@ -310,19 +310,19 @@ export default function LandingPage() {
         <section id="roi-calculator" className="py-16 px-4 sm:px-6">
           <div className="max-w-5xl mx-auto space-y-8">
             <div className="text-center space-y-2">
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-white dark:text-white light:text-slate-900 tracking-tight">
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Estimate Your Merchant Revenue Recovery
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-400 light:text-slate-600 font-mono max-w-2xl mx-auto">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-mono max-w-2xl mx-auto">
                 See how much gross revenue MerchantPulse can autonomously recover for your business each month without discounting.
               </p>
             </div>
 
-            <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 dark:bg-slate-900/80 light:bg-white border border-slate-800 dark:border-slate-800 light:border-slate-200 m3-elevation-3 space-y-6">
+            <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 m3-elevation-3 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-mono text-slate-300 dark:text-slate-300 light:text-slate-800 font-bold mb-2">
-                    Monthly Processing Volume (GMV): <span className="text-blue-500 text-sm">₹{(monthlyGmvLakhs / 100).toFixed(2)} Cr</span> (₹{monthlyGmvLakhs} Lakhs)
+                  <label className="block text-xs font-mono text-slate-800 dark:text-slate-300 font-bold mb-2">
+                    Monthly Processing Volume (GMV): <span className="text-blue-600 dark:text-blue-400 text-sm">₹{(monthlyGmvLakhs / 100).toFixed(2)} Cr</span> (₹{monthlyGmvLakhs} Lakhs)
                   </label>
                   <input
                     type="range"
@@ -331,7 +331,7 @@ export default function LandingPage() {
                     step="5"
                     value={monthlyGmvLakhs}
                     onChange={(e) => setMonthlyGmvLakhs(Number(e.target.value))}
-                    className="w-full accent-blue-500 cursor-pointer h-2 bg-slate-800 dark:bg-slate-800 light:bg-slate-200 rounded-lg"
+                    className="w-full accent-blue-600 cursor-pointer h-2 bg-slate-200 dark:bg-slate-800 rounded-lg"
                   />
                   <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
                     <span>₹10 Lakhs</span>
@@ -341,8 +341,8 @@ export default function LandingPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono text-slate-300 dark:text-slate-300 light:text-slate-800 font-bold mb-2">
-                    Payment Dropoff / Failure Rate: <span className="text-amber-500 text-sm">{failureRatePct}%</span>
+                  <label className="block text-xs font-mono text-slate-800 dark:text-slate-300 font-bold mb-2">
+                    Payment Dropoff / Failure Rate: <span className="text-amber-600 dark:text-amber-400 text-sm">{failureRatePct}%</span>
                   </label>
                   <input
                     type="range"
@@ -351,7 +351,7 @@ export default function LandingPage() {
                     step="0.5"
                     value={failureRatePct}
                     onChange={(e) => setFailureRatePct(Number(e.target.value))}
-                    className="w-full accent-amber-500 cursor-pointer h-2 bg-slate-800 dark:bg-slate-800 light:bg-slate-200 rounded-lg"
+                    className="w-full accent-amber-500 cursor-pointer h-2 bg-slate-200 dark:bg-slate-800 rounded-lg"
                   />
                   <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
                     <span>1.5% (Low)</span>
@@ -362,24 +362,24 @@ export default function LandingPage() {
               </div>
 
               {/* Output Result Surfaces */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-800 dark:border-slate-800 light:border-slate-200">
-                <div className="p-4 rounded-2xl bg-slate-950 dark:bg-slate-950 light:bg-slate-50 border border-slate-800 dark:border-slate-800 light:border-slate-200 font-mono">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono">
                   <div className="text-slate-500 text-[10px]">Monthly Revenue at Risk</div>
-                  <div className="text-xl font-bold text-amber-500 mt-1">
+                  <div className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1">
                     ₹{(monthlyRevenueAtRiskInr / 100000).toFixed(2)} Lakhs
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-950 dark:bg-slate-950 light:bg-slate-50 border border-emerald-500/40 font-mono">
-                  <div className="text-emerald-500 text-[10px] font-bold">Monthly Recovered Money</div>
-                  <div className="text-2xl font-extrabold text-emerald-500 mt-1">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-emerald-500/40 font-mono">
+                  <div className="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">Monthly Recovered Money</div>
+                  <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
                     ₹{(monthlyRecoverableInr / 100000).toFixed(2)} Lakhs
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-900/30 to-indigo-900/30 dark:from-blue-900/30 light:from-blue-50 border border-blue-500/50 font-mono">
-                  <div className="text-blue-500 text-[10px] font-bold">Annual Incremental Recovery</div>
-                  <div className="text-2xl font-extrabold text-blue-500 mt-1">
+                <div className="p-4 rounded-2xl bg-blue-50 dark:bg-gradient-to-br dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-500/50 font-mono">
+                  <div className="text-blue-700 dark:text-blue-400 text-[10px] font-bold">Annual Incremental Recovery</div>
+                  <div className="text-2xl font-extrabold text-blue-700 dark:text-blue-400 mt-1">
                     ₹{(annualRecoveredInr / 100000).toFixed(2)} Lakhs
                   </div>
                 </div>
@@ -389,44 +389,44 @@ export default function LandingPage() {
         </section>
 
         {/* Feature Overview Grid */}
-        <section id="features" className="py-16 px-4 sm:px-6 bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-100 border-t border-slate-900 dark:border-slate-900 light:border-slate-200">
+        <section id="features" className="py-16 px-4 sm:px-6 bg-slate-100 dark:bg-slate-950/60 border-t border-slate-200 dark:border-slate-900">
           <div className="max-w-5xl mx-auto space-y-8">
             <div className="text-center space-y-2">
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-white dark:text-white light:text-slate-900 tracking-tight">
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Architected for Production Razorpay Submissions
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-400 light:text-slate-600 font-mono max-w-2xl mx-auto">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-mono max-w-2xl mx-auto">
                 Deterministic detection, economic expected-value modeling, policy guardrails, and closed-loop Razorpay execution.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-6 rounded-3xl bg-slate-900/70 dark:bg-slate-900/70 light:bg-white border border-slate-800 dark:border-slate-800 light:border-slate-200 m3-elevation-2 space-y-3">
-                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-500">
+              <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 m3-elevation-2 space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
                   <Zap className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-white dark:text-white light:text-slate-900 font-mono">Deterministic EV Math</h3>
-                <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 leading-relaxed font-sans">
-                  Calculates Net Expected Value before taking action: <code className="text-blue-500 font-mono">Net EV = (P_success × GMV) - (Fee + Fatigue)</code>.
+                <h3 className="text-base font-bold text-slate-900 dark:text-white font-mono">Deterministic EV Math</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
+                  Calculates Net Expected Value before taking action: <code className="text-blue-600 dark:text-blue-400 font-mono">Net EV = (P_success × GMV) - (Fee + Fatigue)</code>.
                 </p>
               </div>
 
-              <div className="p-6 rounded-3xl bg-slate-900/70 dark:bg-slate-900/70 light:bg-white border border-slate-800 dark:border-slate-800 light:border-slate-200 m3-elevation-2 space-y-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
+              <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 m3-elevation-2 space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-white dark:text-white light:text-slate-900 font-mono">Bounded Policy Guardrails</h3>
-                <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 leading-relaxed font-sans">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white font-mono">Bounded Policy Guardrails</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
                   Strict caps on maximum GMV auto-execution, 24-hour contact cooldowns, and mandatory escalation queues for high-risk operations.
                 </p>
               </div>
 
-              <div className="p-6 rounded-3xl bg-slate-900/70 dark:bg-slate-900/70 light:bg-white border border-slate-800 dark:border-slate-800 light:border-slate-200 m3-elevation-2 space-y-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-500">
+              <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 m3-elevation-2 space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                   <BarChart3 className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-white dark:text-white light:text-slate-900 font-mono">Closed-Loop Attribution</h3>
-                <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 leading-relaxed font-sans">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white font-mono">Closed-Loop Attribution</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
                   Reconciles Razorpay paid webhooks against idempotency keys to guarantee zero double-counting in batch recovery reports.
                 </p>
               </div>
@@ -435,11 +435,11 @@ export default function LandingPage() {
         </section>
 
         {/* CTA Footer Section */}
-        <section className="py-12 px-4 sm:px-6 bg-slate-950 dark:bg-slate-950 light:bg-white border-t border-slate-900 dark:border-slate-900 light:border-slate-200">
+        <section className="py-12 px-4 sm:px-6 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900">
           <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
             <div>
-              <h3 className="text-xl font-bold text-white dark:text-white light:text-slate-900 tracking-tight">Ready to test the Live Terminal?</h3>
-              <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 font-mono mt-1">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Ready to test the Live Terminal?</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-mono mt-1">
                 Authenticate your merchant account to access live recovery streams and synthetic benchmark suites.
               </p>
             </div>
