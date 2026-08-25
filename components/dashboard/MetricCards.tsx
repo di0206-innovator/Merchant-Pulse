@@ -17,21 +17,21 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Total GMV */}
-      <div className="relative overflow-hidden p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700/80 transition-all group">
+      <div className="relative overflow-hidden p-5 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 m3-elevation-2 transition-all">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Total Pipeline GMV
           </span>
-          <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
             <DollarSign className="w-4 h-4" />
           </div>
         </div>
         <div className="mt-3">
-          <div className="text-2xl font-bold font-mono text-white tracking-tight">
+          <div className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white tracking-tight tabular-nums">
             {formatInr(metrics.totalGmvPaise)}
           </div>
-          <div className="flex items-center gap-1.5 mt-1.5 text-xs text-slate-400">
-            <span className="text-emerald-400 font-mono font-medium">
+          <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500 font-mono">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
               {formatInr(metrics.totalCapturedGmvPaise)}
             </span>
             <span>captured organic</span>
@@ -40,44 +40,44 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics }) => {
       </div>
 
       {/* Revenue at Risk */}
-      <div className="relative overflow-hidden p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700/80 transition-all group">
+      <div className="relative overflow-hidden p-5 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 m3-elevation-2 transition-all">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Revenue at Risk
           </span>
-          <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
+          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
             <AlertTriangle className="w-4 h-4" />
           </div>
         </div>
         <div className="mt-3">
-          <div className="text-2xl font-bold font-mono text-amber-400 tracking-tight">
+          <div className="text-2xl font-extrabold font-mono text-amber-600 dark:text-amber-400 tracking-tight tabular-nums">
             {formatInr(metrics.revenueAtRiskPaise)}
           </div>
-          <div className="flex items-center gap-1.5 mt-1.5 text-xs text-slate-400">
-            <span className="text-amber-400 font-mono font-medium">
+          <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500 font-mono">
+            <span className="text-amber-600 dark:text-amber-400 font-bold">
               {metrics.degradationRatePct}%
             </span>
-            <span>dropoff & degradation rate</span>
+            <span>dropoff failure rate</span>
           </div>
         </div>
       </div>
 
       {/* Recoverable Opportunity EV */}
-      <div className="relative overflow-hidden p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700/80 transition-all group">
+      <div className="relative overflow-hidden p-5 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 m3-elevation-2 transition-all">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Recoverable EV
+          <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            Recoverable EV Math
           </span>
-          <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
             <TrendingUp className="w-4 h-4" />
           </div>
         </div>
         <div className="mt-3">
-          <div className="text-2xl font-bold font-mono text-blue-400 tracking-tight">
+          <div className="text-2xl font-extrabold font-mono text-blue-600 dark:text-blue-400 tracking-tight tabular-nums">
             {formatInr(metrics.recoverableOpportunityPaise)}
           </div>
-          <div className="flex items-center gap-1.5 mt-1.5 text-xs text-slate-400">
-            <span className="text-blue-400 font-mono font-medium">
+          <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500 font-mono">
+            <span className="text-blue-600 dark:text-blue-400 font-bold">
               {metrics.activeOpportunityCount}
             </span>
             <span>active actionable leaks</span>
@@ -86,24 +86,24 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics }) => {
       </div>
 
       {/* Recovered Value */}
-      <div className="relative overflow-hidden p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700/80 transition-all group">
+      <div className="relative overflow-hidden p-5 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 m3-elevation-2 transition-all">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Recovered Value (Closed-Loop)
+          <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            Recovered Money (Attributed)
           </span>
-          <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
             <CheckCircle className="w-4 h-4" />
           </div>
         </div>
         <div className="mt-3">
-          <div className="text-2xl font-bold font-mono text-emerald-400 tracking-tight">
+          <div className="text-2xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400 tracking-tight tabular-nums">
             {formatInr(metrics.recoveredGmvPaise)}
           </div>
-          <div className="flex items-center gap-1.5 mt-1.5 text-xs text-slate-400">
-            <span className="text-emerald-400 font-mono font-medium">
+          <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500 font-mono">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
               {metrics.netRecoveryConversionRatePct}%
             </span>
-            <span>attributed conversion rate</span>
+            <span>attributed conversion</span>
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { AuthProvider } from '@/lib/supabase/authContext';
 import { ThemeProvider } from '@/lib/themeContext';
 import './globals.css';
@@ -15,7 +16,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-[#0A0E17] text-slate-100 antialiased flex flex-col font-sans">
+      <head>
+        <Script
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="lazyOnload"
+        />
+      </head>
+      <body className="min-h-screen bg-[#070B12] dark:bg-[#070B12] light:bg-[#F8FAFC] text-slate-100 dark:text-slate-100 light:text-slate-900 antialiased flex flex-col font-sans">
         <ThemeProvider>
           <AuthProvider>
             {children}
