@@ -1,25 +1,36 @@
 import { createBrowserClient } from '@supabase/ssr';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ttxbgdosrtohcksvydsc.supabase.co';
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy_anon_key_for_demo';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export function isSupabaseConfigured(): boolean {
-  return (
-    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
-    Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== 'dummy_anon_key_for_demo'
-  );
+  return Boolean(SUPABASE_URL) && Boolean(SUPABASE_ANON_KEY);
+}
+
+export function getSupabaseMode(): 'CONFIGURED' | 'DEMO MODE' {
+  return isSupabaseConfigured() ? 'CONFIGURED' : 'DEMO MODE';
 }
 
 export function createClient() {
-  if (typeof window !== 'undefined') {
-    return createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  if (!isSupabaseConfigured()) {
+    throw new Error(
+      '[MerchantPulse Supabase] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. System operating in DEMO MODE.'
+    );
   }
-  return createSupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  if (typeof window !== 'undefined') {
+    return createBrowserClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
+  }
+  return createSupabaseClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
 }
 
 export async function signInWithGoogle(redirectTo?: string) {
+  if (!isSupabaseConfigured()) {
+    console.warn('[MerchantPulse Auth] Supabase not configured. Operating in Demo Mode.');
+    return null;
+  }
+
   const supabase = createClient();
   const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
   const targetRedirect = redirectTo || `${origin}/auth/callback`;
@@ -44,6 +55,7 @@ export async function signInWithGoogle(redirectTo?: string) {
 }
 
 export async function signOutUser() {
+  if (!isSupabaseConfigured()) return;
   const supabase = createClient();
   const { error } = await supabase.auth.signOut();
   if (error) {

@@ -275,4 +275,32 @@ describe('MerchantPulse 10-Scenario Adversarial Evaluation Benchmark Suite', () 
     const updatedAudit = auditLedger.getRecord(decision!.decisionId);
     expect(updatedAudit?.outcome?.status).toBe('EXPIRED');
   });
+
+  // ACCOUNTING INVARIANTS TEST
+  it('ACCOUNTING-INVARIANT: Non-overlapping GMV partitions & Net EV correctness', async () => {
+    const { BatchRunner } = await import('@/core/evaluation/batchRunner');
+    const runner = new BatchRunner();
+    const result = await runner.runBenchmark({
+      batchSize: 100,
+      seed: 42,
+      splitRatio: 0.8,
+      merchantId: 'rzp_merchant_eval',
+    });
+
+    const metrics = result.merchantPulseMock;
+    
+    // Invariant 1: Total Addressable GMV = Rejected + Pending Escalation + Autonomous Attempt + Human Approved Attempt
+    const totalPartitionedGmv = metrics.totalRejectedGmvPaise + metrics.pendingEscalationGmvPaise + metrics.autonomousAttemptGmvPaise + metrics.humanApprovedAttemptGmvPaise;
+    expect(totalPartitionedGmv).toBe(metrics.totalAddressableGmvPaise);
+
+    // Invariant 2: Total Attempted GMV = Autonomous Attempt + Human Approved Attempt
+    expect(metrics.totalAttemptedGmvPaise).toBe(metrics.autonomousAttemptGmvPaise + metrics.humanApprovedAttemptGmvPaise);
+
+    // Invariant 3: Total Recovered GMV <= Total Attempted GMV
+    expect(metrics.totalRecoveredGmvPaise).toBeLessThanOrEqual(metrics.totalAttemptedGmvPaise);
+
+    // Invariant 4: Net Recovered GMV = max(0, totalRecovered - interventionCost - fatigueCost)
+    const expectedNet = Math.max(0, metrics.totalRecoveredGmvPaise - metrics.totalInterventionCostPaise - metrics.totalFatigueCostPaise);
+    expect(metrics.netRecoveredGmvPaise).toBe(expectedNet);
+  });
 });

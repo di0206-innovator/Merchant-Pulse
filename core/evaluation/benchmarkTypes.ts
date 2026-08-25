@@ -5,6 +5,7 @@ export interface BatchConfig {
   seed: number;
   splitRatio: number; // e.g. 0.8 for 80/20 train/held-out split
   merchantId: string;
+  useGeminiAi?: boolean;
 }
 
 export interface SyntheticPaymentEvent {
@@ -25,24 +26,34 @@ export interface StrategyMetrics {
   totalEvents: number;
   totalFailedGmvPaise: number;
   totalAddressableGmvPaise: number;
+  
+  // Non-overlapping primary accounting buckets
   totalRejectedGmvPaise: number;
-  totalEscalatedGmvPaise: number;
-  totalAttemptedGmvPaise: number;
+  pendingEscalationGmvPaise: number;
+  humanApprovedAttemptGmvPaise: number;
+  totalEscalatedGmvPaise: number; // = pendingEscalationGmvPaise + humanApprovedAttemptGmvPaise
+  autonomousAttemptGmvPaise: number;
+  totalAttemptedGmvPaise: number; // = autonomousAttemptGmvPaise + humanApprovedAttemptGmvPaise
+
   totalRecoveredGmvPaise: number;
   netRecoveredGmvPaise: number;
+  
   recoveryRatePct: number;
   attemptSuccessRatePct: number;
   autonomousRecoveryRatePct: number;
-  humanApprovedRecoveryGmvPaise: number;
+  
   totalInterventionCostPaise: number;
   totalFatigueCostPaise: number;
   medianTimeToRecoveryMinutes: number;
+  
   duplicateExecutionCount: number;
   unsafeExecutionCount: number;
   unattributedRecoveryCount: number;
+  
   attemptCount: number;
   rejectionCount: number;
   escalationCount: number;
+  humanApprovedCount: number;
   contactCount: number;
 }
 
@@ -52,6 +63,8 @@ export interface StrategyComparisonResult {
   heldOutCount: number;
   noActionBaseline: StrategyMetrics;
   rulesOnlyBaseline: StrategyMetrics;
+  merchantPulseMock: StrategyMetrics;
   merchantPulseAi: StrategyMetrics;
+  merchantPulseGemini?: StrategyMetrics;
   generatedAt: string;
 }
