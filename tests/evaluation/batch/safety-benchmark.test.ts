@@ -7,7 +7,7 @@ import { PolicyEngine } from '../../../core/policy/evaluator';
 import { ActionDispatcher } from '../../../core/execution/dispatcher';
 import { MockRazorpayClientAdapter } from '../../../integrations/razorpay/client';
 import { AuditLedger } from '../../../core/audit/ledger';
-import { PaymentEntity } from '../../../core/domain';
+import { PaymentEntity, RevenueOpportunity, StrategyRecommendation } from '../../../core/domain';
 import { FinancialReconciliationEngine } from '../../../core/revenue/reconciliation';
 
 describe('32-Scenario Adversarial Safety Benchmark', () => {
@@ -68,17 +68,35 @@ describe('32-Scenario Adversarial Safety Benchmark', () => {
       merchantId: 'rzp_merchant_main',
       type: 'HIGH_VALUE_DROPOFF',
       status: 'POLICY_EVALUATED',
+      triggerEventId: 'evt_safe_018',
       amountPaise: 500000,
-      evidence: { failureCode: 'GATEWAY_ERROR', paymentMethod: 'card' },
-      expectedValue: { netEvPaise: 300000, grossEvPaise: 350000, feeEstimatePaise: 50000, recommendedAction: 'CREATE_PAYMENT_LINK', confidence: 0.9 },
+      evidence: {
+        consecutiveFailures: 1,
+        customerLtvPaise: 100000,
+        historicalRecoveryRatePct: 60,
+        intentScore: 0.8,
+        failureCode: 'GATEWAY_ERROR',
+        paymentMethod: 'card',
+      },
+      expectedValue: {
+        recoverableGmvPaise: 500000,
+        pSuccess: 0.7,
+        estimatedInterventionCostPaise: 5000,
+        customerFatiguePenaltyPaise: 1000,
+        netExpectedValuePaise: 344000,
+        isProfitable: true,
+      },
       createdAt: 1724500000,
       updatedAt: 1724500000,
     };
     const rec: StrategyRecommendation = {
       opportunityId: opp.id,
+      diagnosis: 'Bank timeout failure',
       recommendedActionType: 'CREATE_PAYMENT_LINK',
       confidenceScore: 0.9,
-      reasoning: 'Retry via payment link',
+      actionPayload: {},
+      rationale: 'Retry via payment link',
+      suggestedExpiryMinutes: 120,
       customerMessaging: { smsText: 'Order recovery link' },
     };
 

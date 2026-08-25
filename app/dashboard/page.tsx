@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { ProfileBar } from '@/components/dashboard/ProfileBar';
+import { SettingsDrawer } from '@/components/dashboard/SettingsDrawer';
+import { useAuth } from '@/lib/supabase/authContext';
 import { OverviewHeader } from '@/components/dashboard/OverviewHeader';
 import { MetricCards } from '@/components/dashboard/MetricCards';
 import { GatewayHealthRadar } from '@/components/dashboard/GatewayHealthRadar';
@@ -36,20 +39,13 @@ import {
 } from 'lucide-react';
 
 export default function DashboardPage() {
+  const { profile: currentUser, switchRole } = useAuth();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [stressLoading, setStressLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState<'RADAR' | 'BENCHMARK' | 'AUDIT' | 'SAFETY' | 'HEALTH' | 'STRESS'>('RADAR');
-
-  const [currentUser, setCurrentUser] = useState<UserProfile>({
-    id: 'usr_admin_001',
-    name: 'Divyanshu Sinha',
-    email: 'admin@merchantpulse.io',
-    role: 'OWNER',
-    merchantId: 'rzp_merchant_pulse',
-    permissions: ['*'],
-  });
 
   const [metrics, setMetrics] = useState<MerchantRevenueMetrics>({
     totalGmvPaise: 1245000000,
@@ -157,36 +153,7 @@ export default function DashboardPage() {
     }
   };
 
-  const switchRole = (role: UserRole) => {
-    if (role === 'OWNER') {
-      setCurrentUser({
-        id: 'usr_admin_001',
-        name: 'Divyanshu Sinha',
-        email: 'admin@merchantpulse.io',
-        role: 'OWNER',
-        merchantId: 'rzp_merchant_pulse',
-        permissions: ['*'],
-      });
-    } else if (role === 'OPS_MANAGER') {
-      setCurrentUser({
-        id: 'usr_ops_002',
-        name: 'Rahul Sharma',
-        email: 'ops@merchantpulse.io',
-        role: 'OPS_MANAGER',
-        merchantId: 'rzp_merchant_pulse',
-        permissions: ['opportunities:execute', 'policy:read', 'audit:read'],
-      });
-    } else {
-      setCurrentUser({
-        id: 'usr_auditor_003',
-        name: 'Neha Verma',
-        email: 'auditor@merchantpulse.io',
-        role: 'AUDITOR',
-        merchantId: 'rzp_merchant_pulse',
-        permissions: ['opportunities:read', 'policy:read', 'audit:read'],
-      });
-    }
-  };
+
 
   useEffect(() => {
     fetchDashboardData();
@@ -232,27 +199,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Role Switcher Pill */}
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono">
-              <Users className="w-3.5 h-3.5 text-blue-400" />
-              <span className="text-slate-400 hidden sm:inline">Role:</span>
-              <select
-                value={currentUser.role}
-                onChange={e => switchRole(e.target.value as UserRole)}
-                className="bg-transparent text-white font-bold outline-none cursor-pointer text-xs"
-              >
-                <option value="OWNER" className="bg-slate-900">Owner (Admin)</option>
-                <option value="OPS_MANAGER" className="bg-slate-900">Risk Ops Manager</option>
-                <option value="AUDITOR" className="bg-slate-900">Finance Auditor (Read Only)</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-mono text-slate-300 hidden md:flex">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Policy Guardrails Active</span>
-            </div>
-          </div>
+          <ProfileBar onOpenSettings={() => setIsSettingsOpen(true)} />
         </div>
       </nav>
 
@@ -397,6 +344,13 @@ export default function DashboardPage() {
         onApproveEscalated={handleApproveEscalated}
         onSimulateRecovery={handleSimulateRecovery}
         actionLoading={actionLoading}
+      />
+
+      {/* Settings Modal Drawer */}
+      <SettingsDrawer
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        currentUser={currentUser}
       />
 
       {/* Footer */}
