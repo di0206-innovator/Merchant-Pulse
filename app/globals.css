@@ -3,45 +3,47 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+  /* Default Dark Theme Variables */
+  :root, html.dark {
+    --bg-main: #070B12;
+    --bg-surface: #0F172A;
+    --bg-surface-low: rgba(15, 23, 42, 0.6);
+    --bg-surface-high: rgba(30, 41, 59, 0.9);
+    --border-color: rgba(51, 65, 85, 0.6);
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    --primary-blue: #3B82F6;
+    --primary-indigo: #6366F1;
+    --accent-emerald: #10B981;
+    --accent-amber: #F59E0B;
+  }
 
-    --card: 222 47% 13%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222 47% 13%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 212 100% 60%;
-    --primary-foreground: 222 47% 11%;
-
-    --secondary: 217 33% 18%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217 33% 18%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 217 33% 22%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217 33% 20%;
-    --input: 217 33% 20%;
-    --ring: 212 100% 60%;
-
-    --radius: 0.75rem;
+  /* Light Theme Variables */
+  html.light {
+    --bg-main: #F8FAFC;
+    --bg-surface: #FFFFFF;
+    --bg-surface-low: rgba(241, 245, 249, 0.9);
+    --bg-surface-high: #F1F5F9;
+    --border-color: #E2E8F0;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #64748B;
+    --primary-blue: #2563EB;
+    --primary-indigo: #4F46E5;
+    --accent-emerald: #059669;
+    --accent-amber: #D97706;
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border transition-colors duration-150;
   }
   body {
-    @apply bg-[#070B12] text-foreground antialiased font-sans selection:bg-blue-600/30 selection:text-white;
+    @apply antialiased font-sans selection:bg-blue-600/30 selection:text-white;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
@@ -50,34 +52,35 @@
 .m3-elevation-0 {
   box-shadow: none;
 }
-.m3-elevation-1 {
-  box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
+.dark .m3-elevation-1 {
+  box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.25), 0px 1px 2px 0px rgba(0, 0, 0, 0.40);
 }
-.m3-elevation-2 {
-  box-shadow: 0px 2px 6px 2px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
-}
-.m3-elevation-3 {
-  box-shadow: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px 0px rgba(0, 0, 0, 0.30);
-}
-.m3-elevation-4 {
-  box-shadow: 0px 6px 10px 4px rgba(0, 0, 0, 0.15), 0px 2px 3px 0px rgba(0, 0, 0, 0.30);
-}
-.m3-elevation-5 {
-  box-shadow: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.30);
+.light .m3-elevation-1 {
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.08), 0px 1px 2px 0px rgba(0, 0, 0, 0.04);
 }
 
-/* Material Design 3 Surface Containers */
-.m3-surface-low {
-  background-color: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(12px);
+.dark .m3-elevation-2 {
+  box-shadow: 0px 2px 6px 2px rgba(0, 0, 0, 0.25), 0px 1px 2px 0px rgba(0, 0, 0, 0.40);
 }
-.m3-surface-container {
+.light .m3-elevation-2 {
+  box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.06), 0px 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.dark .m3-elevation-3 {
+  box-shadow: 0px 4px 12px 3px rgba(0, 0, 0, 0.30), 0px 1px 3px 0px rgba(0, 0, 0, 0.40);
+}
+.light .m3-elevation-3 {
+  box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.08), 0px 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Material Surface Containers */
+.dark .m3-card {
   background-color: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(16px);
+  border-color: rgba(51, 65, 85, 0.6);
 }
-.m3-surface-high {
-  background-color: rgba(30, 41, 59, 0.9);
-  backdrop-filter: blur(20px);
+.light .m3-card {
+  background-color: #FFFFFF;
+  border-color: #E2E8F0;
 }
 
 /* Material State Layers */
@@ -113,32 +116,33 @@
   transition: transform 0.05s linear;
 }
 
-/* Custom scrollbar */
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-::-webkit-scrollbar-track {
+.dark ::-webkit-scrollbar-track {
   background: #070B12;
 }
-::-webkit-scrollbar-thumb {
+.light ::-webkit-scrollbar-track {
+  background: #F8FAFC;
+}
+.dark ::-webkit-scrollbar-thumb {
   background: #1E293B;
   border-radius: 3px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+.light ::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
 }
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-.glow-blue {
+.dark .glow-blue {
   box-shadow: 0 0 24px -4px rgba(51, 149, 255, 0.3);
 }
-.glow-emerald {
-  box-shadow: 0 0 24px -4px rgba(16, 185, 129, 0.3);
-}
-.glow-amber {
-  box-shadow: 0 0 24px -4px rgba(245, 158, 11, 0.3);
+.light .glow-blue {
+  box-shadow: 0 0 24px -4px rgba(37, 99, 235, 0.15);
 }
