@@ -98,19 +98,18 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto text-center space-y-6 relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs font-mono text-slate-300">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Track: AI Growth & Agentic Commerce
+            Razorpay AI Buildathon 2026 — Track 03: AI Revenue Recovery
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Turn Lost Payments into{' '}
+            Recover Payment Revenue Automatically —{' '}
             <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-emerald-400 bg-clip-text text-transparent">
-              Recovered Revenue
-            </span>{' '}
-            with Autonomous Precision.
+              Without Letting AI Control Your Money.
+            </span>
           </h1>
 
           <p className="text-base sm:text-lg text-slate-400 max-w-3xl mx-auto leading-relaxed">
-            Not a generic chatbot. Not hallucinated math. <strong className="text-slate-200">MerchantPulse</strong> is an autonomous revenue intelligence system that detects checkout leaks, calculates Expected Economic Value (EV) deterministically, enforces strict policy guardrails, and recovers dropped GMV via real Razorpay primitives.
+            <strong className="text-slate-200">MerchantPulse</strong> finds failed payment revenue that is recoverable, chooses the highest-value bounded intervention, executes it through Razorpay primitives, and proves whether the intervention recovered money.
           </p>
 
           {/* Hero CTAs */}

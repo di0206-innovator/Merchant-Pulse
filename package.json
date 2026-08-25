@@ -11,7 +11,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:eval": "vitest run tests/evaluation",
-    "test:stress": "vitest run tests/stress"
+    "test:stress": "vitest run tests/stress",
+    "benchmark": "npx tsx scripts/runBenchmark.ts",
+    "benchmark:heldout": "npx tsx scripts/runBenchmark.ts --size=1000 --seed=20260825",
+    "benchmark:safety": "vitest run tests/evaluation/batch/safety-benchmark.test.ts",
+    "benchmark:report": "npx tsx scripts/runBenchmark.ts --size=5000"
   },
   "dependencies": {
     "@google/genai": "^2.18.0",

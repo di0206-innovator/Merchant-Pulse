@@ -1,3 +1,5 @@
+import crypto from 'node:crypto';
+
 export interface CreatePaymentLinkParams {
   amountPaise: number;
   currency?: string;
@@ -42,7 +44,8 @@ export class MockRazorpayClientAdapter implements RazorpayClientAdapter {
   public async createPaymentLink(params: CreatePaymentLinkParams): Promise<PaymentLinkResponse> {
     const now = Math.floor(Date.now() / 1000);
     const expireBy = params.expireByMinutes ? now + (params.expireByMinutes * 60) : now + (2 * 3600);
-    const linkId = `plink_${Buffer.from(`${params.referenceId}_${now}`).toString('hex').slice(0, 14)}`;
+    const hash = crypto.createHash('sha256').update(`${params.referenceId}_${now}`).digest('hex').slice(0, 14);
+    const linkId = `plink_${hash}`;
     const shortUrl = `https://rzp.io/i/${linkId.slice(6, 14)}`;
 
     const response: PaymentLinkResponse = {

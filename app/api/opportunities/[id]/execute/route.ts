@@ -8,11 +8,35 @@ export async function POST(
   const opportunityId = params.id;
   const pipeline = getGlobalPipeline();
 
+  const opportunity = pipeline.getOpportunity(opportunityId);
+  if (!opportunity) {
+    return NextResponse.json(
+      { error: `Opportunity ${opportunityId} not found.` },
+      { status: 404 }
+    );
+  }
+
+  // Server-side authorization & policy status validation
+  if (opportunity.status !== 'ESCALATED') {
+    return NextResponse.json(
+      { error: `Invalid action: Opportunity is in status '${opportunity.status}'. Only 'ESCALATED' opportunities can be manually executed.` },
+      { status: 403 }
+    );
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  if (opportunity.updatedAt && (now - opportunity.updatedAt > 86400 * 7)) {
+    return NextResponse.json(
+      { error: 'Opportunity has expired for human approval.' },
+      { status: 400 }
+    );
+  }
+
   const success = await pipeline.approveEscalatedOpportunity(opportunityId);
   if (!success) {
     return NextResponse.json(
-      { error: 'Failed to approve or execute opportunity. Ensure opportunity is in ESCALATED state.' },
-      { status: 400 }
+      { error: 'Execution engine failed to approve and dispatch opportunity.' },
+      { status: 500 }
     );
   }
 

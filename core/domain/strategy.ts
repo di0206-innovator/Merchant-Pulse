@@ -16,6 +16,17 @@ export const CustomerMessagingSchema = z.object({
 });
 export type CustomerMessaging = z.infer<typeof CustomerMessagingSchema>;
 
+export const StrategyTelemetrySchema = z.object({
+  provider: z.string(),
+  model: z.string(),
+  promptVersion: z.string(),
+  contextHash: z.string(),
+  latencyMs: z.number(),
+  validationStatus: z.enum(['PASSED', 'FALLBACK_USED']),
+  fallbackReason: z.string().optional(),
+});
+export type StrategyTelemetry = z.infer<typeof StrategyTelemetrySchema>;
+
 export const StrategyRecommendationSchema = z.object({
   opportunityId: z.string(),
   diagnosis: z.string().min(5).max(500),
@@ -25,6 +36,7 @@ export const StrategyRecommendationSchema = z.object({
   rationale: z.string().min(5).max(1000),
   suggestedExpiryMinutes: z.number().int().positive().default(120),
   customerMessaging: CustomerMessagingSchema.optional(),
+  telemetry: StrategyTelemetrySchema.optional(),
 });
 export type StrategyRecommendation = z.infer<typeof StrategyRecommendationSchema>;
 

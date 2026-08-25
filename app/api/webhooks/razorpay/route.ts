@@ -3,6 +3,7 @@ import { verifyRazorpayWebhookSignature } from '@/integrations/razorpay/signatur
 import { normalizeRazorpayWebhook } from '@/core/events/normalizer';
 import { globalIdempotencyLedger } from '@/core/events/idempotency';
 import { RazorpayWebhookEventSchema } from '@/core/domain/events';
+import { getGlobalPipeline } from '@/core/pipeline';
 
 export async function POST(req: NextRequest) {
   try {
@@ -65,11 +66,32 @@ export async function POST(req: NextRequest) {
     // Record in idempotency ledger
     globalIdempotencyLedger.record(dedupKey, { processedAt: Date.now(), domainEventId: domainEvent.id });
 
+    // Route domain event to the Revenue Pipeline Orchestrator
+    const pipeline = getGlobalPipeline();
+    let opportunityResult = null;
+    let outcomeAttributed = false;
+
+    if (domainEvent.payment) {
+      opportunityResult = await pipeline.handlePaymentEvent(domainEvent.payment, domainEvent.id);
+    } else if (domainEvent.paymentLinkId) {
+      const outcomeStatus = domainEvent.type === 'PAYMENT_LINK_PAID' ? 'paid' : 'expired';
+      const amountPaise = (domainEvent as any).payment?.amountPaise;
+      outcomeAttributed = pipeline.handlePaymentLinkOutcome(
+        domainEvent.paymentLinkId,
+        outcomeStatus,
+        amountPaise,
+        domainEvent.id
+      );
+    }
+
     return NextResponse.json({
       status: 'ACCEPTED',
       eventId: domainEvent.id,
       type: domainEvent.type,
       timestamp: domainEvent.timestamp,
+      opportunityId: opportunityResult?.id || undefined,
+      opportunityStatus: opportunityResult?.status || undefined,
+      outcomeAttributed,
     }, { status: 200 });
   } catch (err) {
     console.error('[Webhook Route Error]:', err);

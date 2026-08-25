@@ -6,6 +6,8 @@ import { OverviewHeader } from '@/components/dashboard/OverviewHeader';
 import { MetricCards } from '@/components/dashboard/MetricCards';
 import { GatewayHealthRadar } from '@/components/dashboard/GatewayHealthRadar';
 import { ConcurrencyStressPanel } from '@/components/dashboard/ConcurrencyStressPanel';
+import { BatchBenchmarkPanel } from '@/components/dashboard/BatchBenchmarkPanel';
+import { TrustGuardrailPanel } from '@/components/dashboard/TrustGuardrailPanel';
 import { OpportunityTable } from '@/components/opportunities/OpportunityTable';
 import { OpportunityDetailDrawer } from '@/components/opportunities/OpportunityDetailDrawer';
 import { AuditTimeline } from '@/components/audit/AuditTimeline';
@@ -28,7 +30,9 @@ import {
   Server,
   Key,
   ArrowLeft,
-  Lock
+  Lock,
+  Sparkles,
+  TrendingUp
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -36,7 +40,7 @@ export default function DashboardPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [stressLoading, setStressLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const [activeTab, setActiveTab] = useState<'RADAR' | 'AUDIT' | 'HEALTH' | 'STRESS'>('RADAR');
+  const [activeTab, setActiveTab] = useState<'RADAR' | 'BENCHMARK' | 'AUDIT' | 'SAFETY' | 'HEALTH' | 'STRESS'>('RADAR');
 
   const [currentUser, setCurrentUser] = useState<UserProfile>({
     id: 'usr_admin_001',
@@ -284,6 +288,18 @@ export default function DashboardPage() {
           </button>
 
           <button
+            onClick={() => setActiveTab('BENCHMARK')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono transition-all whitespace-nowrap ${
+              activeTab === 'BENCHMARK'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                : 'bg-slate-900/60 text-blue-400 hover:text-blue-300 hover:bg-slate-800/60 border border-slate-800/60'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+            <span>Batch Recovery Benchmark</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('AUDIT')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono transition-all whitespace-nowrap ${
               activeTab === 'AUDIT'
@@ -293,6 +309,18 @@ export default function DashboardPage() {
           >
             <FileText className="w-3.5 h-3.5" />
             <span>Closed-Loop Audit Ledger ({auditRecords.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('SAFETY')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono transition-all whitespace-nowrap ${
+              activeTab === 'SAFETY'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                : 'bg-slate-900/60 text-emerald-400 hover:text-emerald-300 hover:bg-slate-800/60 border border-slate-800/60'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Trust & Safety Guardrails</span>
           </button>
 
           <button
@@ -332,8 +360,16 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {activeTab === 'BENCHMARK' && (
+          <BatchBenchmarkPanel />
+        )}
+
         {activeTab === 'AUDIT' && (
           <AuditTimeline auditRecords={auditRecords} />
+        )}
+
+        {activeTab === 'SAFETY' && (
+          <TrustGuardrailPanel />
         )}
 
         {activeTab === 'HEALTH' && (

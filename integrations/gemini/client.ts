@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
+import crypto from 'node:crypto';
 import { RevenueStrategyProvider } from '../../core/strategy/provider';
 import { MockStrategyProvider } from '../../core/strategy/mock';
 import { RevenueOpportunity } from '../../core/domain/opportunity';
@@ -9,6 +10,7 @@ export class GeminiStrategyProvider implements RevenueStrategyProvider {
   private aiClient: GoogleGenAI | null = null;
   private modelName: string;
   private fallbackProvider: MockStrategyProvider;
+  private readonly promptVersion = 'v2.1.0';
 
   constructor(apiKey?: string, modelName: string = 'gemini-2.5-flash') {
     const key = apiKey || process.env.GEMINI_API_KEY;
@@ -25,8 +27,20 @@ export class GeminiStrategyProvider implements RevenueStrategyProvider {
   }
 
   public async generateStrategy(opportunity: RevenueOpportunity): Promise<StrategyRecommendation> {
+    const startTime = performance.now();
+
     if (!this.aiClient) {
-      return this.fallbackProvider.generateStrategy(opportunity);
+      const fallback = await this.fallbackProvider.generateStrategy(opportunity);
+      fallback.telemetry = {
+        provider: 'MockFallback',
+        model: 'deterministic-mock',
+        promptVersion: this.promptVersion,
+        contextHash: crypto.createHash('sha256').update(opportunity.id).digest('hex').slice(0, 16),
+        latencyMs: Math.round(performance.now() - startTime),
+        validationStatus: 'FALLBACK_USED',
+        fallbackReason: 'No GEMINI_API_KEY configured',
+      };
+      return fallback;
     }
 
     const promptContext = {
@@ -43,6 +57,8 @@ export class GeminiStrategyProvider implements RevenueStrategyProvider {
       recoveryProbability: opportunity.expectedValue.pSuccess,
       intentScore: opportunity.evidence.intentScore,
     };
+
+    const contextHash = crypto.createHash('sha256').update(JSON.stringify(promptContext)).digest('hex').slice(0, 16);
 
     const systemInstruction = `You are MerchantPulse AI, a senior payment ops intelligence engine for Razorpay merchants.
 Your job is to analyze validated deterministic payment failure facts and formulate the highest-ROI, policy-compliant recovery recommendation.
@@ -86,19 +102,50 @@ ${JSON.stringify(promptContext, null, 2)}
         }
       });
 
+      const latencyMs = Math.round(performance.now() - startTime);
       const responseText = response.text || '';
       const parsedJson = JSON.parse(responseText);
       const validationResult = StrategyRecommendationSchema.safeParse(parsedJson);
 
       if (validationResult.success) {
-        return validationResult.data;
+        const rec = validationResult.data;
+        rec.telemetry = {
+          provider: 'GoogleGenAI',
+          model: this.modelName,
+          promptVersion: this.promptVersion,
+          contextHash,
+          latencyMs,
+          validationStatus: 'PASSED',
+        };
+        return rec;
       }
 
       console.warn('[GeminiStrategyProvider] AI output schema validation failed, activating deterministic fallback:', validationResult.error);
-      return this.fallbackProvider.generateStrategy(opportunity);
-    } catch (err) {
+      const fallback = await this.fallbackProvider.generateStrategy(opportunity);
+      fallback.telemetry = {
+        provider: 'MockFallback',
+        model: 'deterministic-mock',
+        promptVersion: this.promptVersion,
+        contextHash,
+        latencyMs,
+        validationStatus: 'FALLBACK_USED',
+        fallbackReason: `Schema validation failed: ${validationResult.error.message}`,
+      };
+      return fallback;
+    } catch (err: any) {
+      const latencyMs = Math.round(performance.now() - startTime);
       console.warn('[GeminiStrategyProvider] API invocation error, using deterministic fallback:', err);
-      return this.fallbackProvider.generateStrategy(opportunity);
+      const fallback = await this.fallbackProvider.generateStrategy(opportunity);
+      fallback.telemetry = {
+        provider: 'MockFallback',
+        model: 'deterministic-mock',
+        promptVersion: this.promptVersion,
+        contextHash,
+        latencyMs,
+        validationStatus: 'FALLBACK_USED',
+        fallbackReason: `API invocation error: ${err?.message || 'Unknown error'}`,
+      };
+      return fallback;
     }
   }
 }

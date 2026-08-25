@@ -2,51 +2,25 @@
 
 ## Project Overview
 - **Project**: MerchantPulse
-- **Track**: AI Growth & Agentic Commerce (Razorpay Buildathon)
-- **Core Thesis**: MerchantPulse is an AI-assisted revenue intelligence system that identifies where a merchant is losing or leaving money on the table, determines which intervention has the highest expected economic value, applies explicit policy constraints, executes only valid actions via real Razorpay primitives, and measures the resulting outcome with a transparent audit trail.
+- **Track**: Track 03 — AI Revenue Recovery (Razorpay Buildathon 2026)
+- **Product Promise**: MerchantPulse finds failed payment revenue that is recoverable, chooses the highest-value bounded intervention, executes it through Razorpay primitives, and proves whether the intervention recovered money.
 - **Architectural Tenet**: *Code establishes truth. AI reasons over truth. Policy determines whether reasoning may become action. Events prove what happened.*
 
 ---
 
 ## Current Status
-- **Current Phase**: Phase 10 — Submission Ready (All Phases Completed)
-- **Active Task**: Project Finalization & Submission Review
-- **Next Task**: Submission Ready
+- **Current Phase**: Finalist Submission Transformation (45-Phase Upgrade Completed)
+- **Active Task**: Benchmark & Submission Verification
+- **Next Task**: Buildathon Submission Ready
 
 ---
 
-## Phase Roadmap & Progress
+## Key Finalist System Features
+1. **Reproducible 1,000+ Event Batch Benchmark**: `npm run benchmark` with seeded PRNG (`--seed 20260825`) and 80/20 held-out split.
+2. **3-Way Strategy Baseline Comparison**: Evaluates No-Action vs. Deterministic Rules vs. MerchantPulse AI Strategy on identical held-out datasets.
+3. **Financial Truth Isolation**: Integer paise EV calculations in code, zero LLM arithmetic.
+4. **Execution Idempotency State Machine**: Distributed `EXECUTION_IN_FLIGHT` intent keying preventing duplicate Razorpay link creations.
+5. **Closed-Loop Reconciliation Engine**: Verified outcome attribution matching `payment_link.paid` to `decision_id` with zero double-counting.
+6. **32-Scenario Adversarial Safety Matrix**: 100% passing test matrix for AI failures, timeouts, duplicate webhooks, and rate limits.
+7. **Operator Command Center**: Interactive batch replay, AI-vs-rules comparison, and trust guardrail panel.
 
-| Phase | Description | Status | Verification Gate |
-|---|---|---|---|
-| **Phase 0** | Research & Architecture | **COMPLETED** | Architecture docs, Razorpay capability mapping, evaluation methodology created |
-| **Phase 1** | Project Foundation | **COMPLETED** | Next.js 14, TypeScript, Tailwind CSS, Vitest, @google/genai, Zod installed and verified |
-| **Phase 2** | Domain Model & Schemas | **COMPLETED** | Zod schemas, payment/merchant/opportunity/policy/event types, unit tests passing |
-| **Phase 3** | Deterministic Revenue Engine | **COMPLETED** | Anomaly detection, cohort analysis, opportunity identification, EV math, 100% deterministic tests |
-| **Phase 4** | AI Strategy Layer | **COMPLETED** | Provider interface, `@google/genai` provider, Mock provider, strict schema validation, contract tests |
-| **Phase 5** | Policy Engine | **COMPLETED** | Multi-rule evaluator (limits, approvals, frequency, permissions, evidence sufficiency), unit tests for every branch |
-| **Phase 6** | Event & Razorpay Gateway | **COMPLETED** | Webhook ingestion, HMAC-SHA256 signature verification, idempotency ledger, out-of-order event handler, Razorpay client adapter |
-| **Phase 7** | Execution & Outcome Loop | **COMPLETED** | Action dispatcher (Payment Links, Customer Notifications, Routing recommendations), simulated/live outcome recorder, feedback loop |
-| **Phase 8** | Dashboard & UX | **COMPLETED** | Financial terminal aesthetic, Overview KPIs, Opportunity Radar, Detail Drawer, Policy Inspector, Audit Trail, Human Review Queue |
-| **Phase 9** | Adversarial QA & Evaluation | **COMPLETED** | 10-scenario synthetic benchmark test suite passing (100% score), Playwright/browser UI verified |
-| **Phase 10** | Polish, Documentation & Submission | **COMPLETED** | Production README, ADR decisions log, 5-min pitch narrative, build verification complete |
-
----
-
-## Architectural Decisions Log (ADR)
-1. **ADR-001: Financial Truth Isolation** — All GMV, transaction metrics, recovery rates, fees, and EV math must be computed deterministically in TypeScript (`core/revenue/`). LLMs are strictly prohibited from calculating balances or inventing financial totals.
-2. **ADR-002: Provider-Pattern AI with Schema Guardrails** — AI strategy logic sits behind `RevenueStrategyProvider` (`integrations/gemini/` and `core/strategy/mock.ts`). AI responses are strictly validated via Zod schemas; malformed responses trigger an automatic graceful fallback or human escalation.
-3. **ADR-003: Real Razorpay Capabilities Only** — All executable actions are bounded to verified Razorpay primitives: `Payment Links API` (`POST /v1/payment_links`), `Customer Notifications`, `Order Updates`, and `Payment Retry Configuration`. Refunds are never used as incentives.
-4. **ADR-004: Closed-Loop Audit & Idempotency** — Every decision receives an immutable `decision_id` linking incoming `event_id` -> deterministic analysis -> AI proposal -> policy verdict -> executed action -> outcome measurement. Webhooks enforce HMAC-SHA256 signature verification and `x-razorpay-event-id` idempotency.
-
----
-
-## Known Limitations
-- Initial development uses deterministic in-memory / local storage ledger for state and idempotency before optional Supabase/PostgreSQL adapter attachment.
-- Razorpay test mode credentials will be supported alongside a 100% offline deterministic mock adapter for standalone demo reliability.
-
----
-
-## Verified Behavior
-- Node.js environment: `v22.23.1`, npm: `10.9.8`
-- Research completed for Razorpay Payment Links API, Webhook Signature Verification, and Google Gen AI SDK (`@google/genai`).
