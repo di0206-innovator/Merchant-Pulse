@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { MaterialAppLayout } from '@/components/layout/MaterialAppLayout';
+import { useRouter } from 'next/navigation';
 import {
   Activity,
   ShieldCheck,
@@ -22,10 +22,21 @@ import {
   ExternalLink,
   BarChart3,
   FileCheck2,
-  Globe
+  Globe,
+  LogIn
 } from 'lucide-react';
+import { ProfileBar } from '@/components/dashboard/ProfileBar';
+import { SettingsDrawer } from '@/components/dashboard/SettingsDrawer';
+import { PwaInstallPrompt } from '@/components/PwaInstallPrompt';
+import { AuthModal } from '@/components/auth/AuthModal';
+import { useAuth } from '@/lib/supabase/authContext';
 
 export default function LandingPage() {
+  const router = useRouter();
+  const { isAuthenticated, profile: currentUser } = useAuth();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   // Parallax Scroll Offset State
   const [scrollY, setScrollY] = useState(0);
 
@@ -47,26 +58,72 @@ export default function LandingPage() {
   const monthlyRecoverableInr = monthlyRevenueAtRiskInr * 0.65; // 65% calibrated recovery rate
   const annualRecoveredInr = monthlyRecoverableInr * 12;
 
-  // Interactive Live Pipeline Simulator State
-  const [simStep, setSimStep] = useState<number>(1);
-  const [simSimulating, setSimSimulating] = useState<boolean>(false);
-
-  const triggerSimulation = () => {
-    setSimSimulating(true);
-    setSimStep(1);
-    setTimeout(() => {
-      setSimStep(2);
-      setTimeout(() => {
-        setSimStep(3);
-        setSimSimulating(false);
-      }, 1000);
-    }, 1000);
+  const handleLaunchTerminal = () => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    } else {
+      setIsAuthModalOpen(true);
+    }
   };
 
   return (
-    <MaterialAppLayout>
-      <div className="relative overflow-hidden">
-        {/* Material Design 3 Parallax Hero Background Blobs */}
+    <div className="min-h-screen bg-[#070B12] text-slate-100 flex flex-col font-sans selection:bg-blue-600/30 selection:text-white relative overflow-hidden">
+      {/* Standalone Public Header Navbar */}
+      <header className="sticky top-0 z-50 bg-[#0A0E1A]/90 backdrop-blur-md border-b border-slate-800/80 shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          {/* Brand Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-600 to-blue-700 flex items-center justify-center text-white font-bold text-base shadow-lg shadow-blue-500/25">
+              MP
+            </div>
+            <div>
+              <span className="font-extrabold text-base tracking-tight text-white">MerchantPulse</span>
+              <span className="text-[11px] text-blue-400 font-mono ml-2.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 hidden sm:inline">
+                Razorpay Buildathon
+              </span>
+            </div>
+          </div>
+
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center gap-6 text-xs font-mono text-slate-400">
+            <a href="#roi-calculator" className="hover:text-white transition-colors">
+              ROI Calculator
+            </a>
+            <a href="#features" className="hover:text-white transition-colors">
+              Features & Architecture
+            </a>
+          </div>
+
+          {/* Public Action Header */}
+          <div className="flex items-center gap-3">
+            <PwaInstallPrompt />
+
+            <ProfileBar onOpenSettings={() => setIsSettingsOpen(true)} />
+
+            {!isAuthenticated ? (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs font-mono shadow-lg shadow-blue-600/30 transition-all active:scale-95 m3-state-layer"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Sign In / Register</span>
+              </button>
+            ) : (
+              <button
+                onClick={handleLaunchTerminal}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs font-mono shadow-lg shadow-emerald-600/30 transition-all active:scale-95"
+              >
+                <span>Terminal</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Parallax Body */}
+      <main className="flex-1 relative">
+        {/* Parallax Background Blobs */}
         <div
           className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-blue-600/15 blur-[140px] rounded-full pointer-events-none transition-transform duration-75 ease-out"
           style={{ transform: `translate(-50%, ${scrollY * 0.35}px)` }}
@@ -96,17 +153,17 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link
-                href="/dashboard"
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-xl shadow-blue-600/30 transition-all active:scale-95 m3-state-layer"
+              <button
+                onClick={handleLaunchTerminal}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs font-mono shadow-xl shadow-blue-600/30 transition-all active:scale-95 m3-state-layer"
               >
                 <Activity className="w-4 h-4" />
-                <span>Explore Live Merchant Terminal</span>
-              </Link>
+                <span>{isAuthenticated ? 'Open Live Merchant Terminal' : 'Sign In to Access Terminal'}</span>
+              </button>
 
               <a
                 href="#roi-calculator"
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800 text-slate-200 font-bold text-xs transition-all m3-elevation-1"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800 text-slate-200 font-bold text-xs font-mono transition-all m3-elevation-1"
               >
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
                 <span>Calculate Your Recoverable ROI</span>
@@ -224,7 +281,7 @@ export default function LandingPage() {
         </section>
 
         {/* Feature Overview Grid */}
-        <section className="py-16 px-4 sm:px-6">
+        <section id="features" className="py-16 px-4 sm:px-6">
           <div className="max-w-5xl mx-auto space-y-8">
             <div className="text-center space-y-2">
               <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
@@ -275,20 +332,34 @@ export default function LandingPage() {
             <div>
               <h3 className="text-xl font-bold text-white tracking-tight">Ready to test the Live Terminal?</h3>
               <p className="text-xs text-slate-400 font-mono mt-1">
-                Execute batch simulations, inspect policy guardrails, or run 500+ worker stress tests.
+                Authenticate your merchant account to access live recovery streams and synthetic benchmark suites.
               </p>
             </div>
 
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all active:scale-95"
+            <button
+              onClick={handleLaunchTerminal}
+              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs font-mono shadow-lg shadow-blue-600/30 transition-all active:scale-95"
             >
-              <span>Launch Live Revenue Terminal</span>
+              <span>{isAuthenticated ? 'Open Merchant Terminal' : 'Sign In / Register'}</span>
               <ArrowRight className="w-4 h-4" />
-            </Link>
+            </button>
           </div>
         </section>
-      </div>
-    </MaterialAppLayout>
+      </main>
+
+      {/* Auth Modal Popup */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={() => router.push('/dashboard')}
+      />
+
+      {/* Settings Modal Drawer */}
+      <SettingsDrawer
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        currentUser={currentUser}
+      />
+    </div>
   );
 }

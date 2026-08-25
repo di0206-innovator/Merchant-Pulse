@@ -20,6 +20,8 @@ import { SettingsDrawer } from '@/components/dashboard/SettingsDrawer';
 import { PwaInstallPrompt } from '@/components/PwaInstallPrompt';
 import { useAuth } from '@/lib/supabase/authContext';
 
+import { AuthGuard } from '@/components/auth/AuthGuard';
+
 interface MaterialAppLayoutProps {
   children: React.ReactNode;
 }
@@ -125,7 +127,9 @@ export function MaterialAppLayout({ children }: MaterialAppLayoutProps) {
 
       {/* Main Content Area */}
       <main className="flex-1 pb-16 sm:pb-0">
-        {children}
+        <AuthGuard>
+          {children}
+        </AuthGuard>
       </main>
 
       {/* Material Design 3 Bottom Navigation Bar (Mobile Only < 640px) */}
