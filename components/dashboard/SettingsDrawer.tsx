@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { X, Settings, ShieldCheck, Key, Database, Sparkles, Sliders, CheckCircle2, Lock, Cpu, Globe } from 'lucide-react';
+import { X, Settings, ShieldCheck, Key, Database, Sparkles, Sliders, CheckCircle2, Lock, Cpu, Globe, User, Sun, Moon, Palette } from 'lucide-react';
 import { UserProfile } from '@/core/auth/types';
+import { useAuth } from '@/lib/supabase/authContext';
+import { useTheme } from '@/lib/themeContext';
 
 interface SettingsDrawerProps {
   isOpen: boolean;
@@ -9,10 +11,18 @@ interface SettingsDrawerProps {
 }
 
 export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerProps) {
-  const [activeTab, setActiveTab] = useState<'MERCHANT' | 'GUARDRAILS' | 'RAZORPAY' | 'GEMINI' | 'SUPABASE'>('MERCHANT');
+  const { setProfile, profile } = useAuth();
+  const { theme, setTheme } = useTheme();
+
+  const [activeTab, setActiveTab] = useState<'PROFILE' | 'MERCHANT' | 'GUARDRAILS' | 'RAZORPAY' | 'GEMINI' | 'SUPABASE'>('PROFILE');
   const [savedToast, setSavedToast] = useState(false);
 
-  // Settings State
+  // Profile Edit State
+  const [name, setName] = useState(currentUser.name);
+  const [email, setEmail] = useState(currentUser.email);
+  const [avatarUrl, setAvatarUrl] = useState(currentUser.avatarUrl || '');
+
+  // Merchant Settings State
   const [merchantName, setMerchantName] = useState('MerchantPulse Store');
   const [merchantId, setMerchantId] = useState(currentUser.merchantId);
   const [currency, setCurrency] = useState('INR');
@@ -29,6 +39,14 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
   if (!isOpen) return null;
 
   const handleSave = () => {
+    // Update active profile in context
+    setProfile(prev => ({
+      ...prev,
+      name,
+      email,
+      avatarUrl: avatarUrl || undefined,
+    }));
+
     setSavedToast(true);
     setTimeout(() => setSavedToast(false), 3000);
   };
@@ -42,7 +60,7 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
             <Settings className="w-5 h-5 text-blue-400" />
             <div>
               <h2 className="text-base font-bold text-white font-mono">Merchant Terminal Settings</h2>
-              <p className="text-xs text-slate-400">Configure guardrails, API keys, AI model & Supabase Auth</p>
+              <p className="text-xs text-slate-400">Configure profile, theme, guardrails, API keys & Supabase Auth</p>
             </div>
           </div>
 
@@ -56,6 +74,16 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
 
         {/* Tab Navigation */}
         <div className="flex items-center gap-1 px-6 border-b border-slate-800/80 bg-slate-950/30 overflow-x-auto text-xs font-mono">
+          <button
+            onClick={() => setActiveTab('PROFILE')}
+            className={`px-3 py-2.5 font-semibold border-b-2 transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'PROFILE' ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <User className="w-3.5 h-3.5" />
+            <span>Profile & Theme</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('MERCHANT')}
             className={`px-3 py-2.5 font-semibold border-b-2 transition-all whitespace-nowrap flex items-center gap-1.5 ${
@@ -112,10 +140,101 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
           {savedToast && (
             <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>Settings updated successfully! Policy guardrails updated in memory.</span>
+              <span>Settings updated successfully! Profile and preferences saved.</span>
             </div>
           )}
 
+          {/* Tab 1: Profile & Theme */}
+          {activeTab === 'PROFILE' && (
+            <div className="space-y-6 font-mono text-xs">
+              {/* Theme Preference Toggle */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Palette className="w-4 h-4 text-blue-400" />
+                    <span className="font-bold text-white text-xs">Interface Theme Mode</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 capitalize">{theme} Mode Active</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <button
+                    onClick={() => setTheme('dark')}
+                    className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all ${
+                      theme === 'dark'
+                        ? 'bg-blue-600/20 border-blue-500 text-blue-400 shadow-md'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Moon className="w-4 h-4" />
+                    <span>Dark Terminal</span>
+                  </button>
+
+                  <button
+                    onClick={() => setTheme('light')}
+                    className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all ${
+                      theme === 'light'
+                        ? 'bg-blue-600/20 border-blue-500 text-blue-400 shadow-md'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Sun className="w-4 h-4" />
+                    <span>Light Slate</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* User Profile Form */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-4">
+                <h3 className="font-bold text-white text-xs uppercase tracking-wider text-slate-400">
+                  User Account Information
+                </h3>
+
+                <div>
+                  <label className="block text-slate-400 mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white font-sans focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 mb-1">Primary Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 mb-1">Avatar Image URL (Google Photo or Custom)</label>
+                  <input
+                    type="text"
+                    value={avatarUrl}
+                    onChange={e => setAvatarUrl(e.target.value)}
+                    placeholder="https://lh3.googleusercontent.com/a/..."
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 font-mono text-[11px] focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 mb-1">Assigned Role</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={`${currentUser.role} (Full Platform Permissions)`}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900/50 border border-slate-800/80 text-blue-400 font-mono text-xs cursor-not-allowed"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tab 2: Merchant Profile */}
           {activeTab === 'MERCHANT' && (
             <div className="space-y-4 font-mono text-xs">
               <div>
@@ -152,6 +271,7 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
             </div>
           )}
 
+          {/* Tab 3: Policy Guardrails */}
           {activeTab === 'GUARDRAILS' && (
             <div className="space-y-4 font-mono text-xs">
               <div>
@@ -195,6 +315,7 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
             </div>
           )}
 
+          {/* Tab 4: Razorpay APIs */}
           {activeTab === 'RAZORPAY' && (
             <div className="space-y-4 font-mono text-xs">
               <div>
@@ -246,6 +367,7 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
             </div>
           )}
 
+          {/* Tab 5: Gemini AI Strategy */}
           {activeTab === 'GEMINI' && (
             <div className="space-y-4 font-mono text-xs">
               <div>
@@ -273,6 +395,7 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
             </div>
           )}
 
+          {/* Tab 6: Supabase Auth */}
           {activeTab === 'SUPABASE' && (
             <div className="space-y-4 font-mono text-xs">
               <div className="p-4 rounded-xl bg-blue-950/30 border border-blue-800/50 space-y-2">

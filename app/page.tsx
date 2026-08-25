@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { ProfileBar } from '@/components/dashboard/ProfileBar';
+import { SettingsDrawer } from '@/components/dashboard/SettingsDrawer';
+import { useAuth } from '@/lib/supabase/authContext';
 import {
   Activity,
   ShieldCheck,
@@ -22,6 +25,8 @@ import {
 } from 'lucide-react';
 
 export default function LandingPage() {
+  const { profile: currentUser } = useAuth();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   // Interactive ROI Calculator State
   const [monthlyGmvLakhs, setMonthlyGmvLakhs] = useState<number>(125); // ₹1.25 Cr default
   const [failureRatePct, setFailureRatePct] = useState<number>(4.5); // 4.5% default
@@ -68,21 +73,22 @@ export default function LandingPage() {
           <div className="flex items-center gap-4">
             <a
               href="#roi-calculator"
-              className="text-xs text-slate-400 hover:text-slate-200 transition-colors hidden sm:inline"
+              className="text-xs text-slate-400 hover:text-slate-200 transition-colors hidden md:inline"
             >
               ROI Calculator
             </a>
             <a
               href="#architecture"
-              className="text-xs text-slate-400 hover:text-slate-200 transition-colors hidden sm:inline"
+              className="text-xs text-slate-400 hover:text-slate-200 transition-colors hidden md:inline"
             >
               Architecture Creed
             </a>
+            <ProfileBar onOpenSettings={() => setIsSettingsOpen(true)} />
             <Link
               href="/dashboard"
               className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98]"
             >
-              <span>Launch Live Terminal</span>
+              <span>Live Terminal</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -468,6 +474,13 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Settings Modal Drawer */}
+      <SettingsDrawer
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        currentUser={currentUser}
+      />
 
       {/* Footer CTA */}
       <footer className="border-t border-slate-800 bg-slate-950 py-12 px-6">
