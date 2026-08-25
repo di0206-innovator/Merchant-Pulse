@@ -25,7 +25,8 @@ import {
   Globe,
   LogIn,
   Sun,
-  Moon
+  Moon,
+  Star
 } from 'lucide-react';
 import { ProfileBar } from '@/components/dashboard/ProfileBar';
 import { SettingsDrawer } from '@/components/dashboard/SettingsDrawer';
@@ -41,6 +42,7 @@ export default function LandingPage() {
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [merchantEmailInput, setMerchantEmailInput] = useState('');
 
   // Parallax Scroll Offset State
   const [scrollY, setScrollY] = useState(0);
@@ -88,45 +90,63 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#070B12] text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-blue-600/30 selection:text-white relative overflow-hidden transition-colors duration-200">
-      {/* Standalone Header Navbar */}
-      <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#0A0E1A]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          {/* Brand Logo */}
+    <div className="min-h-screen bg-[#8BE8F5] dark:bg-[#070B12] light:bg-[#F8FAFC] text-slate-950 dark:text-slate-100 flex flex-col font-sans selection:bg-slate-950 selection:text-white relative overflow-hidden transition-colors duration-200">
+      {/* Vintage / Retro Standalone Header Navbar */}
+      <header className="sticky top-0 z-50 bg-[#8BE8F5]/90 dark:bg-[#0A0E1A]/90 backdrop-blur-md border-b-2 border-slate-950 dark:border-slate-800 py-4 px-6 sm:px-12">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* Left Brand Badge */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-600 to-blue-700 flex items-center justify-center text-white font-bold text-base shadow-lg shadow-blue-500/25">
-              MP
+            <div className="w-10 h-10 rounded-xl bg-slate-950 text-white font-serif font-black text-2xl flex items-center justify-center shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
+              G
             </div>
-            <div>
-              <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white">MerchantPulse</span>
-              <span className="text-[11px] text-blue-600 dark:text-blue-400 font-mono ml-2.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 hidden sm:inline">
-                Razorpay Buildathon
+            <div className="flex flex-col">
+              <span className="font-extrabold text-lg tracking-tight text-slate-950 dark:text-white">MerchantPulse</span>
+              <span className="text-[10px] text-slate-800 dark:text-blue-400 font-mono -mt-1 font-bold">
+                Razorpay AI Buildathon
               </span>
             </div>
           </div>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center gap-6 text-xs font-mono text-slate-600 dark:text-slate-400">
-            <a href="#roi-calculator" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-              ROI Calculator
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-900 dark:text-slate-300">
+            <a href="#roi-calculator" className="hover:underline transition-all">
+              Home
             </a>
-            <a href="#pipeline-simulator" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            <a href="#pipeline-simulator" className="hover:underline transition-all">
               Live Pipeline
             </a>
-            <a href="#features" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-              Architecture Creed
+            <a href="#features" className="hover:underline transition-all">
+              Features
+            </a>
+            <a href="#roi-calculator" className="hover:underline transition-all">
+              ROI Calculator
             </a>
           </div>
 
-          {/* Public Action Header */}
+          {/* Public Right Header Actions */}
           <div className="flex items-center gap-3">
             {/* Quick Theme Switcher Button */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
-              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+              className="px-3 py-1.5 rounded-full bg-white dark:bg-slate-900 border-2 border-slate-950 text-slate-950 dark:text-slate-300 hover:bg-slate-100 dark:hover:text-white transition-colors flex items-center gap-1.5 font-mono text-xs font-bold shadow-[2px_2px_0px_0px_rgba(15,23,42,1)]"
+              title={`Switch Mode (${theme.toUpperCase()})`}
             >
-              {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
+              {theme === 'retro' ? (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="hidden sm:inline">Retro Cyan</span>
+                </>
+              ) : theme === 'dark' ? (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="hidden sm:inline">Dark</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-indigo-600" />
+                  <span className="hidden sm:inline">Light</span>
+                </>
+              )}
             </button>
 
             <PwaInstallPrompt />
@@ -136,123 +156,134 @@ export default function LandingPage() {
             {!isAuthenticated ? (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs font-mono shadow-lg shadow-blue-600/30 transition-all active:scale-95 m3-state-layer"
+                className="px-5 py-2 rounded-full border-2 border-slate-950 bg-white hover:bg-slate-100 text-slate-950 font-bold text-xs transition-all shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] active:translate-x-[1px] active:translate-y-[1px]"
               >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Sign In / Register</span>
+                Login
               </button>
-            ) : (
-              <button
-                onClick={handleLaunchTerminal}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs font-mono shadow-lg shadow-emerald-600/30 transition-all active:scale-95"
-              >
-                <span>Terminal</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            )}
+            ) : null}
+
+            <button
+              onClick={handleLaunchTerminal}
+              className="px-6 py-2.5 rounded-full border-2 border-slate-950 bg-slate-950 hover:bg-slate-900 text-white font-bold text-xs transition-all shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] active:translate-x-[2px] active:translate-y-[2px]"
+            >
+              {isAuthenticated ? 'Open Terminal' : 'Try it Now'}
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Main Parallax Body */}
+      {/* Main Vintage Hero & Body Section */}
       <main className="flex-1 relative">
-        {/* Parallax Background Blobs */}
-        <div
-          className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-blue-600/15 blur-[140px] rounded-full pointer-events-none transition-transform duration-75 ease-out"
-          style={{ transform: `translate(-50%, ${scrollY * 0.35}px)` }}
-        />
-        <div
-          className="absolute top-40 right-10 w-[500px] h-[350px] bg-emerald-600/10 blur-[120px] rounded-full pointer-events-none transition-transform duration-75 ease-out"
-          style={{ transform: `translateY(${scrollY * 0.25}px)` }}
-        />
+        {/* Vintage Cyan Hero Section matching Screenshot */}
+        <section className="relative pt-12 sm:pt-20 pb-24 px-6 sm:px-12">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+            {/* Left Headline Area */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border-2 border-slate-950 text-xs font-mono font-bold text-slate-950 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                Track 03 — AI Revenue Recovery
+              </div>
 
-        {/* Hero Section */}
-        <section className="relative pt-12 sm:pt-20 pb-20 px-4 sm:px-6">
-          <div className="max-w-5xl mx-auto text-center space-y-6 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 text-xs font-mono text-slate-700 dark:text-slate-300 m3-elevation-1">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              Razorpay AI Buildathon 2026 — Track 03: AI Revenue Recovery
+              <h1 className="text-5xl sm:text-7xl font-serif font-bold text-slate-950 dark:text-white leading-[1.06] tracking-tight">
+                Handle your <br className="hidden sm:inline" />
+                <span className="italic">Revenue Recovery</span> <br />
+                Easily.
+              </h1>
+
+              <p className="text-lg sm:text-xl text-slate-800 dark:text-slate-300 max-w-xl leading-relaxed font-sans font-medium">
+                MerchantPulse delivers automated AI revenue recovery, deterministic Net EV expected-value modeling, and bounded Razorpay execution.
+              </p>
+
+              {/* Email Input Bar Matching Screenshot */}
+              <div className="pt-4 max-w-md">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleLaunchTerminal();
+                  }}
+                  className="flex items-center bg-white border-2 border-slate-950 rounded-full p-1.5 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]"
+                >
+                  <input
+                    type="email"
+                    placeholder="Your Email address..."
+                    value={merchantEmailInput}
+                    onChange={(e) => setMerchantEmailInput(e.target.value)}
+                    className="flex-1 bg-transparent px-4 py-2 text-sm font-sans text-slate-950 placeholder:text-slate-500 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="px-6 py-3 rounded-full bg-slate-950 hover:bg-slate-900 text-white text-xs font-bold font-mono transition-all"
+                  >
+                    Get Started
+                  </button>
+                </form>
+              </div>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
-              Recover Payment Revenue Automatically —{' '}
-              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-600 dark:from-blue-400 dark:via-indigo-300 dark:to-emerald-400 bg-clip-text text-transparent">
-                Without Letting AI Control Your Money.
-              </span>
-            </h1>
+            {/* Right Vintage Illustration Canvas & Badge Overlay */}
+            <div className="lg:col-span-5 relative flex justify-center items-center">
+              {/* Hand-Drawn Retro Art Simulation Box */}
+              <div className="w-full max-w-md h-80 sm:h-96 rounded-3xl border-3 border-slate-950 bg-white/70 backdrop-blur-sm p-6 relative flex flex-col justify-between shadow-[8px_8px_0px_0px_rgba(15,23,42,1)] overflow-hidden">
+                <div className="flex items-center justify-between border-b-2 border-slate-950 pb-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full bg-rose-500 border border-slate-950" />
+                    <span className="w-3 h-3 rounded-full bg-amber-400 border border-slate-950" />
+                    <span className="w-3 h-3 rounded-full bg-emerald-500 border border-slate-950" />
+                  </div>
+                  <span className="font-mono text-xs font-bold text-slate-950">Razorpay Pipeline v2.5</span>
+                </div>
 
-            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed font-sans">
-              MerchantPulse finds failed payment revenue that is recoverable, chooses the highest-value bounded intervention, executes it through Razorpay primitives, and proves whether the intervention recovered money.
-            </p>
+                {/* Center Animated Hands/Chart Graphic */}
+                <div className="my-auto flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="w-24 h-24 rounded-full bg-amber-300 border-2 border-slate-950 flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] animate-bounce">
+                    <TrendingUp className="w-12 h-12 text-slate-950" />
+                  </div>
+                  <div className="font-serif font-extrabold text-2xl text-slate-950">
+                    ₹48,50,000 Recovered
+                  </div>
+                  <div className="text-xs font-mono font-bold text-slate-700">
+                    Closed-Loop Razorpay Attribution
+                  </div>
+                </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <button
-                onClick={handleLaunchTerminal}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs font-mono shadow-xl shadow-blue-600/30 transition-all active:scale-95 m3-state-layer"
-              >
-                <Activity className="w-4 h-4" />
-                <span>{isAuthenticated ? 'Open Live Merchant Terminal' : 'Sign In to Access Terminal'}</span>
-              </button>
-
-              <a
-                href="#roi-calculator"
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs font-mono transition-all m3-elevation-1"
-              >
-                <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>Calculate Your Recoverable ROI</span>
-              </a>
-            </div>
-
-            {/* Parallax Metrics Surfaces */}
-            <div
-              className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-10 text-left"
-              style={{ transform: `translateY(${scrollY * -0.08}px)` }}
-            >
-              <div className="p-4 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800/80 backdrop-blur m3-elevation-2 space-y-1">
-                <div className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono">₹1.24 Cr</div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">Sample Merchant GMV</div>
-              </div>
-
-              <div className="p-4 rounded-3xl bg-white dark:bg-slate-900/70 border border-emerald-500/30 backdrop-blur m3-elevation-2 space-y-1">
-                <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">76.2%</div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">Attributed Recovery Rate</div>
-              </div>
-
-              <div className="p-4 rounded-3xl bg-white dark:bg-slate-900/70 border border-indigo-500/30 backdrop-blur m3-elevation-2 space-y-1">
-                <div className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 font-mono">41 / 41</div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">Automated Tests Passing</div>
-              </div>
-
-              <div className="p-4 rounded-3xl bg-white dark:bg-slate-900/70 border border-blue-500/30 backdrop-blur m3-elevation-2 space-y-1">
-                <div className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 font-mono">500+ Req/s</div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">Concurrent Worker Scale</div>
+                {/* Floating A+ Rating Badge Overlay (Exactly matching image) */}
+                <div className="absolute bottom-4 right-4 bg-white border-2 border-slate-950 rounded-2xl p-4 shadow-[5px_5px_0px_0px_rgba(15,23,42,1)] font-serif text-slate-950 space-y-1">
+                  <div className="text-xl font-extrabold tracking-tight">A+ Rating</div>
+                  <div className="flex items-center gap-1 text-amber-500">
+                    <Star className="w-4 h-4 fill-amber-400" />
+                    <Star className="w-4 h-4 fill-amber-400" />
+                    <Star className="w-4 h-4 fill-amber-400" />
+                    <Star className="w-4 h-4 fill-amber-400" />
+                    <Star className="w-4 h-4 fill-amber-400" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Live Interactive Pipeline Visualizer Section */}
-        <section id="pipeline-simulator" className="py-16 px-4 sm:px-6 bg-slate-100 dark:bg-slate-950/60 border-t border-slate-200 dark:border-slate-900">
+        <section id="pipeline-simulator" className="py-16 px-6 sm:px-12 bg-white dark:bg-slate-950/60 border-t-2 border-slate-950">
           <div className="max-w-5xl mx-auto space-y-8">
             <div className="text-center space-y-2">
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              <h2 className="text-3xl sm:text-5xl font-serif font-bold text-slate-950 dark:text-white tracking-tight">
                 Live 4-Stage Autonomous Recovery Pipeline
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-mono max-w-2xl mx-auto">
+              <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-400 font-mono max-w-2xl mx-auto font-bold">
                 Test how MerchantPulse processes a real-time failed payment webhook event from Razorpay.
               </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 m3-elevation-3 space-y-6 font-mono text-xs">
+            <div className="p-6 rounded-3xl bg-[#FAF7F2] dark:bg-slate-900/80 border-2 border-slate-950 shadow-[6px_6px_0px_0px_rgba(15,23,42,1)] space-y-6 font-mono text-xs">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
-                  <Play className="w-4 h-4 text-blue-600 dark:text-blue-400 fill-blue-600 dark:fill-blue-400" />
+                <div className="flex items-center gap-2 font-bold text-slate-950 dark:text-white text-sm">
+                  <Play className="w-4 h-4 text-slate-950 fill-slate-950" />
                   <span>Pipeline Event Stream Simulator</span>
                 </div>
                 <button
                   onClick={triggerSimulation}
                   disabled={simSimulating}
-                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-full border-2 border-slate-950 bg-slate-950 hover:bg-slate-900 text-white font-bold text-xs transition-all disabled:opacity-50 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]"
                 >
                   {simSimulating ? 'Processing Event...' : 'Trigger Test Event (₹8,500 Failure)'}
                 </button>
@@ -260,44 +291,44 @@ export default function LandingPage() {
 
               {/* Step Progress Indicators */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className={`p-4 rounded-2xl border transition-all ${
+                <div className={`p-4 rounded-2xl border-2 border-slate-950 transition-all ${
                   simStep >= 1
-                    ? 'bg-blue-50 dark:bg-blue-600/10 border-blue-500 text-blue-700 dark:text-blue-400'
-                    : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-400'
+                    ? 'bg-blue-100 dark:bg-blue-600/10 text-slate-950 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]'
+                    : 'bg-white text-slate-400'
                 }`}>
-                  <div className="font-bold flex items-center justify-between">
+                  <div className="font-bold flex items-center justify-between text-xs">
                     <span>1. Detection & EV Math</span>
-                    {simStep >= 1 && <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                    {simStep >= 1 && <CheckCircle2 className="w-4 h-4 text-slate-950" />}
                   </div>
-                  <p className="text-[11px] mt-1 opacity-80">
-                    Calculated P(success)=0.74, Intervention Fee=₹130, Net EV=₹6,160.
+                  <p className="text-[11px] mt-1 opacity-90 font-sans">
+                    Calculated P(success)=0.74, Fee=₹130, Net EV=₹6,160.
                   </p>
                 </div>
 
-                <div className={`p-4 rounded-2xl border transition-all ${
+                <div className={`p-4 rounded-2xl border-2 border-slate-950 transition-all ${
                   simStep >= 2
-                    ? 'bg-indigo-50 dark:bg-indigo-600/10 border-indigo-500 text-indigo-700 dark:text-indigo-400'
-                    : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-400'
+                    ? 'bg-amber-100 dark:bg-indigo-600/10 text-slate-950 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]'
+                    : 'bg-white text-slate-400'
                 }`}>
-                  <div className="font-bold flex items-center justify-between">
+                  <div className="font-bold flex items-center justify-between text-xs">
                     <span>2. Policy Evaluation</span>
-                    {simStep >= 2 && <CheckCircle2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
+                    {simStep >= 2 && <CheckCircle2 className="w-4 h-4 text-slate-950" />}
                   </div>
-                  <p className="text-[11px] mt-1 opacity-80">
-                    GMV Cap ₹8.5k &lt; ₹25k limit. 24h Cooldown valid. Policy Passed.
+                  <p className="text-[11px] mt-1 opacity-90 font-sans">
+                    GMV Cap ₹8.5k &lt; ₹25k limit. 24h Cooldown valid.
                   </p>
                 </div>
 
-                <div className={`p-4 rounded-2xl border transition-all ${
+                <div className={`p-4 rounded-2xl border-2 border-slate-950 transition-all ${
                   simStep >= 3
-                    ? 'bg-emerald-50 dark:bg-emerald-600/10 border-emerald-500 text-emerald-700 dark:text-emerald-400'
-                    : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-400'
+                    ? 'bg-emerald-200 dark:bg-emerald-600/10 text-slate-950 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]'
+                    : 'bg-white text-slate-400'
                 }`}>
-                  <div className="font-bold flex items-center justify-between">
+                  <div className="font-bold flex items-center justify-between text-xs">
                     <span>3. Razorpay Dispatch</span>
-                    {simStep >= 3 && <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
+                    {simStep >= 3 && <CheckCircle2 className="w-4 h-4 text-slate-950" />}
                   </div>
-                  <p className="text-[11px] mt-1 opacity-80">
+                  <p className="text-[11px] mt-1 opacity-90 font-sans">
                     Payment link generated: plink_Pz884422. SMS dispatched.
                   </p>
                 </div>
@@ -307,22 +338,22 @@ export default function LandingPage() {
         </section>
 
         {/* Interactive Material ROI Calculator Section */}
-        <section id="roi-calculator" className="py-16 px-4 sm:px-6">
+        <section id="roi-calculator" className="py-16 px-6 sm:px-12 bg-[#8BE8F5] border-t-2 border-slate-950">
           <div className="max-w-5xl mx-auto space-y-8">
             <div className="text-center space-y-2">
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                Estimate Your Merchant Revenue Recovery
+              <h2 className="text-3xl sm:text-5xl font-serif font-bold text-slate-950 tracking-tight">
+                Estimate Your Recoverable ROI
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-mono max-w-2xl mx-auto">
+              <p className="text-xs sm:text-sm text-slate-900 font-mono font-bold max-w-2xl mx-auto">
                 See how much gross revenue MerchantPulse can autonomously recover for your business each month without discounting.
               </p>
             </div>
 
-            <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 m3-elevation-3 space-y-6">
+            <div className="p-6 sm:p-8 rounded-3xl bg-white border-2 border-slate-950 shadow-[8px_8px_0px_0px_rgba(15,23,42,1)] space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-mono text-slate-800 dark:text-slate-300 font-bold mb-2">
-                    Monthly Processing Volume (GMV): <span className="text-blue-600 dark:text-blue-400 text-sm">₹{(monthlyGmvLakhs / 100).toFixed(2)} Cr</span> (₹{monthlyGmvLakhs} Lakhs)
+                  <label className="block text-xs font-mono text-slate-950 font-bold mb-2">
+                    Monthly Processing Volume (GMV): <span className="text-blue-700 text-sm font-bold">₹{(monthlyGmvLakhs / 100).toFixed(2)} Cr</span> (₹{monthlyGmvLakhs} Lakhs)
                   </label>
                   <input
                     type="range"
@@ -331,18 +362,13 @@ export default function LandingPage() {
                     step="5"
                     value={monthlyGmvLakhs}
                     onChange={(e) => setMonthlyGmvLakhs(Number(e.target.value))}
-                    className="w-full accent-blue-600 cursor-pointer h-2 bg-slate-200 dark:bg-slate-800 rounded-lg"
+                    className="w-full accent-slate-950 cursor-pointer h-2.5 bg-slate-200 rounded-lg"
                   />
-                  <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
-                    <span>₹10 Lakhs</span>
-                    <span>₹2.5 Crore</span>
-                    <span>₹5.0 Crore</span>
-                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono text-slate-800 dark:text-slate-300 font-bold mb-2">
-                    Payment Dropoff / Failure Rate: <span className="text-amber-600 dark:text-amber-400 text-sm">{failureRatePct}%</span>
+                  <label className="block text-xs font-mono text-slate-950 font-bold mb-2">
+                    Payment Dropoff / Failure Rate: <span className="text-amber-700 text-sm font-bold">{failureRatePct}%</span>
                   </label>
                   <input
                     type="range"
@@ -351,35 +377,30 @@ export default function LandingPage() {
                     step="0.5"
                     value={failureRatePct}
                     onChange={(e) => setFailureRatePct(Number(e.target.value))}
-                    className="w-full accent-amber-500 cursor-pointer h-2 bg-slate-200 dark:bg-slate-800 rounded-lg"
+                    className="w-full accent-amber-600 cursor-pointer h-2.5 bg-slate-200 rounded-lg"
                   />
-                  <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
-                    <span>1.5% (Low)</span>
-                    <span>4.5% (Industry Avg)</span>
-                    <span>8.5% (Elevated)</span>
-                  </div>
                 </div>
               </div>
 
               {/* Output Result Surfaces */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono">
-                  <div className="text-slate-500 text-[10px]">Monthly Revenue at Risk</div>
-                  <div className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t-2 border-slate-950">
+                <div className="p-4 rounded-2xl bg-[#FAF7F2] border-2 border-slate-950 font-mono shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
+                  <div className="text-slate-600 text-[10px] font-bold uppercase">Monthly Revenue at Risk</div>
+                  <div className="text-xl font-bold text-amber-700 mt-1">
                     ₹{(monthlyRevenueAtRiskInr / 100000).toFixed(2)} Lakhs
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-emerald-500/40 font-mono">
-                  <div className="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">Monthly Recovered Money</div>
-                  <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
+                <div className="p-4 rounded-2xl bg-emerald-100 border-2 border-slate-950 font-mono shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
+                  <div className="text-emerald-800 text-[10px] font-extrabold uppercase">Monthly Recovered Money</div>
+                  <div className="text-2xl font-extrabold text-emerald-950 mt-1">
                     ₹{(monthlyRecoverableInr / 100000).toFixed(2)} Lakhs
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-blue-50 dark:bg-gradient-to-br dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-500/50 font-mono">
-                  <div className="text-blue-700 dark:text-blue-400 text-[10px] font-bold">Annual Incremental Recovery</div>
-                  <div className="text-2xl font-extrabold text-blue-700 dark:text-blue-400 mt-1">
+                <div className="p-4 rounded-2xl bg-blue-100 border-2 border-slate-950 font-mono shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
+                  <div className="text-blue-900 text-[10px] font-extrabold uppercase">Annual Incremental Recovery</div>
+                  <div className="text-2xl font-extrabold text-blue-950 mt-1">
                     ₹{(annualRecoveredInr / 100000).toFixed(2)} Lakhs
                   </div>
                 </div>
@@ -388,65 +409,19 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Feature Overview Grid */}
-        <section id="features" className="py-16 px-4 sm:px-6 bg-slate-100 dark:bg-slate-950/60 border-t border-slate-200 dark:border-slate-900">
-          <div className="max-w-5xl mx-auto space-y-8">
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                Architected for Production Razorpay Submissions
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-mono max-w-2xl mx-auto">
-                Deterministic detection, economic expected-value modeling, policy guardrails, and closed-loop Razorpay execution.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 m3-elevation-2 space-y-3">
-                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                  <Zap className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white font-mono">Deterministic EV Math</h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
-                  Calculates Net Expected Value before taking action: <code className="text-blue-600 dark:text-blue-400 font-mono">Net EV = (P_success × GMV) - (Fee + Fatigue)</code>.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 m3-elevation-2 space-y-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white font-mono">Bounded Policy Guardrails</h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
-                  Strict caps on maximum GMV auto-execution, 24-hour contact cooldowns, and mandatory escalation queues for high-risk operations.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 m3-elevation-2 space-y-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                  <BarChart3 className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white font-mono">Closed-Loop Attribution</h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
-                  Reconciles Razorpay paid webhooks against idempotency keys to guarantee zero double-counting in batch recovery reports.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* CTA Footer Section */}
-        <section className="py-12 px-4 sm:px-6 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900">
+        <section className="py-12 px-6 sm:px-12 bg-white border-t-2 border-slate-950">
           <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
             <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Ready to test the Live Terminal?</h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 font-mono mt-1">
+              <h3 className="text-2xl font-serif font-bold text-slate-950 tracking-tight">Ready to test the Live Terminal?</h3>
+              <p className="text-xs text-slate-700 font-mono mt-1 font-semibold">
                 Authenticate your merchant account to access live recovery streams and synthetic benchmark suites.
               </p>
             </div>
 
             <button
               onClick={handleLaunchTerminal}
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs font-mono shadow-lg shadow-blue-600/30 transition-all active:scale-95"
+              className="flex items-center gap-2 px-8 py-3.5 rounded-full border-2 border-slate-950 bg-slate-950 hover:bg-slate-900 text-white font-bold text-xs font-mono shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] transition-all active:translate-x-[2px] active:translate-y-[2px]"
             >
               <span>{isAuthenticated ? 'Open Merchant Terminal' : 'Sign In / Register'}</span>
               <ArrowRight className="w-4 h-4" />

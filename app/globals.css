@@ -3,8 +3,24 @@
 @tailwind utilities;
 
 @layer base {
-  /* Default Dark Theme Variables */
-  :root, html.dark {
+  /* Default Retro Vintage Cyan Theme Variables */
+  :root, html.retro {
+    --bg-main: #8BE8F5;
+    --bg-surface: #FFFFFF;
+    --bg-surface-low: #7CE0EE;
+    --bg-surface-high: #FAF7F2;
+    --border-color: #0F172A;
+    --text-primary: #0F172A;
+    --text-secondary: #334155;
+    --text-muted: #64748B;
+    --primary-blue: #0F172A;
+    --primary-indigo: #0F172A;
+    --accent-emerald: #10B981;
+    --accent-amber: #F59E0B;
+  }
+
+  /* Dark Theme Variables */
+  html.dark {
     --bg-main: #070B12;
     --bg-surface: #0F172A;
     --bg-surface-low: rgba(15, 23, 42, 0.6);
@@ -41,11 +57,54 @@
     @apply border-border transition-colors duration-150;
   }
   body {
-    @apply antialiased font-sans selection:bg-blue-600/30 selection:text-white;
+    @apply antialiased font-sans selection:bg-slate-900 selection:text-white;
     background-color: var(--bg-main);
     color: var(--text-primary);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
+}
+
+/* Retro Vintage Neo-Brutalist Utility Classes */
+.retro-card {
+  background-color: #FFFFFF;
+  border: 2px solid #0F172A;
+  box-shadow: 4px 4px 0px 0px #0F172A;
+  border-radius: 1.25rem;
+}
+.retro-card-sm {
+  background-color: #FFFFFF;
+  border: 2px solid #0F172A;
+  box-shadow: 3px 3px 0px 0px #0F172A;
+  border-radius: 0.85rem;
+}
+.retro-pill-btn {
+  background-color: #0F172A;
+  color: #FFFFFF;
+  border: 2px solid #0F172A;
+  box-shadow: 3px 3px 0px 0px #0F172A;
+  border-radius: 9999px;
+  font-weight: 700;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.retro-pill-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px 0px #0F172A;
+}
+.retro-pill-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px 0px #0F172A;
+}
+
+.retro-pill-outline {
+  background-color: transparent;
+  color: #0F172A;
+  border: 2px solid #0F172A;
+  border-radius: 9999px;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+.retro-pill-outline:hover {
+  background-color: rgba(15, 23, 42, 0.05);
 }
 
 /* Material Design 3 Elevation Tokens */
@@ -58,19 +117,8 @@
 .light .m3-elevation-1 {
   box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.08), 0px 1px 2px 0px rgba(0, 0, 0, 0.04);
 }
-
-.dark .m3-elevation-2 {
-  box-shadow: 0px 2px 6px 2px rgba(0, 0, 0, 0.25), 0px 1px 2px 0px rgba(0, 0, 0, 0.40);
-}
-.light .m3-elevation-2 {
-  box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.06), 0px 2px 4px -1px rgba(0, 0, 0, 0.03);
-}
-
-.dark .m3-elevation-3 {
-  box-shadow: 0px 4px 12px 3px rgba(0, 0, 0, 0.30), 0px 1px 3px 0px rgba(0, 0, 0, 0.40);
-}
-.light .m3-elevation-3 {
-  box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.08), 0px 4px 6px -2px rgba(0, 0, 0, 0.04);
+.retro .m3-elevation-1 {
+  box-shadow: 3px 3px 0px 0px #0F172A;
 }
 
 /* Material Surface Containers */
@@ -82,25 +130,11 @@
   background-color: #FFFFFF;
   border-color: #E2E8F0;
 }
-
-/* Material State Layers */
-.m3-state-layer {
-  position: relative;
-  overflow: hidden;
-}
-.m3-state-layer::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-color: currentColor;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-.m3-state-layer:hover::after {
-  opacity: 0.08;
-}
-.m3-state-layer:active::after {
-  opacity: 0.12;
+.retro .m3-card {
+  background-color: #FFFFFF;
+  border: 2px solid #0F172A;
+  box-shadow: 4px 4px 0px 0px #0F172A;
+  border-radius: 1.25rem;
 }
 
 /* Parallax Scrolling Layers */
@@ -127,6 +161,9 @@
 .light ::-webkit-scrollbar-track {
   background: #F8FAFC;
 }
+.retro ::-webkit-scrollbar-track {
+  background: #8BE8F5;
+}
 .dark ::-webkit-scrollbar-thumb {
   background: #1E293B;
   border-radius: 3px;
@@ -135,14 +172,11 @@
   background: #CBD5E1;
   border-radius: 3px;
 }
+.retro ::-webkit-scrollbar-thumb {
+  background: #0F172A;
+  border-radius: 3px;
+}
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
-}
-
-.dark .glow-blue {
-  box-shadow: 0 0 24px -4px rgba(51, 149, 255, 0.3);
-}
-.light .glow-blue {
-  box-shadow: 0 0 24px -4px rgba(37, 99, 235, 0.15);
 }

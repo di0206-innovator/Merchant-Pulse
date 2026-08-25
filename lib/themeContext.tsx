@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-export type Theme = 'dark' | 'light';
+export type Theme = 'retro' | 'dark' | 'light';
 
 interface ThemeContextType {
   theme: Theme;
@@ -11,29 +11,24 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'dark',
+  theme: 'retro',
   setTheme: () => {},
   toggleTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark');
+  const [theme, setThemeState] = useState<Theme>('retro');
 
   useEffect(() => {
-    const savedTheme = (localStorage.getItem('merchantpulse_theme') as Theme) || 'dark';
+    const savedTheme = (localStorage.getItem('merchantpulse_theme') as Theme) || 'retro';
     setThemeState(savedTheme);
     applyTheme(savedTheme);
   }, []);
 
   const applyTheme = (newTheme: Theme) => {
     const root = document.documentElement;
-    if (newTheme === 'dark') {
-      root.classList.add('dark');
-      root.classList.remove('light');
-    } else {
-      root.classList.add('light');
-      root.classList.remove('dark');
-    }
+    root.classList.remove('retro', 'dark', 'light');
+    root.classList.add(newTheme);
   };
 
   const setTheme = (newTheme: Theme) => {
@@ -43,7 +38,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleTheme = () => {
-    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    const nextTheme: Theme = theme === 'retro' ? 'dark' : theme === 'dark' ? 'light' : 'retro';
     setTheme(nextTheme);
   };
 

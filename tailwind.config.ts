@@ -44,6 +44,16 @@ const config: Config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        retro: {
+          bg: "#8BE8F5",
+          cyan: "#8BE8F5",
+          teal: "#7CE0EE",
+          cream: "#FAF7F2",
+          yellow: "#FCD34D",
+          pink: "#FF8AB5",
+          coral: "#FF6B6B",
+          dark: "#0F172A",
+        },
         fintech: {
           navy: "#0A1128",
           charcoal: "#0F172A",
@@ -58,9 +68,15 @@ const config: Config = {
         }
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "Inter", "sans-serif"],
-        mono: ["var(--font-mono)", "JetBrains Mono", "monospace"],
+        serif: ["Playfair Display", "Georgia", "serif"],
+        sans: ["Plus Jakarta Sans", "Inter", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
       },
+      boxShadow: {
+        retro: "4px 4px 0px 0px #0F172A",
+        "retro-lg": "6px 6px 0px 0px #0F172A",
+        "retro-sm": "2px 2px 0px 0px #0F172A",
+      }
     },
   },
   plugins: [],
