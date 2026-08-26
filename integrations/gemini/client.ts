@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
-import crypto from 'node:crypto';
+import { hashString } from '@/lib/cryptoUtils';
 import { RevenueStrategyProvider } from '../../core/strategy/provider';
 import { MockStrategyProvider } from '../../core/strategy/mock';
 import { RevenueOpportunity } from '../../core/domain/opportunity';
@@ -35,7 +35,7 @@ export class GeminiStrategyProvider implements RevenueStrategyProvider {
         provider: 'MockFallback',
         model: 'deterministic-mock',
         promptVersion: this.promptVersion,
-        contextHash: crypto.createHash('sha256').update(opportunity.id).digest('hex').slice(0, 16),
+        contextHash: hashString(opportunity.id),
         latencyMs: Math.round(performance.now() - startTime),
         validationStatus: 'FALLBACK_USED',
         fallbackReason: 'No GEMINI_API_KEY configured',
@@ -58,7 +58,7 @@ export class GeminiStrategyProvider implements RevenueStrategyProvider {
       intentScore: opportunity.evidence.intentScore,
     };
 
-    const contextHash = crypto.createHash('sha256').update(JSON.stringify(promptContext)).digest('hex').slice(0, 16);
+    const contextHash = hashString(JSON.stringify(promptContext));
 
     const systemInstruction = `You are MerchantPulse AI, a senior payment ops intelligence engine for Razorpay merchants.
 Your job is to analyze validated deterministic payment failure facts and formulate the highest-ROI, policy-compliant recovery recommendation.

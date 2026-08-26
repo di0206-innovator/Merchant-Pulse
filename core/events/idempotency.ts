@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import { hashString } from '@/lib/cryptoUtils';
 
 export class IdempotencyLedger {
   private seenKeys: Map<string, { timestamp: number; result?: unknown }> = new Map();
@@ -15,8 +15,9 @@ export class IdempotencyLedger {
     if (eventId) {
       return `evt_key_${eventId}`;
     }
-    const hash = crypto.createHash('sha256').update(rawPayload || '').digest('hex');
-    return `hash_key_${hash.slice(0, 24)}`;
+    const payloadStr = typeof rawPayload === 'string' ? rawPayload : rawPayload?.toString('utf8') || '';
+    const hash = hashString(payloadStr);
+    return `hash_key_${hash}`;
   }
 
   /**

@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import { hashString } from '@/lib/cryptoUtils';
 import { RevenueFactStore } from '../revenue/factStore';
 import { RevenueOpportunityDetector } from '../revenue/detector';
 import { RevenueStrategyProvider } from '../strategy/provider';
@@ -96,7 +96,7 @@ export class RevenuePipelineOrchestrator {
 
     // 6. Action Execution or Escalation Router
     const now = Math.floor(Date.now() / 1000);
-    const hash = crypto.createHash('sha256').update(`${opportunity.id}_${now}`).digest('hex').slice(0, 14);
+    const hash = hashString(`${opportunity.id}_${now}`);
     const decisionId = `dec_${hash}`;
     let actionStatus: DecisionAuditRecord['actionStatus'] = 'REJECTED';
     let executedActionId: string | undefined;

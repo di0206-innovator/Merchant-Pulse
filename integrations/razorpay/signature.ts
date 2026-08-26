@@ -1,5 +1,3 @@
-import crypto from 'node:crypto';
-
 /**
  * Cryptographically verifies Razorpay webhook signatures using HMAC-SHA256.
  * MUST use unparsed raw request body bytes to prevent whitespace/encoding alterations.
@@ -14,6 +12,8 @@ export function verifyRazorpayWebhookSignature(
   }
 
   try {
+    // Require Node crypto dynamically to protect client-side webpack builds
+    const crypto = require('crypto');
     const rawBuffer = typeof rawBody === 'string' ? Buffer.from(rawBody, 'utf8') : rawBody;
     const expectedSignature = crypto
       .createHmac('sha256', webhookSecret)

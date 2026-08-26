@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import { hashString, generateRandomHex } from '@/lib/cryptoUtils';
 import { PaymentEntity, OrderEntity } from '../domain/payment';
 import { RevenueOpportunity, OpportunityType, OpportunityEvidence } from '../domain/opportunity';
 import { calculateExpectedValue } from './expectedValue';
@@ -66,7 +66,7 @@ export class RevenueOpportunityDetector {
     });
 
     const now = Math.floor(Date.now() / 1000);
-    const hash = crypto.createHash('sha256').update(payment.id).digest('hex').slice(0, 14);
+    const hash = hashString(`${payment.id}_${now}`);
     const opportunityId = `opp_${hash}`;
 
     return {
@@ -120,7 +120,8 @@ export class RevenueOpportunityDetector {
     });
 
     const now = Math.floor(Date.now() / 1000);
-    const opportunityId = `opp_${Buffer.from(`${order.id}_${now}`).toString('hex').slice(0, 14)}`;
+    const hash = hashString(`${order.id}_${now}`);
+    const opportunityId = `opp_${hash}`;
 
     return {
       id: opportunityId,

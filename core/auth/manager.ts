@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import { hashString, generateRandomHex } from '@/lib/cryptoUtils';
 import { UserProfile, UserRole, ApiKey, ROLE_PERMISSIONS } from './types';
 
 export const PRESET_USERS: Record<string, UserProfile> = {
@@ -54,7 +54,7 @@ export class AuthManager {
 
   public createSession(email: string): { token: string; user: UserProfile } | null {
     const user = PRESET_USERS[email] || {
-      id: `usr_${Buffer.from(email).toString('hex').slice(0, 10)}`,
+      id: `usr_${hashString(email)}`,
       name: email.split('@')[0],
       email,
       role: 'OPS_MANAGER' as UserRole,
@@ -62,7 +62,7 @@ export class AuthManager {
       permissions: ROLE_PERMISSIONS.OPS_MANAGER,
     };
 
-    const token = `sess_${crypto.randomBytes(24).toString('hex')}`;
+    const token = `sess_${generateRandomHex(32)}`;
     const expiresAt = Date.now() + (86400 * 1000 * 7); // 7-day session
     this.activeSessions.set(token, { user, expiresAt });
 
@@ -70,9 +70,9 @@ export class AuthManager {
   }
 
   public createApiKey(name: string, role: UserRole = 'OWNER', customKey?: string): { apiKey: ApiKey; secret: string } {
-    const secret = customKey || `mp_${role === 'OWNER' ? 'live' : 'test'}_${crypto.randomBytes(20).toString('hex')}`;
-    const hashedKey = crypto.createHash('sha256').update(secret).digest('hex');
-    const id = `key_${crypto.randomBytes(8).toString('hex')}`;
+    const secret = customKey || `mp_${role === 'OWNER' ? 'live' : 'test'}_${generateRandomHex(24)}`;
+    const hashedKey = hashString(secret);
+    const id = `key_${generateRandomHex(12)}`;
 
     const apiKey: ApiKey = {
       id,
@@ -89,7 +89,7 @@ export class AuthManager {
   }
 
   public verifyApiKey(secret: string): ApiKey | null {
-    const hashed = crypto.createHash('sha256').update(secret).digest('hex');
+    const hashed = hashString(secret);
     const key = this.apiKeys.get(hashed);
     if (!key) return null;
 
