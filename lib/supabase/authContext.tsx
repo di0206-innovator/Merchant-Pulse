@@ -50,34 +50,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isConfigured = isSupabaseConfigured();
 
   useEffect(() => {
-    const supabase = createClient();
-
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        updateProfileFromUser(session.user);
-      }
+    if (!isConfigured) {
       setLoading(false);
-    });
+      return;
+    }
 
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        updateProfileFromUser(session.user);
-      } else {
-        setProfile(defaultProfile);
+    try {
+      const supabase = createClient();
+      if (!supabase) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
-    });
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+      // Check active session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          updateProfileFromUser(session.user);
+        }
+        setLoading(false);
+      }).catch((err) => {
+        console.warn('[AuthProvider] Session retrieval error:', err);
+        setLoading(false);
+      });
+
+      // Listen for auth state changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          updateProfileFromUser(session.user);
+        } else {
+          setProfile(defaultProfile);
+        }
+        setLoading(false);
+      });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    } catch (err) {
+      console.warn('[AuthProvider] Initialization error:', err);
+      setLoading(false);
+    }
+  }, [isConfigured]);
 
   const updateProfileFromUser = (u: User) => {
     const userMetadata = u.user_metadata || {};

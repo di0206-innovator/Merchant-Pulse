@@ -1,22 +1,20 @@
 import { createBrowserClient } from '@supabase/ssr';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export function isSupabaseConfigured(): boolean {
-  return Boolean(SUPABASE_URL) && Boolean(SUPABASE_ANON_KEY);
+  return Boolean(SUPABASE_URL) && Boolean(SUPABASE_ANON_KEY) && SUPABASE_ANON_KEY !== 'dummy_anon_key_for_demo';
 }
 
 export function getSupabaseMode(): 'CONFIGURED' | 'DEMO MODE' {
   return isSupabaseConfigured() ? 'CONFIGURED' : 'DEMO MODE';
 }
 
-export function createClient() {
+export function createClient(): SupabaseClient | null {
   if (!isSupabaseConfigured()) {
-    throw new Error(
-      '[MerchantPulse Supabase] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. System operating in DEMO MODE.'
-    );
+    return null;
   }
 
   if (typeof window !== 'undefined') {
@@ -26,12 +24,12 @@ export function createClient() {
 }
 
 export async function signInWithGoogle(redirectTo?: string) {
-  if (!isSupabaseConfigured()) {
+  const supabase = createClient();
+  if (!supabase) {
     console.warn('[MerchantPulse Auth] Supabase not configured. Operating in Demo Mode.');
     return null;
   }
 
-  const supabase = createClient();
   const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
   const targetRedirect = redirectTo || `${origin}/auth/callback`;
 
@@ -55,8 +53,8 @@ export async function signInWithGoogle(redirectTo?: string) {
 }
 
 export async function signOutUser() {
-  if (!isSupabaseConfigured()) return;
   const supabase = createClient();
+  if (!supabase) return;
   const { error } = await supabase.auth.signOut();
   if (error) {
     console.error('[Supabase Auth] Sign out error:', error);
