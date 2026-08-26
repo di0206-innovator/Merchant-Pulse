@@ -1,59 +1,28 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  Activity,
-  ShieldCheck,
-  Zap,
   TrendingUp,
   ArrowRight,
   CheckCircle2,
-  AlertTriangle,
-  Server,
-  DollarSign,
-  Lock,
-  Layers,
+  Settings,
   Sparkles,
-  ChevronRight,
   Play,
-  RotateCcw,
-  ExternalLink,
-  BarChart3,
-  FileCheck2,
-  Globe,
-  LogIn,
-  Sun,
-  Moon,
   Star
 } from 'lucide-react';
-import { ProfileBar } from '@/components/dashboard/ProfileBar';
 import { SettingsDrawer } from '@/components/dashboard/SettingsDrawer';
 import { PwaInstallPrompt } from '@/components/PwaInstallPrompt';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useAuth } from '@/lib/supabase/authContext';
-import { useTheme } from '@/lib/themeContext';
 
 export default function LandingPage() {
   const router = useRouter();
   const { isAuthenticated, profile: currentUser } = useAuth();
-  const { theme, toggleTheme } = useTheme();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [merchantEmailInput, setMerchantEmailInput] = useState('');
-
-  // Parallax Scroll Offset State
-  const [scrollY, setScrollY] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Interactive ROI Calculator State
   const [monthlyGmvLakhs, setMonthlyGmvLakhs] = useState<number>(125); // ₹1.25 Cr default
@@ -108,51 +77,33 @@ export default function LandingPage() {
           </div>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-900 dark:text-slate-300">
-            <a href="#roi-calculator" className="hover:underline transition-all">
+          <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-950 dark:text-slate-200">
+            <a href="#hero" className="hover:underline transition-all">
               Home
             </a>
             <a href="#pipeline-simulator" className="hover:underline transition-all">
               Live Pipeline
-            </a>
-            <a href="#features" className="hover:underline transition-all">
-              Features
             </a>
             <a href="#roi-calculator" className="hover:underline transition-all">
               ROI Calculator
             </a>
           </div>
 
-          {/* Public Right Header Actions */}
+          {/* Clean Right Actions */}
           <div className="flex items-center gap-3">
-            {/* Quick Theme Switcher Button */}
-            <button
-              onClick={toggleTheme}
-              className="px-3 py-1.5 rounded-full bg-white dark:bg-slate-900 border-2 border-slate-950 text-slate-950 dark:text-slate-300 hover:bg-slate-100 dark:hover:text-white transition-colors flex items-center gap-1.5 font-mono text-xs font-bold shadow-[2px_2px_0px_0px_rgba(15,23,42,1)]"
-              title={`Switch Mode (${theme.toUpperCase()})`}
-            >
-              {theme === 'retro' ? (
-                <>
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="hidden sm:inline">Retro Cyan</span>
-                </>
-              ) : theme === 'dark' ? (
-                <>
-                  <Moon className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="hidden sm:inline">Dark</span>
-                </>
-              ) : (
-                <>
-                  <Sun className="w-3.5 h-3.5 text-indigo-600" />
-                  <span className="hidden sm:inline">Light</span>
-                </>
-              )}
-            </button>
-
             <PwaInstallPrompt />
 
-            <ProfileBar onOpenSettings={() => setIsSettingsOpen(true)} />
+            {/* Settings Drawer Button */}
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-2 rounded-full border-2 border-slate-950 bg-white hover:bg-slate-100 text-slate-950 transition-colors shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] active:translate-x-[1px] active:translate-y-[1px]"
+              title="Settings & Role Config"
+              aria-label="Settings"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
 
+            {/* Login / Auth Button */}
             {!isAuthenticated ? (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
@@ -162,6 +113,7 @@ export default function LandingPage() {
               </button>
             ) : null}
 
+            {/* Primary Action Button */}
             <button
               onClick={handleLaunchTerminal}
               className="px-6 py-2.5 rounded-full border-2 border-slate-950 bg-slate-950 hover:bg-slate-900 text-white font-bold text-xs transition-all shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] active:translate-x-[2px] active:translate-y-[2px]"
@@ -173,8 +125,8 @@ export default function LandingPage() {
       </header>
 
       {/* Main Vintage Hero & Body Section */}
-      <main className="flex-1 relative">
-        {/* Vintage Cyan Hero Section matching Screenshot */}
+      <main id="hero" className="flex-1 relative">
+        {/* Vintage Cyan Hero Section */}
         <section className="relative pt-12 sm:pt-20 pb-24 px-6 sm:px-12">
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
             {/* Left Headline Area */}
@@ -194,7 +146,7 @@ export default function LandingPage() {
                 MerchantPulse delivers automated AI revenue recovery, deterministic Net EV expected-value modeling, and bounded Razorpay execution.
               </p>
 
-              {/* Email Input Bar Matching Screenshot */}
+              {/* Email Input Bar */}
               <div className="pt-4 max-w-md">
                 <form
                   onSubmit={(e) => {
@@ -212,7 +164,7 @@ export default function LandingPage() {
                   />
                   <button
                     type="submit"
-                    className="px-6 py-3 rounded-full bg-slate-950 hover:bg-slate-900 text-white text-xs font-bold font-mono transition-all"
+                    className="px-6 py-3 rounded-full bg-slate-950 hover:bg-slate-900 text-white text-xs font-bold font-mono transition-all cursor-pointer"
                   >
                     Get Started
                   </button>
@@ -222,7 +174,6 @@ export default function LandingPage() {
 
             {/* Right Vintage Illustration Canvas & Badge Overlay */}
             <div className="lg:col-span-5 relative flex justify-center items-center">
-              {/* Hand-Drawn Retro Art Simulation Box */}
               <div className="w-full max-w-md h-80 sm:h-96 rounded-3xl border-3 border-slate-950 bg-white/70 backdrop-blur-sm p-6 relative flex flex-col justify-between shadow-[8px_8px_0px_0px_rgba(15,23,42,1)] overflow-hidden">
                 <div className="flex items-center justify-between border-b-2 border-slate-950 pb-3">
                   <div className="flex items-center gap-1.5">
@@ -233,7 +184,7 @@ export default function LandingPage() {
                   <span className="font-mono text-xs font-bold text-slate-950">Razorpay Pipeline v2.5</span>
                 </div>
 
-                {/* Center Animated Hands/Chart Graphic */}
+                {/* Center Animated Graphic */}
                 <div className="my-auto flex flex-col items-center justify-center text-center space-y-3">
                   <div className="w-24 h-24 rounded-full bg-amber-300 border-2 border-slate-950 flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] animate-bounce">
                     <TrendingUp className="w-12 h-12 text-slate-950" />
@@ -246,7 +197,7 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* Floating A+ Rating Badge Overlay (Exactly matching image) */}
+                {/* Floating A+ Rating Badge Overlay */}
                 <div className="absolute bottom-4 right-4 bg-white border-2 border-slate-950 rounded-2xl p-4 shadow-[5px_5px_0px_0px_rgba(15,23,42,1)] font-serif text-slate-950 space-y-1">
                   <div className="text-xl font-extrabold tracking-tight">A+ Rating</div>
                   <div className="flex items-center gap-1 text-amber-500">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { X, Settings, ShieldCheck, Key, Database, Sparkles, Sliders, CheckCircle2, Lock, Cpu, Globe, User, Sun, Moon, Palette } from 'lucide-react';
-import { UserProfile } from '@/core/auth/types';
+import { X, Settings, ShieldCheck, Key, Database, Sparkles, Sliders, CheckCircle2, Lock, Cpu, Globe, User, Sun, Moon, Palette, Users } from 'lucide-react';
+import { UserProfile, UserRole } from '@/core/auth/types';
 import { useAuth } from '@/lib/supabase/authContext';
 import { useTheme } from '@/lib/themeContext';
 
@@ -11,7 +11,7 @@ interface SettingsDrawerProps {
 }
 
 export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerProps) {
-  const { setProfile, profile } = useAuth();
+  const { setProfile, profile, switchRole } = useAuth();
   const { theme, setTheme } = useTheme();
 
   const [activeTab, setActiveTab] = useState<'PROFILE' | 'MERCHANT' | 'GUARDRAILS' | 'RAZORPAY' | 'GEMINI' | 'SUPABASE'>('PROFILE');
@@ -29,8 +29,8 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
   const [maxAutoGmv, setMaxAutoGmv] = useState(25000);
   const [minEv, setMinEv] = useState(20);
   const [cooldownHours, setCooldownHours] = useState(24);
-  const [razorpayKeyId, setRazorpayKeyId] = useState(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_MerchantPulseMain');
-  const [razorpaySecret, setRazorpaySecret] = useState('••••••••••••••••');
+  const [razorpayKeyId, setRazorpayKeyId] = useState('rzp_test_TUHSBfjPgODDOy');
+  const [razorpaySecret, setRazorpaySecret] = useState('eAr7mPqHUDHycKZa65409Mjs');
   const [razorpayMode, setRazorpayMode] = useState<'TEST' | 'LIVE'>('TEST');
   const [geminiApiKey, setGeminiApiKey] = useState('••••••••••••••••');
   const [geminiModel, setGeminiModel] = useState('gemini-2.5-flash');
@@ -60,7 +60,7 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
             <Settings className="w-5 h-5 text-blue-400" />
             <div>
               <h2 className="text-base font-bold text-white font-mono">Merchant Terminal Settings</h2>
-              <p className="text-xs text-slate-400">Configure profile, theme, guardrails, API keys & Supabase Auth</p>
+              <p className="text-xs text-slate-400">Configure role, theme, guardrails, API keys & Supabase Auth</p>
             </div>
           </div>
 
@@ -81,7 +81,7 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
             }`}
           >
             <User className="w-3.5 h-3.5" />
-            <span>Profile & Theme</span>
+            <span>Role & Theme</span>
           </button>
 
           <button
@@ -144,20 +144,81 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
             </div>
           )}
 
-          {/* Tab 1: Profile & Theme */}
+          {/* Tab 1: Role, Theme & Profile */}
           {activeTab === 'PROFILE' && (
             <div className="space-y-6 font-mono text-xs">
+              {/* Active Role Selector */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-blue-400" />
+                    <span className="font-bold text-white text-xs">Active Merchant Role (RBAC)</span>
+                  </div>
+                  <span className="text-[10px] text-blue-400 font-bold uppercase">{profile.role}</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                  <button
+                    onClick={() => switchRole('OWNER')}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      profile.role === 'OWNER'
+                        ? 'bg-blue-600/20 border-blue-500 text-white shadow-md'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <div className="font-bold text-xs text-white">Owner (Admin)</div>
+                    <div className="text-[10px] text-slate-400 mt-1">Full overrides & policy write</div>
+                  </button>
+
+                  <button
+                    onClick={() => switchRole('OPS_MANAGER')}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      profile.role === 'OPS_MANAGER'
+                        ? 'bg-amber-600/20 border-amber-500 text-white shadow-md'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <div className="font-bold text-xs text-white">Ops Manager</div>
+                    <div className="text-[10px] text-slate-400 mt-1">Intervene & approve recovery</div>
+                  </button>
+
+                  <button
+                    onClick={() => switchRole('AUDITOR')}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      profile.role === 'AUDITOR'
+                        ? 'bg-purple-600/20 border-purple-500 text-white shadow-md'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <div className="font-bold text-xs text-white">Auditor</div>
+                    <div className="text-[10px] text-slate-400 mt-1">Read-only ledger & reports</div>
+                  </button>
+                </div>
+              </div>
+
               {/* Theme Preference Toggle */}
               <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Palette className="w-4 h-4 text-blue-400" />
-                    <span className="font-bold text-white text-xs">Interface Theme Mode</span>
+                    <span className="font-bold text-white text-xs">Interface Theme</span>
                   </div>
-                  <span className="text-[10px] text-slate-400 capitalize">{theme} Mode Active</span>
+                  <span className="text-[10px] text-slate-400 capitalize">{theme} Mode</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  <button
+                    onClick={() => setTheme('retro')}
+                    className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all ${
+                      theme === 'retro'
+                        ? 'bg-[#8BE8F5]/20 border-[#8BE8F5] text-[#8BE8F5] shadow-md'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Retro Cyan</span>
+                  </button>
+
                   <button
                     onClick={() => setTheme('dark')}
                     className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all ${
@@ -166,8 +227,8 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
                         : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
                     }`}
                   >
-                    <Moon className="w-4 h-4" />
-                    <span>Dark Terminal</span>
+                    <Moon className="w-3.5 h-3.5" />
+                    <span>Dark</span>
                   </button>
 
                   <button
@@ -178,8 +239,8 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
                         : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
                     }`}
                   >
-                    <Sun className="w-4 h-4" />
-                    <span>Light Slate</span>
+                    <Sun className="w-3.5 h-3.5" />
+                    <span>Light</span>
                   </button>
                 </div>
               </div>
@@ -207,27 +268,6 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-400 mb-1">Avatar Image URL (Google Photo or Custom)</label>
-                  <input
-                    type="text"
-                    value={avatarUrl}
-                    onChange={e => setAvatarUrl(e.target.value)}
-                    placeholder="https://lh3.googleusercontent.com/a/..."
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 font-mono text-[11px] focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-400 mb-1">Assigned Role</label>
-                  <input
-                    type="text"
-                    disabled
-                    value={`${currentUser.role} (Full Platform Permissions)`}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900/50 border border-slate-800/80 text-blue-400 font-mono text-xs cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -329,7 +369,7 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
                         : 'bg-slate-950 border-slate-800 text-slate-400'
                     }`}
                   >
-                    Razorpay Test Mode
+                    Razorpay Test Mode (Live Keys Active)
                   </button>
 
                   <button
