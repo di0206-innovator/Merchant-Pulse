@@ -16,10 +16,18 @@ export const CustomerMessagingSchema = z.object({
 });
 export type CustomerMessaging = z.infer<typeof CustomerMessagingSchema>;
 
+export const StrategyProviderNameSchema = z.enum([
+  'GeminiStrategyProvider',
+  'MockStrategyProvider',
+  'MockFallback',
+]);
+export type StrategyProviderName = z.infer<typeof StrategyProviderNameSchema>;
+
 export const StrategyTelemetrySchema = z.object({
   provider: z.string(),
   model: z.string(),
   promptVersion: z.string(),
+  strategySchemaVersion: z.string().default('v1.0.0'),
   contextHash: z.string(),
   latencyMs: z.number(),
   validationStatus: z.enum(['PASSED', 'FALLBACK_USED']),

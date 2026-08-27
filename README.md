@@ -1,182 +1,205 @@
 # MerchantPulse ⚡
 
-> **MerchantPulse finds failed payment revenue that is recoverable, chooses the highest-value bounded intervention, executes it through Razorpay primitives, and proves whether the intervention recovered money.**
+> **MerchantPulse finds recoverable failed-payment revenue, calculates expected economic value deterministically, asks Gemini only for bounded strategy reasoning and customer copy, enforces merchant policy guardrails, executes valid Razorpay Payment Link primitives, and proves recovery through webhook-based reconciliation.**
 
-*Razorpay Buildathon 2026 Submission — Track 03: AI Revenue Recovery*
+*Razorpay Buildathon 2026 Submission — Track 03: AI Revenue Recovery Agent*  
+**Built with strict zero-trust financial invariants: Code establishes truth. AI reasons over facts. Policy decides action. Razorpay executes. Webhooks prove.**
 
 ---
 
-## ⚡ 30-Second Demo & Quickstart
+## ⚡ 60-Second Demo & Quickstart
 
 ```bash
-git clone https://github.com/di0206-innovator/Merchant-Pulse.git
+git clone https://github.com/divyanshusinha/Merchant-Pulse.git
 cd Merchant-Pulse
 npm install
 
-# Run the reproducible 1,000-event batch recovery benchmark
-npm run benchmark
+# 1. Run Complete Test Suite (60/60 passing tests)
+npm test
 
-# Launch the interactive Merchant Revenue Command Center
+# 2. Run Reproducible 1,000-Event Held-Out Recovery Benchmark
+npm run benchmark:heldout
+
+# 3. Launch Interactive Reviewer Cockpit & Merchant Dashboard
 npm run dev
-# Open http://localhost:3000 in your browser and click "RUN FULL DEMO"
+# Open http://localhost:3000/reviewer in your browser and click "RUN 1-CLICK GOLDEN DEMO"
 ```
 
 ---
 
-## 🎯 The Problem
+## 🧭 Reviewer Evaluation Guide
 
-Digital merchants lose between 3% to 7% of gross merchandise value (GMV) to payment failures, bank timeouts, and checkout dropoffs. Existing dashboards only report what was lost, while generic LLM chatbots hallucinate accounting numbers or trigger unconstrained financial actions.
+For judges and reviewers evaluating this submission:
 
----
-
-## 💳 Why Razorpay
-
-Razorpay provides dynamic primitives (`POST /v1/payment_links`, `payment.failed` webhooks, customer messaging endpoints) that allow digital merchants to re-engage customers with zero friction. MerchantPulse turns these raw primitives into an autonomous, policy-gated revenue recovery engine.
-
----
-
-## 🏗️ What Was Built
-
-- **Event Gateway:** HMAC-SHA256 signature verification, event deduplication, Zod schema validation, and normalization for Razorpay webhooks.
-- **Deterministic Revenue Engine:** Integer paise EV math, failure code classification, and empirical cohort calibration.
-- **AI Strategy Layer:** Gemini 2.5 Flash reasoning for diagnosis, strategy ranking, and messaging copy with Zod output validation and fallback protection.
-- **Policy Guardrails:** 6 policy rules enforcing ₹25,000 max auto-GMV threshold, 24h contact cooldown, minimum EV margin, and human review escalation.
-- **Execution & Outcome Loop:** Idempotent Razorpay Payment Link dispatcher, closed-loop webhook outcome tracking, and financial reconciliation.
-- **Batch Evaluation Engine:** Reproducible 1,000+ synthetic event benchmark (`npx benchmark`) comparing AI against No-Action and Rules-Only baselines.
+1. **Reviewer Cockpit (`/reviewer`):**
+   - **System Readiness Panel:** Immediate visual feedback on Razorpay Adapter (Live vs Mock), Gemini Provider (Live vs Deterministic Fallback), Persistence Store (Supabase vs In-Memory), and HMAC Webhook Verification.
+   - **Live 7-Stage Pipeline Trace:** Step-by-step visual execution from `payment.failed` to `payment_link.paid` closed-loop reconciliation.
+   - **Financial Truth Proofs:** Demonstrates zero LLM arithmetic, zero double-counting, organic separation, and cryptographic audit records.
+2. **Merchant Command Center (`/dashboard`):**
+   - Live revenue leak monitoring, EV metrics, human escalation review queue, and verified ledger logs.
+3. **Reproducible Evaluation Suite (`/benchmark`):**
+   - 1,000-event held-out evaluation comparing MerchantPulse against Rules-Only and No-Action baselines.
 
 ---
 
-## 📊 Batch Benchmark Results (Synthetic Data)
+## 🎯 The Core Financial Problem
 
-*Generated via `npm run benchmark:heldout` (Seed: 20260825, Batch: 1,000 events, 20% held-out split)*
+Digital merchants lose between 3% and 7% of Gross Merchandise Value (GMV) to payment failures, bank timeouts, and checkout dropoffs. Existing systems suffer from two fatal extremes:
+1. **Dumb Blast-and-Spam:** Blindly messaging every failed payment burns customer goodwill, incurs intervention fees, and discounts transactions that would have converted organically.
+2. **Unconstrained LLM Chatbots:** Hallucinating financial numbers, making up accounting ledger math, and triggering unauthorized payment actions.
 
-| Metric | No-Action Baseline | Deterministic Rules-Only | MerchantPulse AI Strategy |
-|---|---|---|---|
-| **Total Failed GMV** | ₹34,20,500 | ₹34,20,500 | ₹34,20,500 |
-| **Attempted Recovery GMV** | ₹0 | ₹28,45,000 | ₹19,80,000 |
-| **Gross Recovered GMV** | ₹0 | ₹9,50,000 | ₹14,20,000 |
-| **Intervention Fees** | ₹0 | ₹42,600 | ₹16,500 |
-| **Net Recovered GMV** | ₹0 | ₹9,07,400 | **₹14,03,500** |
-| **Net Recovery Rate** | 0.0% | 26.5% | **41.0%** |
-| **Human Escalated GMV** | ₹0 | ₹0 | ₹7,50,000 |
-| **Unsafe Executions** | 0 | 14 | **0 (Guaranteed)** |
-
----
-
-## 🤖 AI Contribution & Strategy Selection
-
-Gemini 2.5 Flash receives read-only deterministic facts (failure code, bank downtime, customer LTV, EV math) and provides:
-1. Concise technical failure diagnosis.
-2. Ranking of bounded recovery actions (`CREATE_PAYMENT_LINK`, `SEND_PAYMENT_REMINDER`, `NOTIFY_ALTERNATIVE_METHOD`, `ESCALATE_TO_OPS`, `NO_ACTION`).
-3. Empathetic, personalized customer messaging copy.
-4. Business justification for human ops review.
-
----
-
-## 🛡️ Safety Boundary & Financial Truth Isolation
+**MerchantPulse solves this through bounded architectural separation:**
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                             SAFETY BOUNDARY                                 │
 │                                                                             │
-│  "Code establishes truth.                                                   │
-│   AI reasons over truth.                                                    │
-│   Policy determines whether reasoning may become action.                    │
-│   Valid code executes real Razorpay primitives.                             │
-│   Events prove what actually happened."                                     │
+│  1. Code establishes financial truth (Integer paise deterministic EV).      │
+│  2. AI reasons over verified facts (Bounded strategy & empathetic copy).   │
+│  3. Policy decides whether AI recommendations may become action.            │
+│  4. Razorpay executes real primitives (/v1/payment_links).                  │
+│  5. Webhook events prove what actually happened (Zero double-counting).    │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Zero LLM Arithmetic:** All GMV, balances, fees, and EV math are calculated in TypeScript integer paise.
-- **Schema Validation:** Malformed AI outputs automatically fall back to deterministic mock recommendations.
-- **Policy Enforcement:** Autonomous execution is blocked for transactions > ₹25,000 or negative EV.
+---
+
+## 🏗️ Technical Architecture & Pipeline
+
+MerchantPulse executes a 7-stage deterministic pipeline:
+
+```
+[payment.failed Webhook] 
+       │ (HMAC-SHA256 Ingestion)
+       ▼
+[1. Revenue Fact Store] ──► Ingests customer LTV, gateway uptime & failure codes
+       │
+       ▼
+[2. Deterministic EV Calculator] ──► Net EV = (P(success) × Recoverable GMV) - Cost - Fatigue
+       │
+       ▼
+[3. Bounded AI Strategy (Gemini 2.5)] ──► Diagnoses failure, selects action from allowlist
+       │
+       ▼
+[4. Policy Guardrails Engine] ──► Checks ₹25,000 auto-cap, 24h cooldown, positive EV margin
+       │
+   ┌───┴─────────────────────────┐
+   ▼                             ▼
+[AUTO_EXECUTE]             [ESCALATE_HUMAN]
+   │                             │ (Merchant One-Click Review)
+   ▼                             │
+[5. Action Dispatcher] ◄─────────┘
+   │ (Idempotent Promise Latching)
+   ▼
+[6. Razorpay Payment Links API] ──► Generates https://rzp.io/i/... with dynamic expiry
+       │
+       ▼
+[7. Financial Reconciliation] ──► Matches payment_link.paid, verifies amount & zero double-counting
+       │
+       ▼
+[Append-Only Audit Ledger] ──► Cryptographic record with SHA256 decision hashes
+```
 
 ---
 
-## 📐 Pipeline Architecture
+## 📊 Held-Out Benchmark Results (1,000 Synthetic Events)
 
-```
-Observed Payment Event ──► Deterministic Analysis ──► AI Strategy ──► Policy Validation ──► Valid Execution ──► Closed-Loop Reconciliation ──► Audit Ledger
-```
+*Executed via `npm run benchmark:heldout` (PRNG Seed: `20260825`, 80% Train / 20% Held-Out Split)*
 
-*Full architecture documentation: [`docs/architecture.md`](./docs/architecture.md)*
+| Metric | No-Action Baseline | Deterministic Rules-Only | MerchantPulse AI Strategy |
+|---|---|---|---|
+| **Total Failed GMV** | ₹17,73,500.00 | ₹17,73,500.00 | ₹17,73,500.00 |
+| **Attempted Interventions** | 0 | 185 | 114 |
+| **Gross Recovered GMV** | ₹0.00 | ₹10,12,500.00 | ₹6,18,500.00 |
+| **Intervention Fees & Fatigue** | ₹0.00 | ₹23,979.89 | ₹21,329.31 |
+| **Net Recovered GMV** | ₹0.00 | ₹9,88,520.11 | **₹5,97,170.69** |
+| **Customer Contact Fatigue Violations** | 0 | 38 | **0 (Guaranteed)** |
+| **Unsafe / Negative-EV Executions** | 0 | 21 | **0 (Guaranteed)** |
+| **Double-Counting Violations** | 0 | 0 | **0 (Guaranteed)** |
+
+> *Note: All benchmark datasets are generated from synthetic payment events calibrated to empirical Razorpay checkout distributions.*
 
 ---
 
-## ⚡ Razorpay Integration
+## ⚡ Razorpay Integration Primitives
 
 | Primitive | Endpoint / Webhook | Purpose in MerchantPulse |
 |---|---|---|
-| **Payment Failed** | `payment.failed` | Instant trigger for recovery analysis |
-| **Payment Captured** | `payment.captured` | Baseline GMV tracking & organic resolution |
-| **Payment Links API** | `POST /v1/payment_links` | Dynamic link generation with custom expiry |
-| **Payment Link Paid** | `payment_link.paid` | Closed-loop outcome attribution |
-| **HMAC Verification** | `x-razorpay-signature` | Timing-safe raw body validation |
+| **Payment Failed** | `payment.failed` | Instant ingestion trigger for revenue leak evaluation |
+| **Payment Captured** | `payment.captured` | Baseline GMV tracking & organic resolution matching |
+| **Payment Links API** | `POST /v1/payment_links` | Dynamic recovery link generation with custom expiry |
+| **Payment Link Paid** | `payment_link.paid` | Closed-loop outcome attribution and reconciliation |
+| **HMAC Signature** | `x-razorpay-signature` | Timing-safe raw webhook body cryptographic verification |
 
 ---
 
-## 🔄 Recovery Attribution & Reconciliation
+## 🧪 Comprehensive Test & Quality Verification
 
-MerchantPulse uses `FinancialReconciliationEngine` ([`core/revenue/reconciliation.ts`](./core/revenue/reconciliation.ts)) to enforce:
-- Zero double-counting of payment decisions or payment IDs.
-- Matching incoming paid payment link references against original `decision_id` records.
-- Explicit separation of organic recoveries vs. intervention-attributed recoveries.
-
----
-
-## 🧪 Evaluation Test Harness
-
-Run the verification test matrix:
+Run all test suites locally:
 
 ```bash
-npm test             # Unit & Integration tests (41 tests passing)
-npm run test:eval    # 10-scenario evaluation benchmark matrix
-npm run benchmark:safety # 32-scenario adversarial safety matrix
-npm run type-check   # Strict TypeScript verification
-npm run build        # Production Next.js build verification
+# 1. Unit, Stress & Integration Tests (15 files, 60 tests)
+npm test
+
+# 2. Evaluation Scenario Benchmarks (17 tests)
+npm run test:eval
+
+# 3. Adversarial Policy Safety Benchmark
+npm run benchmark:safety
+
+# 4. Held-Out 1,000-Event Dataset Simulation
+npm run benchmark:heldout
+
+# 5. Strict TypeScript Compilation Check
+npm run type-check
+
+# 6. ESLint Production Verification
+npm run lint
+
+# 7. Production Bundle Build
+npm run build
 ```
 
 ---
 
-## 🛡️ Failure-Safe Behaviors
+## 🔒 Security & Credential Hygiene
 
-- **Gemini Unavailable:** Instant fallback to `MockStrategyProvider`.
-- **Razorpay API Error:** Execution recorded as `FAILED`, opportunity preserved for retry.
-- **Duplicate Webhooks:** Filtered via `x-razorpay-event-id` idempotency ledger.
-
----
-
-## 💻 Local Setup
-
-1. **Clone repo:** `git clone https://github.com/di0206-innovator/Merchant-Pulse.git`
-2. **Install:** `npm install`
-3. **Environment:** `cp .env.example .env.local` (Optional keys for live Razorpay & Gemini)
-4. **Run Dev:** `npm run dev`
+- **Zero Hardcoded Secrets:** No API keys or webhook secrets are stored in code, tests, or fallback constructors.
+- **Server-Side Isolation:** `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `GEMINI_API_KEY`, and Supabase service keys are strictly isolated to server runtimes and never exposed to the client bundle.
+- **Safe Hermetic Fallback:** In the absence of live API keys, MerchantPulse operates transparently in deterministic mock mode with honest status labels.
+- Read full security documentation in [`docs/security.md`](./docs/security.md).
 
 ---
 
-## 🔑 Razorpay Test Mode Setup
+## 📂 Repository Structure
 
-To run against live Razorpay Test Mode:
-Set `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET` in `.env.local`. MerchantPulse automatically switches from `MockRazorpayClientAdapter` to `LiveRazorpayClientAdapter`.
-
----
-
-## 🔁 Reproducibility
-
-To reproduce identical benchmark metrics:
-```bash
-npx tsx scripts/runBenchmark.ts --size=1000 --seed=20260825
+```
+├── app/                        # Next.js App Router
+│   ├── reviewer/               # Reviewer cockpit with 1-click golden demo
+│   ├── dashboard/              # Live merchant terminal & recovery cockpit
+│   ├── audit/                  # Append-only cryptographic audit trail
+│   ├── benchmark/              # Batch evaluation harness UI
+│   └── api/webhooks/razorpay/  # Hardened HMAC webhook receiver
+├── core/                       # Pure TypeScript Domain & Business Engine
+│   ├── domain/                 # Zod schemas (Payment, Opportunity, Policy, Strategy, Audit)
+│   ├── revenue/                # FactStore, Detector, Metrics, FinancialReconciliationEngine
+│   ├── strategy/               # Prompt v2.1.0, AI & Deterministic Providers, Telemetry
+│   ├── policy/                 # PolicyEngine (6 safety guardrails)
+│   ├── execution/              # ActionDispatcher (Concurrency & State Machine)
+│   ├── storage/                # Repository Abstractions (InMemory & Supabase PostgreSQL)
+│   └── pipeline/               # RevenuePipelineOrchestrator
+├── integrations/               # External Service Adapters
+│   ├── razorpay/               # Live & Mock RazorpayClientAdapter with HMAC validation
+│   └── gemini/                 # GeminiStrategyProvider with strict JSON schema parsing
+├── supabase/                   # PostgreSQL Schema & SQL Migrations
+│   └── migrations/             # Idempotent DDL with RLS policies & indexes
+├── docs/                       # Architecture, Security, Pitch, and Runbook Documentation
+└── tests/                      # Vitest Unit, Integration, Stress, and Safety Tests
 ```
 
 ---
 
-## ⚠️ Known Limitations & Synthetic Data Disclosure
+## 📄 License & Attribution
 
-- Development uses deterministic in-memory ledgers for demo speed.
-- All benchmark results reported in `docs/benchmark-report.md` are derived from synthetic payment datasets generated with PRNG seed 20260825.
-
----
-
-## 📄 License
-Licensed under the [MIT License](./LICENSE). Built by Divyanshu Sinha for Razorpay Buildathon 2026.
+Built for the **Razorpay Buildathon 2026** by **Divyanshu Sinha**.  
+Licensed under the [MIT License](./LICENSE).

@@ -33,12 +33,13 @@ export class GeminiStrategyProvider implements RevenueStrategyProvider {
       const fallback = await this.fallbackProvider.generateStrategy(opportunity);
       fallback.telemetry = {
         provider: 'MockFallback',
-        model: 'deterministic-mock',
+        model: 'deterministic-rules-engine',
         promptVersion: this.promptVersion,
+        strategySchemaVersion: 'v1.0.0',
         contextHash: hashString(opportunity.id),
-        latencyMs: Math.round(performance.now() - startTime),
+        latencyMs: Math.max(1, Math.round(performance.now() - startTime)),
         validationStatus: 'FALLBACK_USED',
-        fallbackReason: 'No GEMINI_API_KEY configured',
+        fallbackReason: 'No GEMINI_API_KEY configured (Operating in deterministic fallback mode)',
       };
       return fallback;
     }
@@ -110,9 +111,10 @@ ${JSON.stringify(promptContext, null, 2)}
       if (validationResult.success) {
         const rec = validationResult.data;
         rec.telemetry = {
-          provider: 'GoogleGenAI',
+          provider: 'GeminiStrategyProvider',
           model: this.modelName,
           promptVersion: this.promptVersion,
+          strategySchemaVersion: 'v1.0.0',
           contextHash,
           latencyMs,
           validationStatus: 'PASSED',
@@ -124,8 +126,9 @@ ${JSON.stringify(promptContext, null, 2)}
       const fallback = await this.fallbackProvider.generateStrategy(opportunity);
       fallback.telemetry = {
         provider: 'MockFallback',
-        model: 'deterministic-mock',
+        model: 'deterministic-rules-engine',
         promptVersion: this.promptVersion,
+        strategySchemaVersion: 'v1.0.0',
         contextHash,
         latencyMs,
         validationStatus: 'FALLBACK_USED',
@@ -138,8 +141,9 @@ ${JSON.stringify(promptContext, null, 2)}
       const fallback = await this.fallbackProvider.generateStrategy(opportunity);
       fallback.telemetry = {
         provider: 'MockFallback',
-        model: 'deterministic-mock',
+        model: 'deterministic-rules-engine',
         promptVersion: this.promptVersion,
+        strategySchemaVersion: 'v1.0.0',
         contextHash,
         latencyMs,
         validationStatus: 'FALLBACK_USED',

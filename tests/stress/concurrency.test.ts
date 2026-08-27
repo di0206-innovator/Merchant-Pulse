@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { RevenuePipelineOrchestrator } from '@/core/pipeline/orchestrator';
 import { RevenueFactStore } from '@/core/revenue/factStore';
 import { RevenueOpportunityDetector } from '@/core/revenue/detector';
@@ -9,20 +9,27 @@ import { MockRazorpayClientAdapter } from '@/integrations/razorpay/client';
 import { AuditLedger } from '@/core/audit/ledger';
 import { ConcurrentEventEngine } from '@/core/concurrency/workerPool';
 import { PaymentEntity } from '@/core/domain/payment';
+import { RevenueOpportunity } from '@/core/domain/opportunity';
+import { StrategyRecommendation } from '@/core/domain/strategy';
+import { InMemoryExecutionIntentStore } from '@/core/storage/inMemoryStores';
 
-describe('500 Concurrent Users High-Throughput Stress Test Suite', () => {
+describe('Concurrency & Execution Intent Hardening Test Suite', () => {
   let orchestrator: RevenuePipelineOrchestrator;
   let concurrentEngine: ConcurrentEventEngine;
+  let mockRazorpayAdapter: MockRazorpayClientAdapter;
+  let dispatcher: ActionDispatcher;
+  let intentStore: InMemoryExecutionIntentStore;
 
   beforeEach(() => {
     const factStore = new RevenueFactStore();
     const auditLedger = new AuditLedger();
-    const razorpayAdapter = new MockRazorpayClientAdapter();
+    mockRazorpayAdapter = new MockRazorpayClientAdapter();
+    intentStore = new InMemoryExecutionIntentStore();
 
     const detector = new RevenueOpportunityDetector(factStore);
     const strategyProvider = new MockStrategyProvider();
     const policyEngine = new PolicyEngine();
-    const dispatcher = new ActionDispatcher(razorpayAdapter);
+    dispatcher = new ActionDispatcher(mockRazorpayAdapter, intentStore);
 
     orchestrator = new RevenuePipelineOrchestrator({
       factStore,
@@ -48,6 +55,82 @@ describe('500 Concurrent Users High-Throughput Stress Test Suite', () => {
     });
 
     concurrentEngine = new ConcurrentEventEngine(orchestrator);
+  });
+
+  it('guarantees 100 concurrent execution attempts produce exactly ONE Razorpay Payment Link', async () => {
+    const spyCreatePaymentLink = vi.spyOn(mockRazorpayAdapter, 'createPaymentLink');
+
+    const opportunity: RevenueOpportunity = {
+      id: 'opp_concurrent_100_race',
+      merchantId: 'rzp_merchant_stress_test',
+      orderId: 'order_race_100',
+      amountPaise: 450000, // ₹4,500
+      type: 'HIGH_VALUE_DROPOFF',
+      status: 'POLICY_EVALUATED',
+      triggerEventId: 'evt_race_100',
+      customerName: 'Priya Verma',
+      customerContact: '+919876500000',
+      customerEmail: 'priya@example.com',
+      expectedValue: {
+        pSuccess: 0.82,
+        recoverableGmvPaise: 450000,
+        estimatedInterventionCostPaise: 130,
+        customerFatiguePenaltyPaise: 0,
+        netExpectedValuePaise: 368870,
+        isProfitable: true,
+      },
+      evidence: {
+        consecutiveFailures: 1,
+        historicalRecoveryRatePct: 65,
+        intentScore: 0.85,
+        paymentMethod: 'upi',
+        failureCode: 'BANK_TIMEOUT',
+        customerLtvPaise: 2000000,
+      },
+      createdAt: Math.floor(Date.now() / 1000),
+      updatedAt: Math.floor(Date.now() / 1000),
+    };
+
+    const recommendation: StrategyRecommendation = {
+      opportunityId: opportunity.id,
+      diagnosis: 'Bank timeout failure on checkout',
+      recommendedActionType: 'CREATE_PAYMENT_LINK',
+      actionPayload: { amountPaise: 450000 },
+      confidenceScore: 0.9,
+      rationale: 'Valid high ROI recovery candidate',
+      suggestedExpiryMinutes: 120,
+    };
+
+    // Fire 100 simultaneous execution attempts for the exact same opportunity
+    const CONCURRENT_ATTEMPTS = 100;
+    const executionPromises = Array.from({ length: CONCURRENT_ATTEMPTS }, () =>
+      dispatcher.execute(opportunity, recommendation)
+    );
+
+    const results = await Promise.all(executionPromises);
+
+    // All 100 executions must succeed without crashing
+    expect(results).toHaveLength(CONCURRENT_ATTEMPTS);
+    results.forEach(res => {
+      expect(res.status).toBe('SUCCESS');
+      expect(res.razorpayReferenceId).toBeDefined();
+    });
+
+    // Exactly 1 external Razorpay Payment Link creation call was made
+    expect(spyCreatePaymentLink).toHaveBeenCalledTimes(1);
+
+    // All 100 callers received the identical Razorpay reference ID
+    const firstReferenceId = results[0].razorpayReferenceId;
+    results.forEach(res => {
+      expect(res.razorpayReferenceId).toBe(firstReferenceId);
+    });
+
+    // Persisted intent state is EXECUTION_SUCCEEDED
+    const intentKey = `intent_${opportunity.merchantId}_${opportunity.id}_${recommendation.recommendedActionType}`;
+    const persistedIntent = await intentStore.getIntent(intentKey);
+    expect(persistedIntent).not.toBeNull();
+    expect(persistedIntent?.state).toBe('EXECUTION_SUCCEEDED');
+    expect(persistedIntent?.record?.razorpayReferenceId).toBe(firstReferenceId);
   });
 
   it('processes 500 simultaneous concurrent payment transactions with 0 dropped events', async () => {

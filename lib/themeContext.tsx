@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-export type Theme = 'retro' | 'dark' | 'light';
+export type Theme = 'dark' | 'light';
 
 interface ThemeContextType {
   theme: Theme;
@@ -11,16 +11,17 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'retro',
+  theme: 'dark',
   setTheme: () => {},
   toggleTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('retro');
+  const [theme, setThemeState] = useState<Theme>('dark');
 
   useEffect(() => {
-    const savedTheme = (localStorage.getItem('merchantpulse_theme') as Theme) || 'retro';
+    const storedTheme = localStorage.getItem('merchantpulse_theme');
+    const savedTheme: Theme = storedTheme === 'light' ? 'light' : 'dark';
     setThemeState(savedTheme);
     applyTheme(savedTheme);
   }, []);
@@ -38,7 +39,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleTheme = () => {
-    const nextTheme: Theme = theme === 'retro' ? 'dark' : theme === 'dark' ? 'light' : 'retro';
+    const nextTheme: Theme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
   };
 

@@ -177,7 +177,7 @@ export default function DashboardPage() {
 
   return (
     <MaterialAppLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <div className="nb-page">
         {/* Overview Header & Controls */}
         <OverviewHeader
           onRunDemo={handleRunDemo}
@@ -189,83 +189,37 @@ export default function DashboardPage() {
         <MetricCards metrics={metrics} />
 
         {/* View Switcher Tabs */}
-        <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 overflow-x-auto">
-          <button
-            onClick={() => setActiveTab('RADAR')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono transition-all whitespace-nowrap ${
-              activeTab === 'RADAR'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-slate-800/60'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Opportunity Radar ({opportunities.length})</span>
-            {escalatedCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-slate-950 font-bold animate-pulse">
-                {escalatedCount} Escalated
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setActiveTab('BENCHMARK')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono transition-all whitespace-nowrap ${
-              activeTab === 'BENCHMARK'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                : 'bg-slate-900/60 text-blue-400 hover:text-blue-300 hover:bg-slate-800/60 border border-slate-800/60'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-            <span>Batch Recovery Benchmark</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('AUDIT')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono transition-all whitespace-nowrap ${
-              activeTab === 'AUDIT'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-slate-800/60'
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5" />
-            <span>Closed-Loop Audit Ledger ({auditRecords.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('SAFETY')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono transition-all whitespace-nowrap ${
-              activeTab === 'SAFETY'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                : 'bg-slate-900/60 text-emerald-400 hover:text-emerald-300 hover:bg-slate-800/60 border border-slate-800/60'
-            }`}
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Trust & Safety Guardrails</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('HEALTH')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono transition-all whitespace-nowrap ${
-              activeTab === 'HEALTH'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-slate-800/60'
-            }`}
-          >
-            <Activity className="w-3.5 h-3.5" />
-            <span>Gateway Health Radar ({gatewayHealth.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('STRESS')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold font-mono transition-all whitespace-nowrap ${
-              activeTab === 'STRESS'
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
-                : 'bg-slate-900/60 text-emerald-400 hover:text-emerald-300 hover:bg-slate-800/60 border border-slate-800/60'
-            }`}
-          >
-            <Server className="w-3.5 h-3.5 text-emerald-400" />
-            <span>500-User Concurrency Stress Harness</span>
-          </button>
+        <div className="flex items-center gap-1 border-b-2 border-white/10 pb-0 overflow-x-auto">
+          {[
+            { id: 'RADAR',     label: `Opportunity Radar (${opportunities.length})`, icon: Layers,      badge: escalatedCount > 0 ? `${escalatedCount} ESC` : null },
+            { id: 'BENCHMARK', label: 'Batch Benchmark',                              icon: Sparkles,    badge: null },
+            { id: 'AUDIT',     label: `Audit Ledger (${auditRecords.length})`,        icon: FileText,    badge: null },
+            { id: 'SAFETY',    label: 'Trust & Safety',                               icon: ShieldCheck, badge: null },
+            { id: 'HEALTH',    label: `Gateway Health (${gatewayHealth.length})`,     icon: Activity,    badge: null },
+            { id: 'STRESS',    label: '500-User Stress',                              icon: Server,      badge: null },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id as typeof activeTab;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                className={`flex items-center gap-2 border-2 border-b-0 px-4 py-2.5 font-mono text-[10px] font-bold uppercase tracking-widest whitespace-nowrap transition-all duration-100 ${
+                  isActive
+                    ? 'border-white bg-[#FFE500] text-black'
+                    : 'border-white/20 bg-[#0A0A0A] text-[#888888] hover:border-white/50 hover:text-white'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{tab.label}</span>
+                {tab.badge && (
+                  <span className="px-1.5 py-0.5 bg-black text-[#FFE500] font-black text-[9px] border border-[#FFE500]">
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* Tab Contents */}

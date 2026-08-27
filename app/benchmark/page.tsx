@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { MaterialAppLayout } from '@/components/layout/MaterialAppLayout';
-import { BarChart3, Play, Sparkles, CheckCircle2, TrendingUp, DollarSign, Layers, ShieldCheck } from 'lucide-react';
+import { BarChart3, Play, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export default function BenchmarkPage() {
   const [batchSize, setBatchSize] = useState<number>(1000);
@@ -29,54 +29,58 @@ export default function BenchmarkPage() {
 
   return (
     <MaterialAppLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-        {/* Header Surface */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900/60 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 m3-elevation-1">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 text-xs font-mono mb-2">
-              <BarChart3 className="w-3.5 h-3.5" />
-              <span>Synthetic Batch Evaluation Suite</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Strategy & Net Money Recovered Benchmark
-            </h1>
-            <p className="text-xs text-slate-600 dark:text-slate-400 font-mono mt-1">
-              Compare 3-way strategy outcomes across 1,000–5,000 synthetic event batches with an 80/20 held-out split.
-            </p>
-          </div>
+      <div className="nb-page">
 
-          <button
-            onClick={runSyntheticBenchmark}
-            disabled={isRunning}
-            className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold font-mono shadow-lg shadow-blue-600/30 transition-all disabled:opacity-50 active:scale-95"
-          >
-            {isRunning ? (
-              <span className="flex items-center gap-2">
-                <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Simulating Batch ({batchSize} Events)...</span>
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <Play className="w-4 h-4 fill-white" />
-                <span>Execute Batch Evaluation</span>
-              </span>
-            )}
-          </button>
+        {/* ── HEADER ─────────────────────────────────────────── */}
+        <div className="nb-page-header">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
+            <div>
+              <div className="nb-eyebrow">
+                <BarChart3 className="w-3.5 h-3.5" />
+                Synthetic Batch Evaluation Suite
+              </div>
+              <h1 className="mt-4 text-3xl sm:text-4xl font-black uppercase tracking-tight text-white leading-none">
+                Strategy &<br />
+                <span className="text-[#FFE500]">Recovery Benchmark</span>
+              </h1>
+              <p className="mt-3 font-mono text-xs text-[#888888] max-w-xl leading-6">
+                Compare 3-way strategy outcomes across 1,000–5,000 synthetic event batches with an 80/20 held-out split.
+              </p>
+            </div>
+
+            <button
+              onClick={runSyntheticBenchmark}
+              disabled={isRunning}
+              className="nb-primary-button shrink-0 whitespace-nowrap"
+            >
+              {isRunning ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-none animate-spin" />
+                  <span>Simulating ({batchSize} Events)...</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 fill-black" />
+                  <span>Execute Batch Evaluation</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Configuration Bar */}
-        <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
+        {/* ── BATCH SIZE SELECTOR ─────────────────────────────── */}
+        <div className="nb-panel p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <span className="text-slate-700 dark:text-slate-400 font-bold">Select Batch Size:</span>
+            <span className="nb-label mb-0">Select Batch Size:</span>
             <div className="flex items-center gap-2">
               {[1000, 2500, 5000].map((size) => (
                 <button
                   key={size}
                   onClick={() => setBatchSize(size)}
-                  className={`px-3 py-1.5 rounded-xl border transition-all ${
+                  className={`border-2 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-widest transition-all duration-100 ${
                     batchSize === size
-                      ? 'bg-blue-600/20 border-blue-500 text-blue-600 dark:text-blue-400 font-bold'
-                      : 'bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-400'
+                      ? 'border-[#FFE500] bg-[#FFE500] text-black shadow-brutal-y'
+                      : 'border-white/20 bg-transparent text-[#888888] hover:border-white hover:text-white hover:shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5'
                   }`}
                 >
                   {size.toLocaleString()} Events
@@ -84,86 +88,108 @@ export default function BenchmarkPage() {
               ))}
             </div>
           </div>
-
-          <span className="text-slate-500 text-[11px]">
-            Held-Out Evaluation Split: <strong className="text-slate-800 dark:text-slate-300">20% Validation Set</strong>
+          <span className="font-mono text-[10px] text-[#888888]">
+            Held-out split: <strong className="text-[#F5F5F5]">20% Validation Set</strong>
           </span>
         </div>
 
-        {/* Results Overview */}
+        {/* ── RESULTS ─────────────────────────────────────────── */}
         {result && result.metrics && (
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="space-y-6 animate-slide-up">
+
             {/* 3-Way Strategy Benchmark Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Baseline 1: No Action */}
-              <div className="p-5 rounded-3xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3 m3-elevation-1">
-                <div className="text-xs text-slate-500 font-mono">Baseline 1: No Intervention</div>
-                <div className="text-xl font-bold text-slate-700 dark:text-slate-300">₹0 Recovered</div>
-                <p className="text-[11px] text-slate-500 font-mono">
+              <div className="nb-panel p-5 space-y-3" style={{ boxShadow: '4px 4px 0 #FF3B3B' }}>
+                <div className="nb-label">Baseline 1: No Intervention</div>
+                <div className="font-mono text-3xl font-black text-[#888888]">₹0</div>
+                <div className="font-mono text-[10px] font-bold uppercase text-[#888888]">Recovered</div>
+                <p className="font-mono text-[10px] leading-5 text-[#888888]">
                   All dropped payment links and failed attempts are permanently lost.
                 </p>
               </div>
 
               {/* Baseline 2: Heuristic Rules */}
-              <div className="p-5 rounded-3xl bg-white dark:bg-slate-900/60 border border-amber-500/30 space-y-3 m3-elevation-1">
-                <div className="text-xs text-amber-600 dark:text-amber-500 font-mono">Baseline 2: Static Rules</div>
-                <div className="text-xl font-bold text-amber-600 dark:text-amber-500">
+              <div className="nb-panel p-5 space-y-3" style={{ boxShadow: '4px 4px 0 #FFE500' }}>
+                <div className="nb-label text-[#FFE500]">Baseline 2: Static Rules</div>
+                <div className="font-mono text-3xl font-black text-[#FFE500]">
                   ₹{((result.metrics.netRecoveredPaise * 0.42) / 100).toLocaleString('en-IN')}
                 </div>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 font-mono">
+                <div className="font-mono text-[10px] font-bold uppercase text-[#888888]">Recovered</div>
+                <p className="font-mono text-[10px] leading-5 text-[#888888]">
                   Static retries without EV cost calculation erode margin on low-intent dropoffs.
                 </p>
               </div>
 
               {/* MerchantPulse AI Recovery */}
-              <div className="p-5 rounded-3xl bg-blue-50 dark:bg-gradient-to-br dark:from-blue-900/40 dark:via-slate-900 dark:to-indigo-900/40 border border-blue-500/50 space-y-3 m3-elevation-3">
-                <div className="text-xs text-blue-600 dark:text-blue-400 font-mono font-bold flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                  <span>MerchantPulse AI System</span>
+              <div className="nb-panel p-5 space-y-3 border-[#00FF94]" style={{ boxShadow: '4px 4px 0 #00FF94', borderColor: '#00FF94' }}>
+                <div className="flex items-center gap-1.5 nb-label text-[#00FF94]">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#00FF94]" />
+                  MerchantPulse AI
                 </div>
-                <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
+                <div className="font-mono text-3xl font-black text-[#00FF94]">
                   ₹{(result.metrics.netRecoveredPaise / 100).toLocaleString('en-IN')}
                 </div>
-                <p className="text-[11px] text-slate-700 dark:text-slate-300 font-mono">
-                  Attributed Recovery Rate: <strong className="text-blue-600 dark:text-blue-400">{result.metrics.attributedRecoveryRatePct}%</strong>
+                <div className="font-mono text-[10px] font-bold uppercase text-[#888888]">
+                  Net Recovered · Rate:{' '}
+                  <span className="text-[#00FF94]">{result.metrics.attributedRecoveryRatePct}%</span>
+                </div>
+                <p className="font-mono text-[10px] leading-5 text-[#888888]">
+                  Attributed recovery with EV-bounded strategy and policy guardrails.
                 </p>
               </div>
             </div>
 
-            {/* Detailed Batch Metrics Table */}
-            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-4 m3-elevation-2 font-mono text-xs">
-              <h3 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                Evaluation Batch Summary Breakdown
-              </h3>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-                  <div className="text-slate-500 text-[10px]">Total Events Evaluated</div>
-                  <div className="text-base font-bold text-slate-900 dark:text-white">{result.metrics.totalEventsProcessed}</div>
+            {/* Detailed Metrics Table */}
+            <div className="nb-panel overflow-hidden">
+              <div className="border-b-2 border-white/10 bg-[#111111] px-6 py-4">
+                <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#888888]">
+                  Evaluation Summary
                 </div>
-
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-                  <div className="text-slate-500 text-[10px]">Revenue at Risk Identified</div>
-                  <div className="text-base font-bold text-slate-800 dark:text-slate-200">
-                    ₹{(result.metrics.totalRevenueAtRiskPaise / 100).toLocaleString('en-IN')}
+                <h3 className="font-black uppercase text-white mt-1">
+                  Batch Breakdown
+                </h3>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/10">
+                {[
+                  { label: 'Total Events', value: String(result.metrics.totalEventsProcessed), color: '#F5F5F5' },
+                  { label: 'Revenue at Risk', value: `₹${(result.metrics.totalRevenueAtRiskPaise / 100).toLocaleString('en-IN')}`, color: '#FF3B3B' },
+                  { label: 'Held-Out Set', value: `${result.metrics.heldOutEventsCount} (${result.metrics.heldOutSplitPct}%)`, color: '#3B82F6' },
+                  { label: 'Escalations', value: `${result.metrics.escalatedCount || 0}`, color: '#FFE500' },
+                ].map((stat) => (
+                  <div key={stat.label} className="p-5">
+                    <div className="nb-label">{stat.label}</div>
+                    <div className="font-mono text-2xl font-black tabular-nums" style={{ color: stat.color }}>
+                      {stat.value}
+                    </div>
                   </div>
-                </div>
-
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-                  <div className="text-slate-500 text-[10px]">Held-Out Validation Set</div>
-                  <div className="text-base font-bold text-indigo-600 dark:text-indigo-400">
-                    {result.metrics.heldOutEventsCount} Events ({result.metrics.heldOutSplitPct}%)
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-                  <div className="text-slate-500 text-[10px]">Guardrail Interventions Escalated</div>
-                  <div className="text-base font-bold text-amber-600 dark:text-amber-500">
-                    {result.metrics.escalatedCount || 0} Events
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!result && !isRunning && (
+          <div className="nb-panel p-12 text-center border-2 border-dashed border-white/10 bg-transparent">
+            <BarChart3 className="w-8 h-8 text-[#888888] mx-auto mb-4" />
+            <div className="font-mono text-sm font-bold uppercase text-[#888888]">
+              No benchmark run yet
+            </div>
+            <p className="font-mono text-[11px] text-[#888888] mt-2 max-w-sm mx-auto">
+              Configure batch size above and click Execute to run the synthetic evaluation.
+            </p>
+          </div>
+        )}
+
+        {isRunning && (
+          <div className="nb-panel p-12 text-center border-2 border-[#FFE500]" style={{ boxShadow: '6px 6px 0 #FFE500' }}>
+            <div className="font-mono text-sm font-black uppercase text-[#FFE500] animate-flicker">
+              Running Benchmark · {batchSize.toLocaleString()} Events
+            </div>
+            <p className="font-mono text-[11px] text-[#888888] mt-2">
+              Simulating payment failures, EV calculations, strategy selection...
+            </p>
           </div>
         )}
       </div>

@@ -46,7 +46,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile>(defaultProfile);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isDemoLoggedIn, setIsDemoLoggedIn] = useState<boolean>(false);
   const isConfigured = isSupabaseConfigured();
 
   useEffect(() => {
@@ -125,7 +124,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await signOutUser();
       setUser(null);
       setSession(null);
-      setIsDemoLoggedIn(false);
       setProfile(defaultProfile);
     } catch (err) {
       console.error('Sign out failed:', err);
@@ -133,7 +131,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const switchRole = (newRole: UserRole) => {
-    setIsDemoLoggedIn(true);
     setProfile(prev => ({
       ...prev,
       role: newRole,
@@ -141,7 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
-  const isAuthenticated = !!user || isDemoLoggedIn;
+  const isAuthenticated = !!user;
 
   return (
     <AuthContext.Provider

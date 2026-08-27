@@ -10,6 +10,7 @@ export function normalizeRazorpayWebhook(webhook: RazorpayWebhookEvent): DomainE
     'order.paid': 'ORDER_PAID',
     'payment_link.paid': 'PAYMENT_LINK_PAID',
     'payment_link.expired': 'PAYMENT_LINK_EXPIRED',
+    'payment_link.cancelled': 'PAYMENT_LINK_CANCELLED',
   };
 
   const domainType = eventTypeMap[webhook.event];

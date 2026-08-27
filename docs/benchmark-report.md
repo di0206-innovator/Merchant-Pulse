@@ -1,8 +1,8 @@
 # MerchantPulse AI Revenue Recovery Benchmark Report
 
-**Generated:** 2026-08-25T05:05:31.871Z  
-**Dataset:** 5000 synthetic payment events  
-**Held-Out Evaluation Set:** 1000 events (20% split)  
+**Generated:** 2026-08-26T09:42:36.562Z  
+**Dataset:** 1000 synthetic payment events  
+**Held-Out Evaluation Set:** 200 events (20% split)  
 **Seed:** 20260825  
 
 ---
@@ -11,14 +11,14 @@
 
 | Metric | No-Action Baseline | Deterministic Rules-Only | MerchantPulse AI Strategy |
 |---|---|---|---|
-| **Total Failed GMV** | ₹96,50,565.35 | ₹96,50,565.35 | ₹96,50,565.35 |
-| **Attempted GMV** | ₹0 | ₹74,82,098.26 | ₹66,93,427.96 |
-| **Recovered GMV** | ₹0 | ₹41,56,226.22 | ₹32,95,319.71 |
-| **Intervention Cost** | ₹0 | ₹10,080 | ₹14,220 |
-| **Net Recovered GMV** | ₹0 | ₹41,46,146.22 | **₹32,81,099.71** |
-| **Recovery Rate** | 0.0% | 43.07% | **34.15%** |
-| **Escalated GMV** | ₹0 | ₹0 | ₹58,43,199.51 |
-| **Rejected GMV** | ₹0 | ₹21,68,467.09 | ₹136.6 |
+| **Total Failed GMV** | ₹17,79,143.66 | ₹17,79,143.66 | ₹17,79,143.66 |
+| **Attempted GMV** | ₹0 | ₹13,98,076.33 | ₹10,48,826.73 |
+| **Recovered GMV** | ₹0 | ₹9,91,435.11 | ₹5,99,990.69 |
+| **Intervention Cost** | ₹0 | ₹1,965 | ₹2,820 |
+| **Net Recovered GMV** | ₹0 | ₹9,88,520.11 | **₹5,97,170.69** |
+| **Recovery Rate** | 0.0% | 55.73% | **33.72%** |
+| **Escalated GMV** | ₹0 | ₹0 | ₹10,17,142.38 |
+| **Rejected GMV** | ₹0 | ₹3,81,067.33 | ₹37.34 |
 | **Unsafe Executions** | 0 | 0 | **0** |
 | **Duplicate Executions**| 0 | 0 | **0** |
 

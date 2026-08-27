@@ -1,18 +1,24 @@
 import { RevenueStrategyProvider } from './provider';
 import { RevenueOpportunity } from '../domain/opportunity';
 import { StrategyRecommendation, StrategyRecommendationSchema } from '../domain/strategy';
+import { hashString } from '@/lib/cryptoUtils';
 
 export class MockStrategyProvider implements RevenueStrategyProvider {
   public readonly name = 'MockStrategyProvider';
+  private readonly promptVersion = 'v2.1.0';
+  private readonly schemaVersion = 'v1.0.0';
 
   public async generateStrategy(opportunity: RevenueOpportunity): Promise<StrategyRecommendation> {
+    const startTime = performance.now();
     const amountInr = (opportunity.amountPaise / 100).toLocaleString('en-IN', {
       maximumFractionDigits: 2,
     });
 
+    let recommendation: StrategyRecommendation;
+
     switch (opportunity.type) {
       case 'HIGH_VALUE_DROPOFF': {
-        const recommendation: StrategyRecommendation = {
+        recommendation = {
           opportunityId: opportunity.id,
           diagnosis: `Transaction of ₹${amountInr} failed due to ${opportunity.evidence.failureCode || 'GATEWAY_ERROR'}. High purchase intent detected.`,
           recommendedActionType: 'CREATE_PAYMENT_LINK',
@@ -31,12 +37,12 @@ export class MockStrategyProvider implements RevenueStrategyProvider {
             emailBody: `We noticed your payment didn't go through due to a temporary bank timeout. Click below to retry securely via UPI or Card.`,
           },
         };
-        return StrategyRecommendationSchema.parse(recommendation);
+        break;
       }
 
       case 'PAYMENT_METHOD_DEGRADATION': {
         const bankName = opportunity.evidence.bankOrIssuer || 'Issuer Bank';
-        const recommendation: StrategyRecommendation = {
+        recommendation = {
           opportunityId: opportunity.id,
           diagnosis: `${bankName} is experiencing elevated failure rates (${opportunity.evidence.methodDowntimeRatePct || 45}%). User payment stalled.`,
           recommendedActionType: 'NOTIFY_ALTERNATIVE_METHOD',
@@ -53,12 +59,12 @@ export class MockStrategyProvider implements RevenueStrategyProvider {
             emailSubject: `Quick checkout update: Try UPI for your order`,
           },
         };
-        return StrategyRecommendationSchema.parse(recommendation);
+        break;
       }
 
       case 'CUSTOMER_CHURN_RISK': {
         const ltvInr = (opportunity.evidence.customerLtvPaise / 100).toLocaleString('en-IN');
-        const recommendation: StrategyRecommendation = {
+        recommendation = {
           opportunityId: opportunity.id,
           diagnosis: `High-value loyal customer (LTV: ₹${ltvInr}) failed payment twice consecutively. High churn risk.`,
           recommendedActionType: 'CREATE_PAYMENT_LINK',
@@ -74,11 +80,11 @@ export class MockStrategyProvider implements RevenueStrategyProvider {
             smsText: `Hi from Merchant! We noticed your ₹${amountInr} payment was interrupted. We saved your cart here: {short_url}`,
           },
         };
-        return StrategyRecommendationSchema.parse(recommendation);
+        break;
       }
 
       case 'ABANDONED_CHECKOUT': {
-        const recommendation: StrategyRecommendation = {
+        recommendation = {
           opportunityId: opportunity.id,
           diagnosis: `Customer initiated order #${opportunity.orderId || 'Cart'} of ₹${amountInr} but left checkout before completing authorization.`,
           recommendedActionType: 'SEND_PAYMENT_REMINDER',
@@ -93,11 +99,11 @@ export class MockStrategyProvider implements RevenueStrategyProvider {
             smsText: `Still interested in your order of ₹${amountInr}? Complete your purchase in one tap: {short_url}`,
           },
         };
-        return StrategyRecommendationSchema.parse(recommendation);
+        break;
       }
 
       default: {
-        const recommendation: StrategyRecommendation = {
+        recommendation = {
           opportunityId: opportunity.id,
           diagnosis: `General payment dropoff for ₹${amountInr}.`,
           recommendedActionType: 'CREATE_PAYMENT_LINK',
@@ -109,8 +115,21 @@ export class MockStrategyProvider implements RevenueStrategyProvider {
           rationale: `Standard recovery protocol for verified opportunity with positive expected value (₹${(opportunity.expectedValue.netExpectedValuePaise / 100).toFixed(2)}).`,
           suggestedExpiryMinutes: 120,
         };
-        return StrategyRecommendationSchema.parse(recommendation);
+        break;
       }
     }
+
+    const latencyMs = Math.max(1, Math.round(performance.now() - startTime));
+    recommendation.telemetry = {
+      provider: 'MockStrategyProvider',
+      model: 'deterministic-rules-engine',
+      promptVersion: this.promptVersion,
+      strategySchemaVersion: this.schemaVersion,
+      contextHash: hashString(opportunity.id),
+      latencyMs,
+      validationStatus: 'PASSED',
+    };
+
+    return StrategyRecommendationSchema.parse(recommendation);
   }
 }

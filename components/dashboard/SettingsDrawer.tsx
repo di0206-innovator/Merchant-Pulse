@@ -29,12 +29,12 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
   const [maxAutoGmv, setMaxAutoGmv] = useState(25000);
   const [minEv, setMinEv] = useState(20);
   const [cooldownHours, setCooldownHours] = useState(24);
-  const [razorpayKeyId, setRazorpayKeyId] = useState('rzp_test_TUHSBfjPgODDOy');
-  const [razorpaySecret, setRazorpaySecret] = useState('eAr7mPqHUDHycKZa65409Mjs');
+  const [razorpayKeyId, setRazorpayKeyId] = useState('');
+  const [razorpaySecret, setRazorpaySecret] = useState('');
   const [razorpayMode, setRazorpayMode] = useState<'TEST' | 'LIVE'>('TEST');
-  const [geminiApiKey, setGeminiApiKey] = useState('••••••••••••••••');
+  const [geminiApiKey, setGeminiApiKey] = useState('');
   const [geminiModel, setGeminiModel] = useState('gemini-2.5-flash');
-  const [supabaseUrl, setSupabaseUrl] = useState(process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ttxbgdosrtohcksvydsc.supabase.co');
+  const [supabaseUrl, setSupabaseUrl] = useState('');
 
   if (!isOpen) return null;
 
@@ -206,18 +206,7 @@ export function SettingsDrawer({ isOpen, onClose, currentUser }: SettingsDrawerP
                   <span className="text-[10px] text-slate-400 capitalize">{theme} Mode</span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 pt-1">
-                  <button
-                    onClick={() => setTheme('retro')}
-                    className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all ${
-                      theme === 'retro'
-                        ? 'bg-[#8BE8F5]/20 border-[#8BE8F5] text-[#8BE8F5] shadow-md'
-                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Retro Cyan</span>
-                  </button>
+                <div className="grid grid-cols-2 gap-2 pt-1">
 
                   <button
                     onClick={() => setTheme('dark')}

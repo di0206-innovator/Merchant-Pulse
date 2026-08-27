@@ -7,6 +7,7 @@ import { ActionDispatcher } from '../execution/dispatcher';
 import { MockRazorpayClientAdapter, LiveRazorpayClientAdapter } from '../../integrations/razorpay/client';
 import { globalAuditLedger } from '../audit/ledger';
 import { MerchantPolicyConfig } from '../domain/policy';
+import { getGlobalRepositories } from '../storage';
 
 export * from './orchestrator';
 
@@ -16,17 +17,24 @@ const globalForPipeline = globalThis as unknown as {
 
 export function getGlobalPipeline(policyConfig?: Partial<MerchantPolicyConfig>): RevenuePipelineOrchestrator {
   if (!globalForPipeline.__merchantPulsePipeline) {
+    const storage = getGlobalRepositories();
     const factStore = new RevenueFactStore();
     const detector = new RevenueOpportunityDetector(factStore);
     const strategyProvider = getStrategyProvider(true);
     const policyEngine = new PolicyEngine();
 
+    const isLiveConfigured =
+      Boolean(process.env.RAZORPAY_KEY_ID) &&
+      Boolean(process.env.RAZORPAY_KEY_SECRET) &&
+      process.env.RAZORPAY_KEY_ID !== 'rzp_test_YourKeyIdHere' &&
+      process.env.RAZORPAY_KEY_SECRET !== 'YourKeySecretHere';
+
     // Use Live adapter if keys are configured, otherwise Mock adapter
-    const razorpayAdapter = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_ID !== 'rzp_test_YourKeyIdHere'
+    const razorpayAdapter = isLiveConfigured
       ? new LiveRazorpayClientAdapter()
       : new MockRazorpayClientAdapter();
 
-    const dispatcher = new ActionDispatcher(razorpayAdapter);
+    const dispatcher = new ActionDispatcher(razorpayAdapter, storage.executionIntents);
 
     const defaultConfig: MerchantPolicyConfig = {
       merchantId: 'rzp_merchant_pulse',
@@ -52,9 +60,9 @@ export function getGlobalPipeline(policyConfig?: Partial<MerchantPolicyConfig>):
       dispatcher,
       auditLedger: globalAuditLedger,
       policyConfig: defaultConfig,
+      storage,
     });
   }
 
   return globalForPipeline.__merchantPulsePipeline;
 }
-

@@ -37,6 +37,7 @@ export const DomainEventTypeSchema = z.enum([
   'ORDER_PAID',
   'PAYMENT_LINK_PAID',
   'PAYMENT_LINK_EXPIRED',
+  'PAYMENT_LINK_CANCELLED',
 ]);
 export type DomainEventType = z.infer<typeof DomainEventTypeSchema>;
 

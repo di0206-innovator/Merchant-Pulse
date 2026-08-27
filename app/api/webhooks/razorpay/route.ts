@@ -4,6 +4,7 @@ import { normalizeRazorpayWebhook } from '@/core/events/normalizer';
 import { globalIdempotencyLedger } from '@/core/events/idempotency';
 import { RazorpayWebhookEventSchema } from '@/core/domain/events';
 import { getGlobalPipeline } from '@/core/pipeline';
+import { getGlobalRepositories } from '@/core/storage';
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,8 +12,10 @@ export async function POST(req: NextRequest) {
     const signature = req.headers.get('x-razorpay-signature');
     const eventIdHeader = req.headers.get('x-razorpay-event-id');
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    const storage = getGlobalRepositories();
 
-    // In production or when webhook secret is configured, enforce strict signature verification
+    // 1. Signature Verification with Honest Mode Labeling
+    let signatureVerified = false;
     if (webhookSecret && webhookSecret !== 'YourWebhookSecretHere') {
       if (!signature) {
         return NextResponse.json(
@@ -21,25 +24,31 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const isValid = verifyRazorpayWebhookSignature(rawBody, signature, webhookSecret);
-      if (!isValid) {
+      signatureVerified = verifyRazorpayWebhookSignature(rawBody, signature, webhookSecret);
+      if (!signatureVerified) {
         return NextResponse.json(
           { error: 'Invalid webhook signature' },
           { status: 401 }
         );
       }
+    } else {
+      // Offline Demo / Hermetic Testing Mode
+      console.warn('[Webhook Gateway]: RAZORPAY_WEBHOOK_SECRET is not configured. Ingesting event in HERMETIC_DEMO_MODE.');
     }
 
-    // Idempotency check
+    // 2. Idempotency check across store & ledger
     const dedupKey = globalIdempotencyLedger.generateKey(eventIdHeader || undefined, rawBody);
-    if (globalIdempotencyLedger.isDuplicate(dedupKey)) {
+    const isDup = globalIdempotencyLedger.isDuplicate(dedupKey) ||
+      (await storage.webhookEvents.isDuplicate(dedupKey));
+
+    if (isDup) {
       return NextResponse.json({
         status: 'DUPLICATE_IGNORED',
         message: 'Event has already been processed idempotently.',
       }, { status: 200 });
     }
 
-    // Parse and validate JSON structure
+    // 3. Parse and validate JSON structure
     let jsonBody: unknown;
     try {
       jsonBody = JSON.parse(rawBody);
@@ -57,16 +66,40 @@ export async function POST(req: NextRequest) {
 
     const domainEvent = normalizeRazorpayWebhook(parseResult.data);
     if (!domainEvent) {
+      // Record unhandled event safely
+      await storage.webhookEvents.recordEvent({
+        id: `we_${Date.now()}`,
+        eventId: dedupKey,
+        eventType: parseResult.data.event,
+        merchantId: parseResult.data.account_id,
+        rawPayload: jsonBody as Record<string, unknown>,
+        signature: signature || undefined,
+        signatureVerified,
+        processedStatus: 'UNHANDLED_EVENT_TYPE',
+        receivedAt: Date.now(),
+      });
+
       return NextResponse.json({
         status: 'UNHANDLED_EVENT_TYPE',
         event: parseResult.data.event,
       }, { status: 200 });
     }
 
-    // Record in idempotency ledger
+    // 4. Record in idempotency ledger & storage
     globalIdempotencyLedger.record(dedupKey, { processedAt: Date.now(), domainEventId: domainEvent.id });
+    await storage.webhookEvents.recordEvent({
+      id: domainEvent.id,
+      eventId: dedupKey,
+      eventType: domainEvent.type,
+      merchantId: domainEvent.merchantId,
+      rawPayload: jsonBody as Record<string, unknown>,
+      signature: signature || undefined,
+      signatureVerified,
+      processedStatus: 'ACCEPTED',
+      receivedAt: Date.now(),
+    });
 
-    // Route domain event to the Revenue Pipeline Orchestrator
+    // 5. Route domain event to the Revenue Pipeline Orchestrator
     const pipeline = getGlobalPipeline();
     let opportunityResult = null;
     let outcomeAttributed = false;
@@ -74,13 +107,23 @@ export async function POST(req: NextRequest) {
     if (domainEvent.payment) {
       opportunityResult = await pipeline.handlePaymentEvent(domainEvent.payment, domainEvent.id);
     } else if (domainEvent.paymentLinkId) {
-      const outcomeStatus = domainEvent.type === 'PAYMENT_LINK_PAID' ? 'paid' : 'expired';
-      const amountPaise = (domainEvent as any).payment?.amountPaise;
-      outcomeAttributed = pipeline.handlePaymentLinkOutcome(
+      let outcomeStatus: 'paid' | 'expired' | 'cancelled' = 'expired';
+      if (domainEvent.type === 'PAYMENT_LINK_PAID') {
+        outcomeStatus = 'paid';
+      } else if (domainEvent.type === 'PAYMENT_LINK_CANCELLED') {
+        outcomeStatus = 'cancelled';
+      }
+
+      const amountPaise = (domainEvent.rawPayload as any)?.payload?.payment?.entity?.amount ||
+        (domainEvent.rawPayload as any)?.payload?.payment_link?.entity?.amount;
+      const paymentId = (domainEvent.rawPayload as any)?.payload?.payment?.entity?.id;
+
+      outcomeAttributed = await pipeline.handlePaymentLinkOutcome(
         domainEvent.paymentLinkId,
         outcomeStatus,
         amountPaise,
-        domainEvent.id
+        domainEvent.id,
+        paymentId
       );
     }
 

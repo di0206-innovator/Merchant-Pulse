@@ -1,12 +1,27 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
+import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import { AuthProvider } from '@/lib/supabase/authContext';
-import { ThemeProvider } from '@/lib/themeContext';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { OnboardingProvider } from '@/lib/onboardingContext';
 import './globals.css';
 
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
-  title: 'MerchantPulse | AI-Assisted Revenue Intelligence for Razorpay',
-  description: 'Autonomous revenue leak detection, economic expected-value decisioning, policy guardrails, and closed-loop Razorpay recovery.',
+  title: 'MerchantPulse | AI Revenue Recovery for Razorpay',
+  description: 'Deterministic financial truth. Bounded AI strategy. Closed-loop recovery.',
 };
 
 export default function RootLayout({
@@ -15,25 +30,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="retro">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
+    <html lang="en" suppressHydrationWarning className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
+      <body className="min-h-screen bg-nb-bg text-nb-white antialiased flex flex-col font-sans transition-colors duration-200">
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <OnboardingProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </OnboardingProvider>
+        </ThemeProvider>
         <Script
           src="https://checkout.razorpay.com/v1/checkout.js"
           strategy="lazyOnload"
         />
-      </head>
-      <body className="min-h-screen bg-[#8BE8F5] dark:bg-[#070B12] light:bg-[#F8FAFC] text-slate-900 dark:text-slate-100 antialiased flex flex-col font-sans">
-        <ThemeProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </ThemeProvider>
       </body>
     </html>
   );

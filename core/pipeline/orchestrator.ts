@@ -5,12 +5,14 @@ import { RevenueStrategyProvider } from '../strategy/provider';
 import { PolicyEngine } from '../policy/evaluator';
 import { ActionDispatcher } from '../execution/dispatcher';
 import { AuditLedger } from '../audit/ledger';
-import { PaymentEntity, OrderEntity } from '../domain/payment';
+import { PaymentEntity } from '../domain/payment';
 import { RevenueOpportunity } from '../domain/opportunity';
 import { MerchantPolicyConfig } from '../domain/policy';
 import { StrategyRecommendation } from '../domain/strategy';
 import { DecisionAuditRecord } from '../domain/audit';
 import { computeMerchantMetrics, MerchantRevenueMetrics } from '../revenue/metrics';
+import { FinancialReconciliationEngine } from '../revenue/reconciliation';
+import { StorageRepositories } from '../storage';
 
 export interface PipelineDependencies {
   factStore: RevenueFactStore;
@@ -20,6 +22,8 @@ export interface PipelineDependencies {
   dispatcher: ActionDispatcher;
   auditLedger: AuditLedger;
   policyConfig: MerchantPolicyConfig;
+  reconciliationEngine?: FinancialReconciliationEngine;
+  storage?: StorageRepositories;
 }
 
 export class RevenuePipelineOrchestrator {
@@ -30,6 +34,9 @@ export class RevenuePipelineOrchestrator {
   private dispatcher: ActionDispatcher;
   private auditLedger: AuditLedger;
   private policyConfig: MerchantPolicyConfig;
+  private reconciliationEngine: FinancialReconciliationEngine;
+  private storage?: StorageRepositories;
+
   private opportunities: Map<string, RevenueOpportunity> = new Map();
   private recommendations: Map<string, StrategyRecommendation> = new Map();
 
@@ -41,32 +48,58 @@ export class RevenuePipelineOrchestrator {
     this.dispatcher = deps.dispatcher;
     this.auditLedger = deps.auditLedger;
     this.policyConfig = deps.policyConfig;
+    this.storage = deps.storage;
+    this.reconciliationEngine =
+      deps.reconciliationEngine || new FinancialReconciliationEngine(this.storage?.reconciliation);
   }
 
   /**
    * Primary ingestion handler for payment events (e.g. payment.failed, payment.captured)
    */
   public async handlePaymentEvent(payment: PaymentEntity, eventId: string): Promise<RevenueOpportunity | null> {
-    // 1. Fact Store updates
+    // 1. Ingest payment facts into Fact Store
     this.factStore.recordPayment(payment);
 
-    // 2. If payment captured, check if it resolves an open opportunity
+    // 2. If payment captured, reconcile against any open opportunity for this order
     if (payment.status === 'captured') {
       if (payment.orderId) {
         const matchingOpp = Array.from(this.opportunities.values()).find(
           o => o.orderId === payment.orderId && o.status !== 'RECOVERED'
         );
         if (matchingOpp) {
-          matchingOpp.status = 'RECOVERED';
-          matchingOpp.updatedAt = Math.floor(Date.now() / 1000);
-          this.opportunities.set(matchingOpp.id, matchingOpp);
           const decision = this.auditLedger.getRecordByOpportunityId(matchingOpp.id);
           if (decision) {
-            this.auditLedger.updateOutcome(decision.decisionId, {
-              status: 'RECOVERED',
-              recoveredAmountPaise: payment.amountPaise,
-              resolutionEventId: eventId,
-            });
+            const reconResult = this.reconciliationEngine.reconcileRecovery(
+              decision,
+              matchingOpp,
+              payment.amountPaise,
+              payment.id,
+              eventId
+            );
+
+            if (reconResult.valid && reconResult.attributionType === 'ATTRIBUTED_INTERVENTION') {
+              matchingOpp.status = 'RECOVERED';
+              matchingOpp.updatedAt = Math.floor(Date.now() / 1000);
+              this.opportunities.set(matchingOpp.id, matchingOpp);
+              if (this.storage) this.storage.opportunities.saveOpportunity(matchingOpp).catch(() => {});
+
+              this.auditLedger.updateOutcome(decision.decisionId, {
+                status: 'RECOVERED',
+                recoveredAmountPaise: reconResult.reconciledAmountPaise,
+                resolutionEventId: eventId,
+              });
+            } else if (reconResult.attributionType === 'ORGANIC_RECOVERY') {
+              // Organic recovery without active MerchantPulse intervention
+              matchingOpp.status = 'REJECTED'; // Close without AI attribution
+              matchingOpp.updatedAt = Math.floor(Date.now() / 1000);
+              this.opportunities.set(matchingOpp.id, matchingOpp);
+              if (this.storage) this.storage.opportunities.saveOpportunity(matchingOpp).catch(() => {});
+
+              this.auditLedger.updateOutcome(decision.decisionId, {
+                status: 'CANCELLED',
+                resolutionEventId: eventId,
+              });
+            }
           }
         }
       }
@@ -80,8 +113,9 @@ export class RevenuePipelineOrchestrator {
     }
 
     this.opportunities.set(opportunity.id, opportunity);
+    if (this.storage) this.storage.opportunities.saveOpportunity(opportunity).catch(() => {});
 
-    // 4. Generate AI Strategy Recommendation
+    // 4. Generate AI / Deterministic Strategy Recommendation
     const recommendation = await this.strategyProvider.generateStrategy(opportunity);
     this.recommendations.set(opportunity.id, recommendation);
     opportunity.status = 'STRATEGY_GENERATED';
@@ -124,6 +158,7 @@ export class RevenuePipelineOrchestrator {
 
     opportunity.updatedAt = now;
     this.opportunities.set(opportunity.id, opportunity);
+    if (this.storage) this.storage.opportunities.saveOpportunity(opportunity).catch(() => {});
 
     // 7. Write immutable audit ledger trace
     const auditRecord: DecisionAuditRecord = {
@@ -149,45 +184,77 @@ export class RevenuePipelineOrchestrator {
     };
 
     this.auditLedger.recordDecision(auditRecord);
+    if (this.storage) this.storage.audit.recordDecision(auditRecord).catch(() => {});
+
     return opportunity;
   }
 
   /**
-   * Processes closed-loop outcome webhooks (payment_link.paid / payment_link.expired)
+   * Processes closed-loop outcome webhooks (payment_link.paid / payment_link.expired / payment_link.cancelled)
    */
   public handlePaymentLinkOutcome(
     paymentLinkId: string,
     status: 'paid' | 'expired' | 'cancelled',
     amountPaise?: number,
-    eventId: string = 'evt_outcome'
+    eventId: string = 'evt_outcome',
+    paymentId?: string
   ): boolean {
     const decision = this.auditLedger.getRecordByPaymentLinkId(paymentLinkId);
     if (!decision) return false;
 
     const opportunity = this.opportunities.get(decision.opportunityId);
+    if (!opportunity) return false;
 
     if (status === 'paid') {
+      const actualPaidPaise = amountPaise || decision.deterministicMetrics.amountPaise;
+      const reconResult = this.reconciliationEngine.reconcileRecovery(
+        decision,
+        opportunity,
+        actualPaidPaise,
+        paymentId,
+        eventId
+      );
+
+      if (!reconResult.valid) {
+        if (reconResult.attributionType === 'DUPLICATE_RECOVERY_EVENT') {
+          return true; // Idempotent success
+        }
+        return false;
+      }
+
       this.auditLedger.updateOutcome(decision.decisionId, {
         status: 'RECOVERED',
-        recoveredAmountPaise: amountPaise || decision.deterministicMetrics.amountPaise,
+        recoveredAmountPaise: reconResult.reconciledAmountPaise,
         resolutionEventId: eventId,
       });
-      if (opportunity) {
-        opportunity.status = 'RECOVERED';
-        opportunity.updatedAt = Math.floor(Date.now() / 1000);
-        this.opportunities.set(opportunity.id, opportunity);
+
+      opportunity.status = 'RECOVERED';
+      opportunity.updatedAt = Math.floor(Date.now() / 1000);
+      this.opportunities.set(opportunity.id, opportunity);
+
+      if (this.storage) {
+        this.storage.opportunities.saveOpportunity(opportunity).catch(() => {});
+        this.storage.audit.updateOutcome(decision.decisionId, {
+          status: 'RECOVERED',
+          recoveredAmountPaise: reconResult.reconciledAmountPaise,
+          resolutionEventId: eventId,
+        }).catch(() => {});
       }
+
       return true;
-    } else if (status === 'expired') {
+    } else if (status === 'expired' || status === 'cancelled') {
       this.auditLedger.updateOutcome(decision.decisionId, {
         status: 'EXPIRED',
         resolutionEventId: eventId,
       });
-      if (opportunity && opportunity.status === 'EXECUTED') {
+
+      if (opportunity.status === 'EXECUTED') {
         opportunity.status = 'EXPIRED';
         opportunity.updatedAt = Math.floor(Date.now() / 1000);
         this.opportunities.set(opportunity.id, opportunity);
+        if (this.storage) this.storage.opportunities.saveOpportunity(opportunity).catch(() => {});
       }
+
       return true;
     }
 
@@ -215,6 +282,11 @@ export class RevenuePipelineOrchestrator {
       decision.actionStatus = 'MANUALLY_APPROVED';
       decision.executedActionId = execResult.razorpayReferenceId;
       this.auditLedger.recordDecision(decision);
+
+      if (this.storage) {
+        this.storage.opportunities.saveOpportunity(opportunity).catch(() => {});
+        this.storage.audit.recordDecision(decision).catch(() => {});
+      }
 
       const customerKey = opportunity.customerContact || opportunity.customerEmail;
       if (customerKey) {
@@ -251,10 +323,16 @@ export class RevenuePipelineOrchestrator {
     return this.factStore;
   }
 
+  public getReconciliationEngine(): FinancialReconciliationEngine {
+    return this.reconciliationEngine;
+  }
+
   public clear(): void {
     this.opportunities.clear();
     this.recommendations.clear();
     this.factStore.clear();
     this.auditLedger.clear();
+    this.reconciliationEngine.clear();
+    this.dispatcher.clear();
   }
 }

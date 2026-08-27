@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MaterialAppLayout } from '@/components/layout/MaterialAppLayout';
-import { ShieldCheck, FileText, CheckCircle2, AlertTriangle, Search, Filter, Download, Lock } from 'lucide-react';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { ShieldCheck, CheckCircle2, AlertTriangle, Search, Filter, Download, Lock } from 'lucide-react';
 
 export default function AuditPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -82,52 +82,64 @@ export default function AuditPage() {
     document.body.removeChild(link);
   };
 
-  return (
-    <MaterialAppLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-        {/* Header Surface */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900/60 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 m3-elevation-1">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-xs font-mono mb-2">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Tamper-Evident Audit Ledger</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Compliance & Policy Audit Trail
-            </h1>
-            <p className="text-xs text-slate-600 dark:text-slate-400 font-mono mt-1">
-              Deterministic verification of every EV decision, policy guardrail, and Razorpay API execution.
-            </p>
-          </div>
+  const statusColor = (status: string) => {
+    if (status === 'PASSED') return '#00FF94';
+    if (status === 'ESCALATED') return '#FFE500';
+    return '#FF3B3B';
+  };
 
-          <button
-            onClick={exportCsv}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-mono font-bold transition-all shadow-md shadow-blue-600/20 active:scale-95"
-          >
-            <Download className="w-4 h-4 text-white" />
-            <span>Export Compliance Report</span>
-          </button>
+  return (
+    <AppLayout>
+      <div className="nb-page">
+
+        {/* ── HEADER ─────────────────────────────────────────── */}
+        <div className="nb-page-header">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
+            <div>
+              <div className="nb-eyebrow">
+                <Lock className="w-3.5 h-3.5" />
+                Tamper-Evident Audit Ledger
+              </div>
+              <h1 className="mt-4 text-3xl sm:text-4xl font-black uppercase tracking-tight text-white leading-none">
+                Compliance &<br />
+                <span className="text-[#FFE500]">Policy Audit Trail</span>
+              </h1>
+              <p className="mt-3 font-mono text-xs text-[#888888] leading-6">
+                Deterministic verification of every EV decision, policy guardrail, and Razorpay API execution.
+              </p>
+            </div>
+
+            <button
+              onClick={exportCsv}
+              className="nb-primary-button shrink-0 whitespace-nowrap"
+            >
+              <Download className="w-4 h-4" />
+              <span>Export Compliance Report</span>
+            </button>
+          </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-100 dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+        {/* ── FILTERS ─────────────────────────────────────────── */}
+        <div className="nb-panel p-4 flex flex-col sm:flex-row items-center gap-4">
+          {/* Search */}
           <div className="relative flex-1 w-full">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#888888] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search opportunity ID, action type, or rule..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-slate-100 text-xs font-mono focus:outline-none focus:border-blue-500"
+              className="nb-input pl-10 text-xs"
             />
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Filter className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+          {/* Status filter */}
+          <div className="flex items-center gap-2 shrink-0">
+            <Filter className="w-4 h-4 text-[#888888]" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-slate-100 text-xs font-mono focus:outline-none focus:border-blue-500"
+              className="nb-input w-auto px-3 py-2.5 text-xs cursor-pointer"
             >
               <option value="ALL">All Statuses</option>
               <option value="PASSED">Passed</option>
@@ -137,62 +149,84 @@ export default function AuditPage() {
           </div>
         </div>
 
-        {/* Audit Data Table */}
-        <div className="bg-white dark:bg-slate-900/80 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden m3-elevation-2">
+        {/* ── AUDIT TABLE ─────────────────────────────────────── */}
+        <div className="nb-panel overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 text-slate-600 dark:text-slate-400 font-mono text-[11px] uppercase tracking-wider">
-                  <th className="py-3.5 px-4">Audit ID / Time</th>
-                  <th className="py-3.5 px-4">Opportunity ID</th>
-                  <th className="py-3.5 px-4">Recommended Action</th>
-                  <th className="py-3.5 px-4">Net EV (₹)</th>
-                  <th className="py-3.5 px-4">Policy Status</th>
-                  <th className="py-3.5 px-4">Evaluated Rule</th>
-                  <th className="py-3.5 px-4">Razorpay Reference</th>
+                <tr>
+                  <th className="nb-th">Audit ID / Time</th>
+                  <th className="nb-th">Opportunity ID</th>
+                  <th className="nb-th">Recommended Action</th>
+                  <th className="nb-th">Net EV (₹)</th>
+                  <th className="nb-th">Policy Status</th>
+                  <th className="nb-th">Evaluated Rule</th>
+                  <th className="nb-th">Razorpay Ref</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60 font-mono text-xs text-slate-800 dark:text-slate-200">
-                {filteredLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-100 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <div className="font-bold text-slate-900 dark:text-white">{log.id}</div>
-                      <div className="text-[10px] text-slate-500">{log.timestamp}</div>
-                    </td>
-                    <td className="py-3.5 px-4 text-blue-600 dark:text-blue-400 font-bold">{log.opportunityId}</td>
-                    <td className="py-3.5 px-4 font-semibold">{log.actionType}</td>
-                    <td className="py-3.5 px-4 text-emerald-600 dark:text-emerald-400 font-bold">
-                      ₹{(log.evPaise / 100).toLocaleString('en-IN')}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          log.policyStatus === 'PASSED'
-                            ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
-                            : 'bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400'
-                        }`}
-                      >
-                        {log.policyStatus === 'PASSED' ? (
-                          <CheckCircle2 className="w-3 h-3" />
-                        ) : (
-                          <AlertTriangle className="w-3 h-3" />
-                        )}
-                        <span>{log.policyStatus}</span>
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400 text-[11px] max-w-xs truncate">
-                      {log.ruleEvaluated}
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400 font-mono text-[11px]">
-                      {log.razorpayRef}
+              <tbody>
+                {filteredLogs.map((log) => {
+                  const sc = statusColor(log.policyStatus);
+                  return (
+                    <tr
+                      key={log.id}
+                      className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                    >
+                      <td className="nb-td">
+                        <div className="font-black text-white">{log.id}</div>
+                        <div className="text-[10px] text-[#888888]">{log.timestamp}</div>
+                      </td>
+                      <td className="nb-td text-[#3B82F6] font-black">{log.opportunityId}</td>
+                      <td className="nb-td font-bold">{log.actionType}</td>
+                      <td className="nb-td text-[#00FF94] font-black">
+                        ₹{(log.evPaise / 100).toLocaleString('en-IN')}
+                      </td>
+                      <td className="nb-td">
+                        <span
+                          className="inline-flex items-center gap-1 border-2 px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-widest"
+                          style={{ borderColor: sc, color: sc, backgroundColor: `${sc}15` }}
+                        >
+                          {log.policyStatus === 'PASSED' ? (
+                            <CheckCircle2 className="w-3 h-3" />
+                          ) : (
+                            <AlertTriangle className="w-3 h-3" />
+                          )}
+                          {log.policyStatus}
+                        </span>
+                      </td>
+                      <td className="nb-td text-[#888888] text-[10px] max-w-xs truncate">
+                        {log.ruleEvaluated}
+                      </td>
+                      <td className="nb-td text-[#888888] text-[10px]">
+                        {log.razorpayRef}
+                      </td>
+                    </tr>
+                  );
+                })}
+
+                {filteredLogs.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center font-mono text-[11px] text-[#888888]">
+                      No records match your filters.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
+
+          {/* Footer */}
+          <div className="border-t-2 border-white/10 bg-[#111111] px-6 py-3 flex items-center justify-between">
+            <span className="font-mono text-[10px] text-[#888888]">
+              Showing <strong className="text-white">{filteredLogs.length}</strong> of {auditLogs.length} records
+            </span>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#00FF94]" />
+              <span className="font-mono text-[10px] text-[#888888]">Tamper-evident · Append-only ledger</span>
+            </div>
+          </div>
         </div>
       </div>
-    </MaterialAppLayout>
+    </AppLayout>
   );
 }

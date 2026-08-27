@@ -55,12 +55,18 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
     const inrAmount = opportunity.amountPaise / 100;
     
     // Check if Razorpay SDK script is available
+    const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+    if (!razorpayKey) {
+      alert(`[Demo Mode] Razorpay Test Mode Key is not configured on the client (NEXT_PUBLIC_RAZORPAY_KEY_ID). In production or test mode, this triggers Razorpay Standard Checkout for ₹${inrAmount}.`);
+      return;
+    }
+
     if (typeof window !== 'undefined' && (window as any).Razorpay) {
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_MerchantPulseKey',
+        key: razorpayKey,
         amount: opportunity.amountPaise,
         currency: 'INR',
-        name: 'MerchantPulse Recovery Demo',
+        name: 'MerchantPulse Recovery',
         description: `Revenue Recovery Payment for ${opportunity.id}`,
         handler: function (response: any) {
           alert(`Razorpay Payment Successful!\nPayment ID: ${response.razorpay_payment_id}`);

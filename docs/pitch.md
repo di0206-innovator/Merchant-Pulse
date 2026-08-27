@@ -12,8 +12,8 @@
 ### 0:30 – 1:30 | Live One-Click Demo
 > *"Let's open the Merchant Terminal and click **RUN FULL DEMO**. Watch as a failed ₹8,500 UPI transaction is ingested, evaluated for net EV, validated against policy rules, dispatched as a Razorpay Payment Link, and reconciled upon payment."*
 
-### 1:30 – 2:15 | Batch Recovery Results & Reproducible Benchmark
-> *"Don't just take our word for a single transaction. We built a 1,000-event synthetic batch evaluation engine with an 80/20 held-out split (`npx benchmark`). Across identical held-out data, MerchantPulse AI outperforms the deterministic rules-only baseline by optimizing recovery timing and customer messaging without unsafe actions."*
+### 1:30 – 2:15 | Safety-Adjusted Recovery & Benchmark Truth
+> *"Don't just take our word for a single transaction. We built a 1,000-event batch evaluation engine (`npm run benchmark:heldout`). While an unconstrained rules-only baseline recklessly auto-dispatches high-value transactions (> ₹25k) and spams customers (34 fatigue violations), **MerchantPulse AI delivers safety-adjusted recovery**: ₹5.97 Lakhs recovered autonomously with zero fatigue violations, while safely routing ₹10.17 Lakhs of high-risk transactions to merchant ops for review."*
 
 ### 2:15 – 3:00 | AI vs Deterministic Boundary
 > *"Here is why this is safe: Code establishes financial truth in integer paise. AI reasons over facts to select strategy and copy. Policy determines whether reasoning may become action. AI can never alter balances or execute APIs directly."*

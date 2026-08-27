@@ -11,72 +11,64 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+        nb: {
+          bg:      "var(--nb-bg)",
+          surface: "var(--nb-surface)",
+          border:  "var(--nb-border)",
+          stroke:  "var(--nb-stroke)",
+          yellow:  "var(--nb-yellow)",
+          green:   "var(--nb-green)",
+          red:     "var(--nb-red)",
+          blue:    "var(--nb-blue)",
+          white:   "var(--nb-white)",
+          muted:   "var(--nb-muted)",
         },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        retro: {
-          bg: "#8BE8F5",
-          cyan: "#8BE8F5",
-          teal: "#7CE0EE",
-          cream: "#FAF7F2",
-          yellow: "#FCD34D",
-          pink: "#FF8AB5",
-          coral: "#FF6B6B",
-          dark: "#0F172A",
-        },
-        fintech: {
-          navy: "#0A1128",
-          charcoal: "#0F172A",
-          surface: "#1E293B",
-          border: "#334155",
-          razorpay: "#3395FF",
-          razorpayDark: "#0B2545",
-          success: "#10B981",
-          warning: "#F59E0B",
-          danger: "#EF4444",
-          highlight: "#6366F1",
-        }
       },
       fontFamily: {
-        serif: ["Playfair Display", "Georgia", "serif"],
-        sans: ["Plus Jakarta Sans", "Inter", "sans-serif"],
-        mono: ["JetBrains Mono", "monospace"],
+        sans:    ["Space Grotesk", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono:    ["JetBrains Mono", "ui-monospace", "Menlo", "monospace"],
+        display: ["Space Grotesk", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        retro: "4px 4px 0px 0px #0F172A",
-        "retro-lg": "6px 6px 0px 0px #0F172A",
-        "retro-sm": "2px 2px 0px 0px #0F172A",
-      }
+        brutal:      "3px 3px 0px 0px #FFFFFF",
+        "brutal-sm": "2px 2px 0px 0px #FFFFFF",
+        "brutal-lg": "6px 6px 0px 0px #FFFFFF",
+        "brutal-xl": "8px 8px 0px 0px #FFFFFF",
+        "brutal-y":  "3px 3px 0px 0px #FFE500",
+        "brutal-y-lg":"6px 6px 0px 0px #FFE500",
+        "brutal-g":  "3px 3px 0px 0px #00FF94",
+        "brutal-b":  "3px 3px 0px 0px #3B82F6",
+        "brutal-r":  "3px 3px 0px 0px #FF3B3B",
+        none:        "none",
+      },
+      borderWidth: {
+        "3": "3px",
+      },
+      fontSize: {
+        "2xs": ["0.625rem", { lineHeight: "1rem" }],
+      },
+      spacing: {
+        "18": "4.5rem",
+      },
+      keyframes: {
+        "flicker": {
+          "0%, 100%": { opacity: "1" },
+          "50%":       { opacity: "0.85" },
+        },
+        "slide-in": {
+          "0%":   { transform: "translateX(-8px)", opacity: "0" },
+          "100%": { transform: "translateX(0)",    opacity: "1" },
+        },
+        "slide-up": {
+          "0%":   { transform: "translateY(12px)", opacity: "0" },
+          "100%": { transform: "translateY(0)",    opacity: "1" },
+        },
+      },
+      animation: {
+        flicker:  "flicker 2s ease-in-out infinite",
+        "slide-in": "slide-in 0.2s ease-out",
+        "slide-up": "slide-up 0.25s ease-out",
+      },
     },
   },
   plugins: [],

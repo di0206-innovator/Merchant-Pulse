@@ -88,8 +88,14 @@ export class LiveRazorpayClientAdapter implements RazorpayClientAdapter {
   private baseUrl = 'https://api.razorpay.com/v1';
 
   constructor(keyId?: string, keySecret?: string) {
-    this.keyId = keyId || process.env.RAZORPAY_KEY_ID || 'rzp_test_TUHSBfjPgODDOy';
-    this.keySecret = keySecret || process.env.RAZORPAY_KEY_SECRET || 'eAr7mPqHUDHycKZa65409Mjs';
+    this.keyId = keyId || process.env.RAZORPAY_KEY_ID || '';
+    this.keySecret = keySecret || process.env.RAZORPAY_KEY_SECRET || '';
+
+    if (!this.keyId || !this.keySecret) {
+      throw new Error(
+        '[LiveRazorpayClientAdapter] Missing required Razorpay credentials. Please configure RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in environment variables.'
+      );
+    }
   }
 
   private getAuthHeader(): string {

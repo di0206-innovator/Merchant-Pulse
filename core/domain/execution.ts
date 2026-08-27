@@ -22,3 +22,22 @@ export const ExecutionRecordSchema = z.object({
   executedAt: z.number().int().positive(),
 });
 export type ExecutionRecord = z.infer<typeof ExecutionRecordSchema>;
+
+export const ExecutionIntentStateSchema = z.enum([
+  'EXECUTION_REQUESTED',
+  'EXECUTION_IN_FLIGHT',
+  'EXECUTION_SUCCEEDED',
+  'EXECUTION_FAILED',
+]);
+export type ExecutionIntentState = z.infer<typeof ExecutionIntentStateSchema>;
+
+export interface ExecutionIntent {
+  intentKey: string;
+  opportunityId: string;
+  merchantId: string;
+  actionType: string;
+  state: ExecutionIntentState;
+  record?: ExecutionRecord;
+  createdAt: number;
+  updatedAt: number;
+}

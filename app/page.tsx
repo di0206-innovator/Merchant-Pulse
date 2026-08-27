@@ -1,399 +1,322 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  TrendingUp,
   ArrowRight,
+  BarChart3,
   CheckCircle2,
-  Settings,
-  Sparkles,
-  Play,
-  Star
+  Clock,
+  Database,
+  Gauge,
+  Lock,
+  ShieldCheck,
+  TrendingUp,
+  Zap,
+  Activity,
+  Globe,
 } from 'lucide-react';
-import { SettingsDrawer } from '@/components/dashboard/SettingsDrawer';
-import { PwaInstallPrompt } from '@/components/PwaInstallPrompt';
-import { AuthModal } from '@/components/auth/AuthModal';
-import { useAuth } from '@/lib/supabase/authContext';
+
+const FEATURES = [
+  {
+    icon: Activity,
+    title: 'Real-Time Failure Detection',
+    desc: 'Every failed payment event is ingested, verified, deduplicated, and normalized within milliseconds.',
+    accent: '#FFE500',
+  },
+  {
+    icon: Gauge,
+    title: 'Deterministic EV Calculus',
+    desc: 'Net expected value is computed in integer paise — no floating point drift, no LLM math errors.',
+    accent: '#00FF94',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Bounded Recovery Strategies',
+    desc: 'AI proposes only allowlisted recovery actions. Policy gates enforce amount caps, cooldowns and profitability rules.',
+    accent: '#3B82F6',
+  },
+  {
+    icon: Lock,
+    title: 'Idempotent Execution',
+    desc: 'Payment Link issuance is idempotent. Reconciliation only closes the loop when outcome webhooks arrive.',
+    accent: '#FF3B3B',
+  },
+];
+
+const PIPELINE = [
+  ['01', 'Ingest & Verify',    'payment.failed webhooks are HMAC-verified, deduped, and written to the event ledger.'],
+  ['02', 'EV Calculation',     'Recoverable GMV, action cost, customer fatigue penalty and net expected value computed in paise.'],
+  ['03', 'Strategy Selection', 'Bounded AI or deterministic fallback selects from an approved action allowlist only.'],
+  ['04', 'Policy Gate',        'Amount caps, cooldown windows, evidence sufficiency and profitability thresholds applied.'],
+  ['05', 'Execute & Reconcile','Payment links issued idempotently; reconciliation triggered on outcome webhook receipt.'],
+];
+
+const PROOF = [
+  { icon: CheckCircle2, label: 'Test Coverage',   value: '60+',  detail: 'unit · integration · stress · safety', accent: '#00FF94' },
+  { icon: Lock,         label: 'Duplicate Links', value: '0',    detail: 'intent state machine guard',            accent: '#FF3B3B' },
+  { icon: ShieldCheck,  label: 'GMV Safety Cap',  value: '₹25k', detail: 'ops escalation above threshold',        accent: '#3B82F6' },
+  { icon: BarChart3,    label: 'Event Benchmark', value: '1k+',  detail: 'synthetic held-out evaluation',         accent: '#FFE500' },
+];
 
 export default function LandingPage() {
   const router = useRouter();
-  const { isAuthenticated, profile: currentUser } = useAuth();
+  const [gmvLakhs, setGmvLakhs] = useState(125);
+  const [failRate, setFailRate] = useState(4.5);
 
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [merchantEmailInput, setMerchantEmailInput] = useState('');
-
-  // Interactive ROI Calculator State
-  const [monthlyGmvLakhs, setMonthlyGmvLakhs] = useState<number>(125); // ₹1.25 Cr default
-  const [failureRatePct, setFailureRatePct] = useState<number>(4.5); // 4.5% default
-
-  // ROI Math
-  const monthlyGmvInr = monthlyGmvLakhs * 100000;
-  const monthlyRevenueAtRiskInr = monthlyGmvInr * (failureRatePct / 100);
-  const monthlyRecoverableInr = monthlyRevenueAtRiskInr * 0.65; // 65% calibrated recovery rate
-  const annualRecoveredInr = monthlyRecoverableInr * 12;
-
-  // Interactive Live Pipeline Simulator State
-  const [simStep, setSimStep] = useState<number>(1);
-  const [simSimulating, setSimSimulating] = useState<boolean>(false);
-
-  const triggerSimulation = () => {
-    setSimSimulating(true);
-    setSimStep(1);
-    setTimeout(() => {
-      setSimStep(2);
-      setTimeout(() => {
-        setSimStep(3);
-        setSimSimulating(false);
-      }, 1000);
-    }, 1000);
-  };
-
-  const handleLaunchTerminal = () => {
-    if (isAuthenticated) {
-      router.push('/dashboard');
-    } else {
-      setIsAuthModalOpen(true);
-    }
-  };
+  const gmvInr = gmvLakhs * 100_000;
+  const atRisk = gmvInr * (failRate / 100);
+  const recovered = atRisk * 0.34;
 
   return (
-    <div className="min-h-screen bg-[#8BE8F5] dark:bg-[#070B12] light:bg-[#F8FAFC] text-slate-950 dark:text-slate-100 flex flex-col font-sans selection:bg-slate-950 selection:text-white relative overflow-hidden transition-colors duration-200">
-      {/* Vintage / Retro Standalone Header Navbar */}
-      <header className="sticky top-0 z-50 bg-[#8BE8F5]/90 dark:bg-[#0A0E1A]/90 backdrop-blur-md border-b-2 border-slate-950 dark:border-slate-800 py-4 px-6 sm:px-12">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Left Brand Badge */}
+    <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5]">
+
+      {/* ── NAV ──────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-50 border-b-2 border-white/10 bg-[#0A0A0A]">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 py-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-950 text-white font-serif font-black text-2xl flex items-center justify-center shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
-              G
+            <div className="w-9 h-9 border-2 border-white bg-[#FFE500] flex items-center justify-center font-mono text-xs font-black text-black">
+              MP
             </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-lg tracking-tight text-slate-950 dark:text-white">MerchantPulse</span>
-              <span className="text-[10px] text-slate-800 dark:text-blue-400 font-mono -mt-1 font-bold">
-                Razorpay AI Buildathon
-              </span>
+            <div>
+              <div className="font-black uppercase text-xs tracking-tight text-white">MerchantPulse</div>
+              <div className="font-mono text-[9px] uppercase tracking-widest text-[#888888]">AI Revenue Recovery</div>
             </div>
           </div>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-950 dark:text-slate-200">
-            <a href="#hero" className="hover:underline transition-all">
-              Home
-            </a>
-            <a href="#pipeline-simulator" className="hover:underline transition-all">
-              Live Pipeline
-            </a>
-            <a href="#roi-calculator" className="hover:underline transition-all">
-              ROI Calculator
-            </a>
-          </div>
-
-          {/* Clean Right Actions */}
-          <div className="flex items-center gap-3">
-            <PwaInstallPrompt />
-
-            {/* Settings Drawer Button */}
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="p-2 rounded-full border-2 border-slate-950 bg-white hover:bg-slate-100 text-slate-950 transition-colors shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] active:translate-x-[1px] active:translate-y-[1px]"
-              title="Settings & Role Config"
-              aria-label="Settings"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
-
-            {/* Login / Auth Button */}
-            {!isAuthenticated ? (
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="px-5 py-2 rounded-full border-2 border-slate-950 bg-white hover:bg-slate-100 text-slate-950 font-bold text-xs transition-all shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] active:translate-x-[1px] active:translate-y-[1px]"
-              >
-                Login
-              </button>
-            ) : null}
-
-            {/* Primary Action Button */}
-            <button
-              onClick={handleLaunchTerminal}
-              className="px-6 py-2.5 rounded-full border-2 border-slate-950 bg-slate-950 hover:bg-slate-900 text-white font-bold text-xs transition-all shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] active:translate-x-[2px] active:translate-y-[2px]"
-            >
-              {isAuthenticated ? 'Open Terminal' : 'Try it Now'}
-            </button>
+          <div className="flex items-center gap-2">
+            <Link href="/auth" className="nb-secondary-button text-xs py-2 px-4">
+              Sign In
+            </Link>
+            <Link href="/auth" className="nb-primary-button text-xs py-2 px-4">
+              Get Started Free
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
       </header>
 
-      {/* Main Vintage Hero & Body Section */}
-      <main id="hero" className="flex-1 relative">
-        {/* Vintage Cyan Hero Section */}
-        <section className="relative pt-12 sm:pt-20 pb-24 px-6 sm:px-12">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
-            {/* Left Headline Area */}
-            <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border-2 border-slate-950 text-xs font-mono font-bold text-slate-950 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                Track 03 — AI Revenue Recovery
-              </div>
+      {/* ── HERO ─────────────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-8 items-start">
 
-              <h1 className="text-5xl sm:text-7xl font-serif font-bold text-slate-950 dark:text-white leading-[1.06] tracking-tight">
-                Handle your <br className="hidden sm:inline" />
-                <span className="italic">Revenue Recovery</span> <br />
-                Easily.
-              </h1>
+          {/* Left */}
+          <div className="bg-[#111111] border-2 border-white p-8" style={{ boxShadow: '6px 6px 0 #FFE500' }}>
+            <div className="flex flex-wrap gap-2 mb-8">
+              <span className="nb-eyebrow">
+                <Globe className="w-3.5 h-3.5" />
+                AI-Powered Payment Recovery
+              </span>
+              <span className="inline-flex items-center gap-1.5 border-2 border-[#00FF94] bg-[#00FF94]/10 px-3 py-1 font-mono text-[10px] font-bold text-[#00FF94]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00FF94] animate-flicker" />
+                Live System
+              </span>
+            </div>
 
-              <p className="text-lg sm:text-xl text-slate-800 dark:text-slate-300 max-w-xl leading-relaxed font-sans font-medium">
-                MerchantPulse delivers automated AI revenue recovery, deterministic Net EV expected-value modeling, and bounded Razorpay execution.
-              </p>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white leading-[0.92]">
+              Stop Losing<br />
+              <span className="text-[#FFE500]">Revenue</span><br />
+              To Failures.
+            </h1>
 
-              {/* Email Input Bar */}
-              <div className="pt-4 max-w-md">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleLaunchTerminal();
-                  }}
-                  className="flex items-center bg-white border-2 border-slate-950 rounded-full p-1.5 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]"
+            <p className="mt-6 font-mono text-sm leading-7 text-[#888888] max-w-lg">
+              MerchantPulse detects every failed payment, calculates the exact expected value of recovery, selects a bounded AI strategy, and executes — all with cryptographic proof.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/auth" className="nb-primary-button">
+                Start for Free
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link href="/auth" className="nb-secondary-button">
+                See a Demo
+              </Link>
+            </div>
+
+            <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {PROOF.map(({ icon: Icon, label, value, detail, accent }) => (
+                <div
+                  key={label}
+                  className="border-2 border-white bg-[#0A0A0A] p-4 transition-all duration-100 hover:-translate-x-0.5 hover:-translate-y-0.5"
+                  style={{ boxShadow: `3px 3px 0 ${accent}` }}
                 >
-                  <input
-                    type="email"
-                    placeholder="Your Email address..."
-                    value={merchantEmailInput}
-                    onChange={(e) => setMerchantEmailInput(e.target.value)}
-                    className="flex-1 bg-transparent px-4 py-2 text-sm font-sans text-slate-950 placeholder:text-slate-500 focus:outline-none"
-                  />
-                  <button
-                    type="submit"
-                    className="px-6 py-3 rounded-full bg-slate-950 hover:bg-slate-900 text-white text-xs font-bold font-mono transition-all cursor-pointer"
-                  >
-                    Get Started
-                  </button>
-                </form>
-              </div>
-            </div>
-
-            {/* Right Vintage Illustration Canvas & Badge Overlay */}
-            <div className="lg:col-span-5 relative flex justify-center items-center">
-              <div className="w-full max-w-md h-80 sm:h-96 rounded-3xl border-3 border-slate-950 bg-white/70 backdrop-blur-sm p-6 relative flex flex-col justify-between shadow-[8px_8px_0px_0px_rgba(15,23,42,1)] overflow-hidden">
-                <div className="flex items-center justify-between border-b-2 border-slate-950 pb-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full bg-rose-500 border border-slate-950" />
-                    <span className="w-3 h-3 rounded-full bg-amber-400 border border-slate-950" />
-                    <span className="w-3 h-3 rounded-full bg-emerald-500 border border-slate-950" />
-                  </div>
-                  <span className="font-mono text-xs font-bold text-slate-950">Razorpay Pipeline v2.5</span>
+                  <Icon className="w-4 h-4" style={{ color: accent }} />
+                  <div className="mt-3 font-mono text-3xl font-black text-white tabular-nums leading-none">{value}</div>
+                  <div className="mt-1.5 font-mono text-[10px] font-bold uppercase tracking-widest text-white">{label}</div>
+                  <div className="mt-1 font-mono text-[10px] text-[#888888]">{detail}</div>
                 </div>
-
-                {/* Center Animated Graphic */}
-                <div className="my-auto flex flex-col items-center justify-center text-center space-y-3">
-                  <div className="w-24 h-24 rounded-full bg-amber-300 border-2 border-slate-950 flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] animate-bounce">
-                    <TrendingUp className="w-12 h-12 text-slate-950" />
-                  </div>
-                  <div className="font-serif font-extrabold text-2xl text-slate-950">
-                    ₹48,50,000 Recovered
-                  </div>
-                  <div className="text-xs font-mono font-bold text-slate-700">
-                    Closed-Loop Razorpay Attribution
-                  </div>
-                </div>
-
-                {/* Floating A+ Rating Badge Overlay */}
-                <div className="absolute bottom-4 right-4 bg-white border-2 border-slate-950 rounded-2xl p-4 shadow-[5px_5px_0px_0px_rgba(15,23,42,1)] font-serif text-slate-950 space-y-1">
-                  <div className="text-xl font-extrabold tracking-tight">A+ Rating</div>
-                  <div className="flex items-center gap-1 text-amber-500">
-                    <Star className="w-4 h-4 fill-amber-400" />
-                    <Star className="w-4 h-4 fill-amber-400" />
-                    <Star className="w-4 h-4 fill-amber-400" />
-                    <Star className="w-4 h-4 fill-amber-400" />
-                    <Star className="w-4 h-4 fill-amber-400" />
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
-        </section>
 
-        {/* Live Interactive Pipeline Visualizer Section */}
-        <section id="pipeline-simulator" className="py-16 px-6 sm:px-12 bg-white dark:bg-slate-950/60 border-t-2 border-slate-950">
-          <div className="max-w-5xl mx-auto space-y-8">
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl sm:text-5xl font-serif font-bold text-slate-950 dark:text-white tracking-tight">
-                Live 4-Stage Autonomous Recovery Pipeline
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-400 font-mono max-w-2xl mx-auto font-bold">
-                Test how MerchantPulse processes a real-time failed payment webhook event from Razorpay.
-              </p>
+          {/* Pipeline right */}
+          <div className="bg-[#111111] border-2 border-white p-6" style={{ boxShadow: '4px 4px 0 #fff' }}>
+            <div className="flex items-start justify-between gap-4 border-b-2 border-white/10 pb-4 mb-5">
+              <div>
+                <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#888888]">Recovery Pipeline</div>
+                <h2 className="mt-1 font-black uppercase text-white">Observe · Decide · Act · Reconcile</h2>
+              </div>
+              <Gauge className="w-5 h-5 shrink-0 text-[#FFE500]" />
             </div>
 
-            <div className="p-6 rounded-3xl bg-[#FAF7F2] dark:bg-slate-900/80 border-2 border-slate-950 shadow-[6px_6px_0px_0px_rgba(15,23,42,1)] space-y-6 font-mono text-xs">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 font-bold text-slate-950 dark:text-white text-sm">
-                  <Play className="w-4 h-4 text-slate-950 fill-slate-950" />
-                  <span>Pipeline Event Stream Simulator</span>
-                </div>
-                <button
-                  onClick={triggerSimulation}
-                  disabled={simSimulating}
-                  className="px-5 py-2.5 rounded-full border-2 border-slate-950 bg-slate-950 hover:bg-slate-900 text-white font-bold text-xs transition-all disabled:opacity-50 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]"
+            <div className="space-y-2">
+              {PIPELINE.map(([num, title, detail]) => (
+                <div
+                  key={num}
+                  className="grid grid-cols-[2.5rem_1fr] gap-3 border-2 border-white/10 bg-[#0A0A0A] p-3 transition-all hover:border-[#FFE500]/40 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_rgba(255,229,0,0.3)]"
                 >
-                  {simSimulating ? 'Processing Event...' : 'Trigger Test Event (₹8,500 Failure)'}
-                </button>
+                  <div className="flex h-9 w-9 items-center justify-center border-2 border-[#FFE500] bg-[#FFE500]/10 font-mono text-xs font-black text-[#FFE500]">
+                    {num}
+                  </div>
+                  <div>
+                    <div className="font-mono text-xs font-black uppercase tracking-wide text-white">{title}</div>
+                    <p className="mt-1 font-mono text-[10px] leading-5 text-[#888888]">{detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SIMULATOR ────────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-6 items-start">
+
+          <div className="bg-[#111111] border-2 border-white p-6" style={{ boxShadow: '4px 4px 0 #00FF94' }}>
+            <div className="flex items-center gap-3 border-b-2 border-white/10 pb-4 mb-5">
+              <TrendingUp className="w-5 h-5 text-[#00FF94]" />
+              <div>
+                <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#888888]">Interactive</div>
+                <h2 className="font-black uppercase text-white">Revenue Recovery Estimator</h2>
               </div>
+            </div>
 
-              {/* Step Progress Indicators */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className={`p-4 rounded-2xl border-2 border-slate-950 transition-all ${
-                  simStep >= 1
-                    ? 'bg-blue-100 dark:bg-blue-600/10 text-slate-950 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]'
-                    : 'bg-white text-slate-400'
-                }`}>
-                  <div className="font-bold flex items-center justify-between text-xs">
-                    <span>1. Detection & EV Math</span>
-                    {simStep >= 1 && <CheckCircle2 className="w-4 h-4 text-slate-950" />}
-                  </div>
-                  <p className="text-[11px] mt-1 opacity-90 font-sans">
-                    Calculated P(success)=0.74, Fee=₹130, Net EV=₹6,160.
-                  </p>
+            <div className="space-y-6">
+              <label className="block">
+                <div className="nb-label">Monthly GMV</div>
+                <div className="mb-2 flex justify-between">
+                  <span className="font-mono text-xs text-[#888888]">Gross Merchandise Value</span>
+                  <strong className="font-mono text-sm font-black text-[#FFE500]">₹{(gmvLakhs / 100).toFixed(2)} Cr</strong>
                 </div>
+                <input type="range" min="10" max="500" step="5" value={gmvLakhs}
+                  onChange={e => setGmvLakhs(Number(e.target.value))} className="w-full" />
+              </label>
 
-                <div className={`p-4 rounded-2xl border-2 border-slate-950 transition-all ${
-                  simStep >= 2
-                    ? 'bg-amber-100 dark:bg-indigo-600/10 text-slate-950 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]'
-                    : 'bg-white text-slate-400'
-                }`}>
-                  <div className="font-bold flex items-center justify-between text-xs">
-                    <span>2. Policy Evaluation</span>
-                    {simStep >= 2 && <CheckCircle2 className="w-4 h-4 text-slate-950" />}
-                  </div>
-                  <p className="text-[11px] mt-1 opacity-90 font-sans">
-                    GMV Cap ₹8.5k &lt; ₹25k limit. 24h Cooldown valid.
-                  </p>
+              <label className="block">
+                <div className="nb-label">Failure / Drop-off Rate</div>
+                <div className="mb-2 flex justify-between">
+                  <span className="font-mono text-xs text-[#888888]">Payment failure rate</span>
+                  <strong className="font-mono text-sm font-black text-[#FF3B3B]">{failRate}%</strong>
                 </div>
+                <input type="range" min="1" max="12" step="0.5" value={failRate}
+                  onChange={e => setFailRate(Number(e.target.value))} className="w-full" />
+              </label>
+            </div>
+          </div>
 
-                <div className={`p-4 rounded-2xl border-2 border-slate-950 transition-all ${
-                  simStep >= 3
-                    ? 'bg-emerald-200 dark:bg-emerald-600/10 text-slate-950 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]'
-                    : 'bg-white text-slate-400'
-                }`}>
-                  <div className="font-bold flex items-center justify-between text-xs">
-                    <span>3. Razorpay Dispatch</span>
-                    {simStep >= 3 && <CheckCircle2 className="w-4 h-4 text-slate-950" />}
-                  </div>
-                  <p className="text-[11px] mt-1 opacity-90 font-sans">
-                    Payment link generated: plink_Pz884422. SMS dispatched.
-                  </p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="bg-[#111111] border-2 border-white p-5 flex flex-col justify-between" style={{ boxShadow: '4px 4px 0 #FF3B3B' }}>
+              <Clock className="w-5 h-5 text-[#FF3B3B]" />
+              <div>
+                <div className="mt-4 font-mono text-4xl font-black text-white tabular-nums leading-none">
+                  ₹{(atRisk / 100_000).toFixed(2)}L
                 </div>
+                <div className="mt-2 font-mono text-[10px] font-bold uppercase tracking-widest text-[#888888]">Monthly at Risk</div>
+              </div>
+            </div>
+            <div className="bg-[#111111] border-2 border-white p-5 flex flex-col justify-between" style={{ boxShadow: '4px 4px 0 #00FF94' }}>
+              <Zap className="w-5 h-5 text-[#00FF94]" />
+              <div>
+                <div className="mt-4 font-mono text-4xl font-black text-[#00FF94] tabular-nums leading-none">
+                  ₹{(recovered / 100_000).toFixed(2)}L
+                </div>
+                <div className="mt-2 font-mono text-[10px] font-bold uppercase tracking-widest text-[#888888]">Conservative Recovery</div>
+              </div>
+            </div>
+            <div className="bg-[#111111] border-2 border-white p-5 flex flex-col justify-between" style={{ boxShadow: '4px 4px 0 #3B82F6' }}>
+              <Database className="w-5 h-5 text-[#3B82F6]" />
+              <div>
+                <div className="mt-4 font-mono text-4xl font-black text-white tabular-nums leading-none">
+                  ₹{((recovered * 12) / 100_000).toFixed(2)}L
+                </div>
+                <div className="mt-2 font-mono text-[10px] font-bold uppercase tracking-widest text-[#888888]">Annualised Signal</div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Interactive Material ROI Calculator Section */}
-        <section id="roi-calculator" className="py-16 px-6 sm:px-12 bg-[#8BE8F5] border-t-2 border-slate-950">
-          <div className="max-w-5xl mx-auto space-y-8">
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl sm:text-5xl font-serif font-bold text-slate-950 tracking-tight">
-                Estimate Your Recoverable ROI
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-900 font-mono font-bold max-w-2xl mx-auto">
-                See how much gross revenue MerchantPulse can autonomously recover for your business each month without discounting.
-              </p>
-            </div>
-
-            <div className="p-6 sm:p-8 rounded-3xl bg-white border-2 border-slate-950 shadow-[8px_8px_0px_0px_rgba(15,23,42,1)] space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs font-mono text-slate-950 font-bold mb-2">
-                    Monthly Processing Volume (GMV): <span className="text-blue-700 text-sm font-bold">₹{(monthlyGmvLakhs / 100).toFixed(2)} Cr</span> (₹{monthlyGmvLakhs} Lakhs)
-                  </label>
-                  <input
-                    type="range"
-                    min="10"
-                    max="500"
-                    step="5"
-                    value={monthlyGmvLakhs}
-                    onChange={(e) => setMonthlyGmvLakhs(Number(e.target.value))}
-                    className="w-full accent-slate-950 cursor-pointer h-2.5 bg-slate-200 rounded-lg"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-mono text-slate-950 font-bold mb-2">
-                    Payment Dropoff / Failure Rate: <span className="text-amber-700 text-sm font-bold">{failureRatePct}%</span>
-                  </label>
-                  <input
-                    type="range"
-                    min="1.0"
-                    max="12.0"
-                    step="0.5"
-                    value={failureRatePct}
-                    onChange={(e) => setFailureRatePct(Number(e.target.value))}
-                    className="w-full accent-amber-600 cursor-pointer h-2.5 bg-slate-200 rounded-lg"
-                  />
-                </div>
-              </div>
-
-              {/* Output Result Surfaces */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t-2 border-slate-950">
-                <div className="p-4 rounded-2xl bg-[#FAF7F2] border-2 border-slate-950 font-mono shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
-                  <div className="text-slate-600 text-[10px] font-bold uppercase">Monthly Revenue at Risk</div>
-                  <div className="text-xl font-bold text-amber-700 mt-1">
-                    ₹{(monthlyRevenueAtRiskInr / 100000).toFixed(2)} Lakhs
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-emerald-100 border-2 border-slate-950 font-mono shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
-                  <div className="text-emerald-800 text-[10px] font-extrabold uppercase">Monthly Recovered Money</div>
-                  <div className="text-2xl font-extrabold text-emerald-950 mt-1">
-                    ₹{(monthlyRecoverableInr / 100000).toFixed(2)} Lakhs
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-blue-100 border-2 border-slate-950 font-mono shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
-                  <div className="text-blue-900 text-[10px] font-extrabold uppercase">Annual Incremental Recovery</div>
-                  <div className="text-2xl font-extrabold text-blue-950 mt-1">
-                    ₹{(annualRecoveredInr / 100000).toFixed(2)} Lakhs
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* ── FEATURES ─────────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
+        <div className="border-2 border-white bg-[#111111] p-6 sm:p-8" style={{ boxShadow: '6px 6px 0 #fff' }}>
+          <div className="mb-8 border-b-2 border-white/10 pb-5">
+            <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#888888]">Platform Capabilities</div>
+            <h2 className="mt-1 text-2xl font-black uppercase text-white">Built for precision. Built to recover.</h2>
           </div>
-        </section>
-
-        {/* CTA Footer Section */}
-        <section className="py-12 px-6 sm:px-12 bg-white border-t-2 border-slate-950">
-          <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="text-2xl font-serif font-bold text-slate-950 tracking-tight">Ready to test the Live Terminal?</h3>
-              <p className="text-xs text-slate-700 font-mono mt-1 font-semibold">
-                Authenticate your merchant account to access live recovery streams and synthetic benchmark suites.
-              </p>
-            </div>
-
-            <button
-              onClick={handleLaunchTerminal}
-              className="flex items-center gap-2 px-8 py-3.5 rounded-full border-2 border-slate-950 bg-slate-950 hover:bg-slate-900 text-white font-bold text-xs font-mono shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] transition-all active:translate-x-[2px] active:translate-y-[2px]"
-            >
-              <span>{isAuthenticated ? 'Open Merchant Terminal' : 'Sign In / Register'}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {FEATURES.map(({ icon: Icon, title, desc, accent }) => (
+              <div
+                key={title}
+                className="border-2 border-white/10 bg-[#0A0A0A] p-5 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5"
+                style={{ '--accent': accent } as React.CSSProperties}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = `4px 4px 0 ${accent}`;
+                  (e.currentTarget as HTMLElement).style.borderColor = accent;
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)';
+                }}
+              >
+                <div className="w-10 h-10 border-2 flex items-center justify-center mb-4" style={{ borderColor: accent, backgroundColor: `${accent}15` }}>
+                  <Icon className="w-5 h-5" style={{ color: accent }} />
+                </div>
+                <div className="font-mono text-xs font-black uppercase tracking-wide text-white mb-2">{title}</div>
+                <p className="font-mono text-[11px] leading-5 text-[#888888]">{desc}</p>
+              </div>
+            ))}
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
 
-      {/* Auth Modal Popup */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={() => router.push('/dashboard')}
-      />
+      {/* ── CTA FOOTER ───────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+        <div className="border-2 border-[#FFE500] bg-[#FFE500]/5 p-8 sm:p-12 text-center" style={{ boxShadow: '8px 8px 0 #FFE500' }}>
+          <div className="nb-eyebrow mx-auto w-fit mb-6">
+            Start recovering revenue today
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-black uppercase text-white leading-tight mb-4">
+            Your first <span className="text-[#FFE500]">₹1 recovered</span><br />is on us.
+          </h2>
+          <p className="font-mono text-xs text-[#888888] max-w-md mx-auto mb-8 leading-6">
+            Get started in under 2 minutes. No credit card required for the Base plan. Upgrade when you&apos;re ready.
+          </p>
+          <Link href="/auth" className="nb-primary-button inline-flex mx-auto text-sm px-8 py-4">
+            Create Free Account
+            <ArrowRight className="w-5 h-5" />
+          </Link>
+          <p className="mt-4 font-mono text-[10px] text-[#888888]">
+            Base plan free forever · No contracts · Cancel anytime
+          </p>
+        </div>
+      </section>
 
-      {/* Settings Modal Drawer */}
-      <SettingsDrawer
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        currentUser={currentUser}
-      />
+      {/* ── FOOTER ───────────────────────────────────────────── */}
+      <footer className="border-t-2 border-white/10 px-4 sm:px-6 py-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 border-2 border-white bg-[#FFE500] flex items-center justify-center font-mono text-[10px] font-black text-black">MP</div>
+            <span className="font-mono text-[10px] text-[#888888]">MerchantPulse · AI Revenue Recovery</span>
+          </div>
+          <div className="flex gap-4 font-mono text-[10px] text-[#888888]">
+            <span className="cursor-pointer hover:text-white transition-colors">Privacy</span>
+            <span className="cursor-pointer hover:text-white transition-colors">Terms</span>
+            <span className="cursor-pointer hover:text-white transition-colors">Contact</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

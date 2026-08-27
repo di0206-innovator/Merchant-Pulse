@@ -30,17 +30,9 @@ export function ProfileBar({ onOpenSettings }: ProfileBarProps) {
         {isAuthenticated ? (
           <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
             <div className="flex items-center gap-2">
-              {profile.avatarUrl ? (
-                <img
-                  src={profile.avatarUrl}
-                  alt={profile.name}
-                  className="w-7 h-7 rounded-full border border-blue-500/50 object-cover"
-                />
-              ) : (
-                <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-[11px] shadow-sm">
-                  {profile.name.slice(0, 2).toUpperCase()}
-                </div>
-              )}
+              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-[11px] shadow-sm border border-blue-400/40">
+                {profile.name.slice(0, 2).toUpperCase()}
+              </div>
 
               <div className="hidden md:block text-left leading-tight">
                 <div className="font-bold text-white text-xs">{profile.name}</div>

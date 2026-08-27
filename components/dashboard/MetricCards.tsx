@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { DollarSign, AlertTriangle, ArrowUpRight, CheckCircle, TrendingUp } from 'lucide-react';
+import { DollarSign, AlertTriangle, TrendingUp, CheckCircle } from 'lucide-react';
 import { MerchantRevenueMetrics } from '@/core/revenue/metrics';
 
 interface MetricCardsProps {
@@ -14,99 +14,69 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics }) => {
     return '₹' + inr.toLocaleString('en-IN', { maximumFractionDigits: 0 });
   };
 
+  const cards = [
+    {
+      label: 'Total Pipeline GMV',
+      value: formatInr(metrics.totalGmvPaise),
+      sub: `${formatInr(metrics.totalCapturedGmvPaise)} captured organic`,
+      icon: DollarSign,
+      accent: '#3B82F6',
+      shadow: '4px 4px 0 #3B82F6',
+    },
+    {
+      label: 'Revenue at Risk',
+      value: formatInr(metrics.revenueAtRiskPaise),
+      sub: `${metrics.degradationRatePct}% dropoff failure rate`,
+      icon: AlertTriangle,
+      accent: '#FF3B3B',
+      shadow: '4px 4px 0 #FF3B3B',
+    },
+    {
+      label: 'Recoverable EV Math',
+      value: formatInr(metrics.recoverableOpportunityPaise),
+      sub: `${metrics.activeOpportunityCount} active actionable leaks`,
+      icon: TrendingUp,
+      accent: '#FFE500',
+      shadow: '4px 4px 0 #FFE500',
+    },
+    {
+      label: 'Recovered Money (Attributed)',
+      value: formatInr(metrics.recoveredGmvPaise),
+      sub: `${metrics.netRecoveryConversionRatePct}% attributed conversion`,
+      icon: CheckCircle,
+      accent: '#00FF94',
+      shadow: '4px 4px 0 #00FF94',
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {/* Total GMV */}
-      <div className="relative overflow-hidden p-5 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 m3-elevation-2 transition-all">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Total Pipeline GMV
-          </span>
-          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-            <DollarSign className="w-4 h-4" />
+      {cards.map((card) => {
+        const Icon = card.icon;
+        return (
+          <div
+            key={card.label}
+            className="nb-panel p-5 transition-all duration-100 hover:-translate-x-0.5 hover:-translate-y-0.5"
+            style={{ boxShadow: card.shadow }}
+          >
+            <div className="flex items-center justify-between">
+              <span className="nb-label mb-0">{card.label}</span>
+              <Icon className="w-4 h-4 shrink-0" style={{ color: card.accent }} />
+            </div>
+            <div className="mt-4">
+              <div
+                className="font-mono text-3xl font-black tabular-nums leading-none"
+                style={{ color: card.accent }}
+              >
+                {card.value}
+              </div>
+              <div className="mt-2 font-mono text-[10px] text-[#888888]">
+                {card.sub}
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="mt-3">
-          <div className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white tracking-tight tabular-nums">
-            {formatInr(metrics.totalGmvPaise)}
-          </div>
-          <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500 font-mono">
-            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-              {formatInr(metrics.totalCapturedGmvPaise)}
-            </span>
-            <span>captured organic</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Revenue at Risk */}
-      <div className="relative overflow-hidden p-5 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 m3-elevation-2 transition-all">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Revenue at Risk
-          </span>
-          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-            <AlertTriangle className="w-4 h-4" />
-          </div>
-        </div>
-        <div className="mt-3">
-          <div className="text-2xl font-extrabold font-mono text-amber-600 dark:text-amber-400 tracking-tight tabular-nums">
-            {formatInr(metrics.revenueAtRiskPaise)}
-          </div>
-          <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500 font-mono">
-            <span className="text-amber-600 dark:text-amber-400 font-bold">
-              {metrics.degradationRatePct}%
-            </span>
-            <span>dropoff failure rate</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Recoverable Opportunity EV */}
-      <div className="relative overflow-hidden p-5 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 m3-elevation-2 transition-all">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Recoverable EV Math
-          </span>
-          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-            <TrendingUp className="w-4 h-4" />
-          </div>
-        </div>
-        <div className="mt-3">
-          <div className="text-2xl font-extrabold font-mono text-blue-600 dark:text-blue-400 tracking-tight tabular-nums">
-            {formatInr(metrics.recoverableOpportunityPaise)}
-          </div>
-          <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500 font-mono">
-            <span className="text-blue-600 dark:text-blue-400 font-bold">
-              {metrics.activeOpportunityCount}
-            </span>
-            <span>active actionable leaks</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Recovered Value */}
-      <div className="relative overflow-hidden p-5 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 m3-elevation-2 transition-all">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Recovered Money (Attributed)
-          </span>
-          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            <CheckCircle className="w-4 h-4" />
-          </div>
-        </div>
-        <div className="mt-3">
-          <div className="text-2xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400 tracking-tight tabular-nums">
-            {formatInr(metrics.recoveredGmvPaise)}
-          </div>
-          <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500 font-mono">
-            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-              {metrics.netRecoveryConversionRatePct}%
-            </span>
-            <span>attributed conversion</span>
-          </div>
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 };
