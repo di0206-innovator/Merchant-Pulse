@@ -1,9 +1,9 @@
 import { GoogleGenAI } from '@google/genai';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
+const getSupabase = () => createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.SUPABASE_SECRET_KEY || ''
 );
 
 const aiClient = process.env.GEMINI_API_KEY 
@@ -20,6 +20,7 @@ export async function processKnowledgeFile(merchantId: string, documentId: strin
   }
 
   // 1. Download file from Supabase
+  const supabase = getSupabase();
   const { data: fileData, error: downloadError } = await supabase
     .storage
     .from('knowledge_base')
