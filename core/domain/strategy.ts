@@ -4,6 +4,7 @@ export const ActionTypeSchema = z.enum([
   'CREATE_PAYMENT_LINK',
   'SEND_PAYMENT_REMINDER',
   'NOTIFY_ALTERNATIVE_METHOD',
+  'RECONCILE_ORDER_STATE',
   'ESCALATE_TO_OPS',
   'NO_ACTION',
 ]);

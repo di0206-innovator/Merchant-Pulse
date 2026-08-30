@@ -21,6 +21,7 @@ describe('AI Strategy Layer Unit & Contract Tests', () => {
       customerLtvPaise: 1200000,
       historicalRecoveryRatePct: 65,
       intentScore: 0.9,
+      recentContactCount: 0,
     },
     expectedValue: {
       recoverableGmvPaise: 450000,

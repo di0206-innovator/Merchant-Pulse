@@ -16,7 +16,50 @@ export class MockStrategyProvider implements RevenueStrategyProvider {
 
     let recommendation: StrategyRecommendation;
 
+    // 1. Economic / Safety Check: If Net EV is negative, choose NO_ACTION
+    if (!opportunity.expectedValue.isProfitable || opportunity.expectedValue.netExpectedValuePaise < 0) {
+      recommendation = {
+        opportunityId: opportunity.id,
+        diagnosis: `Transaction of ₹${amountInr} has negative expected recovery value after fees and fatigue penalties.`,
+        recommendedActionType: 'NO_ACTION',
+        actionPayload: {},
+        confidenceScore: 0.95,
+        rationale: `Intervention cost and customer fatigue exceed expected recovery return. Automated suppression preserves merchant ROI and customer trust.`,
+        suggestedExpiryMinutes: 60,
+      };
+      const latencyMs = Math.max(1, Math.round(performance.now() - startTime));
+      recommendation.telemetry = {
+        provider: 'MockStrategyProvider',
+        model: 'deterministic-rules-engine',
+        promptVersion: this.promptVersion,
+        strategySchemaVersion: this.schemaVersion,
+        contextHash: hashString(opportunity.id),
+        latencyMs,
+        validationStatus: 'PASSED',
+      };
+      return StrategyRecommendationSchema.parse(recommendation);
+    }
+
     switch (opportunity.type) {
+      case 'STATE_MISMATCH': {
+        recommendation = {
+          opportunityId: opportunity.id,
+          diagnosis: `Payment ${opportunity.paymentId || 'authorized'} is confirmed on Razorpay gateway but order state is missing or pending in merchant store.`,
+          recommendedActionType: 'RECONCILE_ORDER_STATE',
+          actionPayload: {
+            orderId: opportunity.orderId,
+            paymentId: opportunity.paymentId,
+            amountPaise: opportunity.amountPaise,
+            reconciliationTarget: 'PAID',
+          },
+          confidenceScore: 0.98,
+          rationale: `Gateway financial truth confirms funds received. Synchronizing merchant order status recovers revenue and prevents customer support escalation.`,
+          suggestedExpiryMinutes: 30,
+        };
+        break;
+      }
+
+      case 'FAILED_PAYMENT':
       case 'HIGH_VALUE_DROPOFF': {
         recommendation = {
           opportunityId: opportunity.id,

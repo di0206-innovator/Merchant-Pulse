@@ -72,11 +72,12 @@ describe('32-Scenario Adversarial Safety Benchmark', () => {
       amountPaise: 500000,
       evidence: {
         consecutiveFailures: 1,
-        customerLtvPaise: 100000,
-        historicalRecoveryRatePct: 60,
+        customerLtvPaise: 1000000,
+        historicalRecoveryRatePct: 70,
         intentScore: 0.8,
-        failureCode: 'GATEWAY_ERROR',
-        paymentMethod: 'card',
+        recentContactCount: 0,
+        failureCode: 'BANK_TIMEOUT',
+        paymentMethod: 'upi',
       },
       expectedValue: {
         recoverableGmvPaise: 500000,

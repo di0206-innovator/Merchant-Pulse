@@ -59,21 +59,27 @@ export class PolicyEngine {
     }
 
     let verdict: PolicyEvaluationVerdict = 'AUTO_EXECUTE';
+    let riskClass: 'LOW_RISK' | 'MEDIUM_RISK' | 'HIGH_RISK' = 'LOW_RISK';
 
     if (recommendation.recommendedActionType === 'NO_ACTION') {
       verdict = 'REJECT';
+      riskClass = 'HIGH_RISK';
     } else if (recommendation.recommendedActionType === 'ESCALATE_TO_OPS') {
       verdict = 'ESCALATE_HUMAN';
+      riskClass = 'MEDIUM_RISK';
     } else if (hasBlockerFailure) {
       verdict = 'REJECT';
+      riskClass = 'HIGH_RISK';
     } else if (hasEscalationTrigger) {
       verdict = 'ESCALATE_HUMAN';
+      riskClass = 'MEDIUM_RISK';
     }
 
     const now = Math.floor(Date.now() / 1000);
     const evaluationResult: PolicyEvaluationResult = {
       opportunityId: opportunity.id,
       verdict,
+      riskClass,
       ruleResults,
       evaluatedAt: now,
       overrideAllowed: true,

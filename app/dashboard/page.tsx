@@ -55,9 +55,15 @@ export default function DashboardPage() {
     degradationRatePct: 3.87,
     recoverableOpportunityPaise: 31845000,
     recoveredGmvPaise: 24280000,
+    attributedInterventionGmvPaise: 19500000,
+    organicRecoveredGmvPaise: 4780000,
     activeOpportunityCount: 6,
     recoveredOpportunityCount: 3,
+    escalatedOpportunityCount: 1,
     netRecoveryConversionRatePct: 76.2,
+    automationRatePct: 83.3,
+    criticalPriorityCount: 2,
+    highPriorityCount: 3,
   });
 
   const [opportunities, setOpportunities] = useState<RevenueOpportunity[]>([]);

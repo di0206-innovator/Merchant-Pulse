@@ -28,9 +28,13 @@ export const PolicyRuleResultSchema = z.object({
 });
 export type PolicyRuleResult = z.infer<typeof PolicyRuleResultSchema>;
 
+export const RiskClassSchema = z.enum(['LOW_RISK', 'MEDIUM_RISK', 'HIGH_RISK']);
+export type RiskClass = z.infer<typeof RiskClassSchema>;
+
 export const PolicyEvaluationResultSchema = z.object({
   opportunityId: z.string(),
   verdict: PolicyEvaluationVerdictSchema,
+  riskClass: RiskClassSchema.default('LOW_RISK'),
   ruleResults: z.array(PolicyRuleResultSchema),
   evaluatedAt: z.number().int().positive(),
   overrideAllowed: z.boolean().default(true),
@@ -44,6 +48,7 @@ export const MerchantPolicyConfigSchema = z.object({
     'CREATE_PAYMENT_LINK',
     'SEND_PAYMENT_REMINDER',
     'NOTIFY_ALTERNATIVE_METHOD',
+    'RECONCILE_ORDER_STATE',
     'ESCALATE_TO_OPS',
     'NO_ACTION'
   ]),

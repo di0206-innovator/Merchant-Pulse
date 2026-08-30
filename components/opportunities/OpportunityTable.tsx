@@ -39,9 +39,12 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
 
   const filteredItems = items.filter(item => {
     if (filterType === 'ALL') return true;
+    if (filterType === 'HIGH_PRIORITY') return (item.opportunity.priority?.score || 0) >= 70;
     if (filterType === 'ESCALATED') return item.opportunity.status === 'ESCALATED';
     if (filterType === 'RECOVERED') return item.opportunity.status === 'RECOVERED';
     if (filterType === 'EXECUTED') return item.opportunity.status === 'EXECUTED';
+    if (filterType === 'ORGANIC') return item.opportunity.outcome?.attributionType === 'ORGANIC_RECOVERY';
+    if (filterType === 'NO_ACTION') return item.auditRecord?.aiRecommendation?.recommendedActionType === 'NO_ACTION';
     return item.opportunity.type === filterType;
   });
 
@@ -57,7 +60,7 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
     // Check if Razorpay SDK script is available
     const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
     if (!razorpayKey) {
-      alert(`[Demo Mode] Razorpay Test Mode Key is not configured on the client (NEXT_PUBLIC_RAZORPAY_KEY_ID). In production or test mode, this triggers Razorpay Standard Checkout for ₹${inrAmount}.`);
+      alert(`[Demo Mode] Razorpay Test Mode Key is not configured on the client. In live mode, this triggers Razorpay Checkout for ₹${inrAmount.toLocaleString('en-IN')}.`);
       return;
     }
 
@@ -72,102 +75,138 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
           alert(`Razorpay Payment Successful!\nPayment ID: ${response.razorpay_payment_id}`);
         },
         prefill: {
-          name: 'Demo Merchant',
-          email: opportunity.customerEmail || 'merchant@example.com',
+          name: opportunity.customerName || 'Demo Merchant Customer',
+          email: opportunity.customerEmail || 'customer@example.com',
           contact: opportunity.customerContact || '9999999999',
         },
         theme: {
-          color: '#2563EB',
+          color: '#FFE500',
         },
       };
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } else {
-      alert(`Razorpay Payment Link Triggered for ${opportunity.id}.\nAmount: ₹${inrAmount.toLocaleString('en-IN')}\nPayment Link: https://rzp.io/l/plink_${opportunity.id}`);
+      alert(`Razorpay Payment Link Dispatched for ${opportunity.id}.\nAmount: ₹${inrAmount.toLocaleString('en-IN')}\nPayment Link: https://rzp.io/l/plink_${opportunity.id}`);
     }
   };
 
-  const getStatusBadge = (status: RevenueOpportunity['status']) => {
-    switch (status) {
-      case 'RECOVERED':
-        return (
-          <span className="px-2 py-0.5 text-[11px] font-mono font-semibold rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 w-fit">
-            <CheckCircle2 className="w-3 h-3" />
-            RECOVERED
-          </span>
-        );
-      case 'EXECUTED':
-        return (
-          <span className="px-2 py-0.5 text-[11px] font-mono font-semibold rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30 flex items-center gap-1.5 w-fit">
-            <ArrowUpRight className="w-3 h-3" />
-            EXECUTED
-          </span>
-        );
-      case 'ESCALATED':
-        return (
-          <span className="px-2 py-0.5 text-[11px] font-mono font-semibold rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1.5 w-fit">
-            <AlertCircle className="w-3 h-3" />
-            ESCALATED
-          </span>
-        );
-      case 'REJECTED':
-        return (
-          <span className="px-2 py-0.5 text-[11px] font-mono font-semibold rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30 flex items-center gap-1.5 w-fit">
-            REJECTED
-          </span>
-        );
-      default:
-        return (
-          <span className="px-2 py-0.5 text-[11px] font-mono font-semibold rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 flex items-center gap-1.5 w-fit">
-            <Clock className="w-3 h-3" />
-            {status}
-          </span>
-        );
+  const getPriorityBadge = (score?: number, tier?: string) => {
+    const s = score ?? 75;
+    const t = tier ?? (s >= 85 ? 'CRITICAL' : s >= 70 ? 'HIGH' : s >= 45 ? 'MEDIUM' : 'LOW');
+
+    let badgeStyle = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+    if (t === 'CRITICAL') {
+      badgeStyle = 'bg-rose-500/10 text-rose-400 border-rose-500/40';
+    } else if (t === 'HIGH') {
+      badgeStyle = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+    } else if (t === 'LOW') {
+      badgeStyle = 'bg-slate-800 text-slate-400 border-slate-700';
     }
+
+    return (
+      <span className={`px-2 py-0.5 text-[10px] font-mono font-black border rounded flex items-center gap-1 w-fit ${badgeStyle}`}>
+        <span className="text-xs font-black">{s}</span>
+        <span className="text-[9px] uppercase tracking-wider">{t}</span>
+      </span>
+    );
+  };
+
+  const getStatusBadge = (status: RevenueOpportunity['status'], attribution?: string) => {
+    if (status === 'RECOVERED') {
+      if (attribution === 'ORGANIC_RECOVERY') {
+        return (
+          <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1 w-fit">
+            <CheckCircle2 className="w-3 h-3" />
+            ORGANIC
+          </span>
+        );
+      }
+      return (
+        <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-emerald-500/10 text-[#00FF94] border border-emerald-500/30 flex items-center gap-1 w-fit">
+          <CheckCircle2 className="w-3 h-3" />
+          VERIFIED RECOVERED
+        </span>
+      );
+    }
+    if (status === 'EXECUTED') {
+      return (
+        <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-blue-500/10 text-blue-400 border border-blue-500/30 flex items-center gap-1 w-fit">
+          <ArrowUpRight className="w-3 h-3" />
+          EXECUTED
+        </span>
+      );
+    }
+    if (status === 'ESCALATED') {
+      return (
+        <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1 w-fit animate-pulse">
+          <AlertCircle className="w-3 h-3" />
+          ESCALATED
+        </span>
+      );
+    }
+    if (status === 'REJECTED') {
+      return (
+        <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center gap-1 w-fit">
+          SUPPRESSED
+        </span>
+      );
+    }
+    return (
+      <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-white/5 text-white/60 border border-white/10 flex items-center gap-1 w-fit">
+        <Clock className="w-3 h-3" />
+        {status}
+      </span>
+    );
   };
 
   const getTypeLabel = (type: RevenueOpportunity['type']) => {
     switch (type) {
-      case 'HIGH_VALUE_DROPOFF': return 'High-Value Dropoff';
-      case 'PAYMENT_METHOD_DEGRADATION': return 'Gateway Degradation';
+      case 'FAILED_PAYMENT': return 'Failed Payment';
+      case 'HIGH_VALUE_DROPOFF': return 'High-Value Failure';
+      case 'PAYMENT_METHOD_DEGRADATION': return 'Bank Downtime';
       case 'CUSTOMER_CHURN_RISK': return 'VIP Churn Risk';
-      case 'RETRIED_CARD_FAILURE': return 'Card Retry Failures';
-      case 'ABANDONED_CHECKOUT': return 'Abandoned Checkout';
+      case 'RETRIED_CARD_FAILURE': return 'Card Retry Failure';
+      case 'ABANDONED_CHECKOUT': return 'Abandoned Cart';
+      case 'STATE_MISMATCH': return 'Payment/Order Mismatch';
       default: return type;
     }
   };
 
   return (
-    <div className="p-5 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-4 m3-elevation-2">
+    <div className="nb-panel p-5 space-y-4" role="region" aria-label="Recovery Opportunity Queue">
       {/* Controls & Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-white/10 pb-4">
         <div>
-          <h2 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2 font-mono">
-            <span>Opportunity Leak Radar</span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30">
-              {filteredItems.length} Active Leaks
+          <h2 className="text-base font-black uppercase text-white tracking-tight flex items-center gap-2 font-mono">
+            <span>Recovery Opportunity Queue</span>
+            <span className="nb-chip border-[#FFE500] text-[#FFE500] text-[10px]">
+              {filteredItems.length} Leaks
             </span>
           </h2>
-          <p className="text-xs text-slate-600 dark:text-slate-400 font-mono mt-0.5">
-            Deterministic leaks ranked by Net Expected Value (EV) math
+          <p className="text-xs text-[#888888] font-mono mt-0.5">
+            Ranked deterministically by Recovery Priority Score (Net EV × Probability × Urgency × LTV)
           </p>
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 font-mono text-xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 font-mono text-xs" role="toolbar" aria-label="Filter opportunities by status or priority">
           {[
-            { key: 'ALL', label: 'All Leaks' },
-            { key: 'ESCALATED', label: 'Human Review Queue' },
-            { key: 'EXECUTED', label: 'Executed' },
+            { key: 'ALL', label: 'All' },
+            { key: 'HIGH_PRIORITY', label: 'High Priority (70+)' },
+            { key: 'ESCALATED', label: 'Human Review' },
+            { key: 'EXECUTED', label: 'Dispatched' },
             { key: 'RECOVERED', label: 'Recovered' },
+            { key: 'ORGANIC', label: 'Organic' },
+            { key: 'NO_ACTION', label: 'Suppressed' },
           ].map(f => (
             <button
               key={f.key}
               onClick={() => setFilterType(f.key)}
-              className={`px-3 py-1 rounded-xl transition-all whitespace-nowrap ${
+              aria-pressed={filterType === f.key}
+              className={`px-3 py-1 text-[10px] font-bold uppercase transition-all whitespace-nowrap border-2 ${
                 filterType === f.key
-                  ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-600/30'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  ? 'border-[#FFE500] bg-[#FFE500] text-black'
+                  : 'border-white/20 bg-[#0A0A0A] text-[#888888] hover:border-white/50 hover:text-white'
               }`}
             >
               {f.label}
@@ -177,28 +216,29 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
-        <table className="w-full text-left text-xs font-mono">
-          <thead className="bg-slate-50 dark:bg-slate-950/80 text-slate-600 dark:text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-800">
+      <div className="overflow-x-auto border-2 border-white/10 bg-[#0A0A0A]">
+        <table className="w-full text-left text-xs font-mono" aria-label="Recoverable revenue opportunities">
+          <thead className="bg-[#111111] text-[#888888] uppercase text-[10px] tracking-wider border-b-2 border-white/10">
             <tr>
-              <th className="py-3 px-4">Opportunity ID / Type</th>
-              <th className="py-3 px-4">Customer Context</th>
-              <th className="py-3 px-4 text-right">GMV (INR)</th>
-              <th className="py-3 px-4 text-right">Net Expected Value</th>
-              <th className="py-3 px-4 text-center">P(Success)</th>
-              <th className="py-3 px-4">Status & Action</th>
-              <th className="py-3 px-4 text-right">Razorpay Pay</th>
+              <th scope="col" className="py-3 px-4">Priority</th>
+              <th scope="col" className="py-3 px-4">Type / ID</th>
+              <th scope="col" className="py-3 px-4">Customer &amp; Evidence</th>
+              <th scope="col" className="py-3 px-4 text-right">Revenue at Risk</th>
+              <th scope="col" className="py-3 px-4 text-right">Net Expected Value</th>
+              <th scope="col" className="py-3 px-4 text-center">P(Success)</th>
+              <th scope="col" className="py-3 px-4">Status &amp; Attribution</th>
+              <th scope="col" className="py-3 px-4 text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
+          <tbody className="divide-y divide-white/10 text-white">
             {filteredItems.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-slate-500 font-mono">
+                <td colSpan={8} className="py-8 text-center text-[#888888] font-mono">
                   No opportunities match the selected filter.
                 </td>
               </tr>
             ) : (
-              filteredItems.map(({ opportunity }) => {
+              filteredItems.map(({ opportunity, recommendation, auditRecord }) => {
                 const isSelected = selectedOpportunityId === opportunity.id;
                 const inr = opportunity.amountPaise / 100;
                 const evInr = opportunity.expectedValue.netExpectedValuePaise / 100;
@@ -207,61 +247,66 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
                   <tr
                     key={opportunity.id}
                     onClick={() => onSelectOpportunity(opportunity)}
-                    className={`cursor-pointer transition-all hover:bg-slate-100 dark:hover:bg-slate-800/40 ${
-                      isSelected ? 'bg-blue-50 dark:bg-blue-950/40 border-l-2 border-l-blue-600' : ''
+                    className={`cursor-pointer transition-all hover:bg-white/5 ${
+                      isSelected ? 'bg-[#FFE500]/10 border-l-4 border-l-[#FFE500]' : ''
                     }`}
                   >
+                    {/* Priority Score */}
+                    <td className="py-3.5 px-4">
+                      {getPriorityBadge(opportunity.priority?.score, opportunity.priority?.tier)}
+                    </td>
+
                     {/* Opportunity Type */}
                     <td className="py-3.5 px-4">
-                      <div className="font-bold text-slate-900 dark:text-white">
+                      <div className="font-black text-white">
                         {getTypeLabel(opportunity.type)}
                       </div>
-                      <div className="text-[11px] text-blue-600 dark:text-blue-400 font-mono">
+                      <div className="text-[10px] text-[#3B82F6] font-mono">
                         {opportunity.id}
                       </div>
                     </td>
 
                     {/* Customer / Context */}
                     <td className="py-3.5 px-4 text-xs">
-                      <div className="text-slate-800 dark:text-slate-200">
-                        {opportunity.customerEmail || opportunity.customerContact || 'Direct Checkout'}
+                      <div className="text-[#F5F5F5] font-semibold">
+                        {opportunity.customerEmail || opportunity.customerContact || 'Direct Customer'}
                       </div>
-                      <div className="text-[11px] text-slate-500">
-                        {opportunity.evidence.paymentMethod?.toUpperCase()} • {opportunity.evidence.failureCode || 'GATEWAY_TIMEOUT'}
+                      <div className="text-[10px] text-[#888888]">
+                        {opportunity.evidence.paymentMethod?.toUpperCase()} · {opportunity.evidence.failureCode || 'GATEWAY_ERROR'}
                       </div>
                     </td>
 
                     {/* GMV */}
-                    <td className="py-3.5 px-4 text-right font-bold text-slate-900 dark:text-white">
+                    <td className="py-3.5 px-4 text-right font-black text-white">
                       ₹{inr.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                     </td>
 
                     {/* Expected Value */}
-                    <td className="py-3.5 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                    <td className="py-3.5 px-4 text-right font-black text-[#00FF94]">
                       ₹{evInr.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                     </td>
 
                     {/* P(Success) */}
                     <td className="py-3.5 px-4 text-center">
-                      <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
+                      <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-white font-bold text-[11px]">
                         {Math.round(opportunity.expectedValue.pSuccess * 100)}%
                       </span>
                     </td>
 
                     {/* Status Badge */}
                     <td className="py-3.5 px-4">
-                      {getStatusBadge(opportunity.status)}
+                      {getStatusBadge(opportunity.status, opportunity.outcome?.attributionType)}
                     </td>
 
                     {/* Razorpay Pay Action Button */}
                     <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={(e) => handleOpenRazorpayCheckout(e, opportunity)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition-all shadow-sm active:scale-95"
-                        title="Test Razorpay Web Checkout"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-white/20 bg-white/5 hover:bg-[#FFE500] hover:text-black text-white font-bold text-[10px] uppercase transition-all"
+                        title="Inspect or Trigger Razorpay Checkout"
                       >
-                        <CreditCard className="w-3.5 h-3.5" />
-                        <span>Pay Link</span>
+                        <CreditCard className="w-3 h-3" />
+                        <span>Inspect</span>
                       </button>
                     </td>
                   </tr>

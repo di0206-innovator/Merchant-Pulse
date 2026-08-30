@@ -134,6 +134,35 @@ export class ActionDispatcher {
         return record;
       }
 
+      if (recommendation.recommendedActionType === 'RECONCILE_ORDER_STATE') {
+        const reconcileRef = `sync_${opportunity.orderId || opportunity.paymentId || opportunity.id.slice(4)}`;
+        const payloadSent = {
+          orderId: opportunity.orderId,
+          paymentId: opportunity.paymentId,
+          reconciledStatus: 'PAID',
+          amountPaise: opportunity.amountPaise,
+        };
+
+        const record = ExecutionRecordSchema.parse({
+          id: executionId,
+          opportunityId: opportunity.id,
+          actionType: 'RECONCILE_ORDER_STATE',
+          status: 'SUCCESS',
+          razorpayReferenceId: reconcileRef,
+          payloadSent,
+          responseReceived: {
+            success: true,
+            synchronizedOrder: opportunity.orderId,
+            matchedPayment: opportunity.paymentId,
+            state: 'RECONCILED',
+          },
+          executedAt: now,
+        });
+
+        this.finalizeIntent(intentKey, 'EXECUTION_SUCCEEDED', record);
+        return record;
+      }
+
       const record = ExecutionRecordSchema.parse({
         id: executionId,
         opportunityId: opportunity.id,

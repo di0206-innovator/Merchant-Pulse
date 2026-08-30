@@ -41,11 +41,12 @@ describe('Policy Engine & Guardrail Tests', () => {
       customerEmail: 'user@example.com',
       amountPaise: 450000, // ₹4,500
       evidence: {
-        failureCode: 'GATEWAY_ERROR',
+        failureCode: 'BANK_TIMEOUT',
         consecutiveFailures: 1,
-        customerLtvPaise: 500000,
-        historicalRecoveryRatePct: 65,
+        customerLtvPaise: 1000000,
+        historicalRecoveryRatePct: 75,
         intentScore: 0.85,
+        recentContactCount: 0,
       },
       expectedValue: {
         recoverableGmvPaise: 450000,

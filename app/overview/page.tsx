@@ -39,15 +39,21 @@ export default function OverviewPage() {
   const [activeTab, setActiveTab] = useState<TabId>('RADAR');
 
   const [metrics, setMetrics] = useState<MerchantRevenueMetrics>({
-    totalGmvPaise: 1245000000,
-    totalCapturedGmvPaise: 1196740000,
-    revenueAtRiskPaise: 48260000,
-    degradationRatePct: 3.87,
-    recoverableOpportunityPaise: 31845000,
-    recoveredGmvPaise: 24280000,
-    activeOpportunityCount: 6,
-    recoveredOpportunityCount: 3,
-    netRecoveryConversionRatePct: 76.2,
+    totalGmvPaise: 0,
+    totalCapturedGmvPaise: 0,
+    revenueAtRiskPaise: 0,
+    degradationRatePct: 0,
+    recoverableOpportunityPaise: 0,
+    recoveredGmvPaise: 0,
+    attributedInterventionGmvPaise: 0,
+    organicRecoveredGmvPaise: 0,
+    activeOpportunityCount: 0,
+    recoveredOpportunityCount: 0,
+    escalatedOpportunityCount: 0,
+    netRecoveryConversionRatePct: 0,
+    automationRatePct: 0,
+    criticalPriorityCount: 0,
+    highPriorityCount: 0,
   });
 
   const [opportunities, setOpportunities] = useState<RevenueOpportunity[]>([]);

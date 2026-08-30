@@ -56,16 +56,6 @@ export const PositiveEvRule: PolicyRule = {
   id: 'POSITIVE_EV_REQUIRED',
   name: 'Economic Value Profitability Gate',
   evaluate(opportunity, recommendation, config) {
-    if (recommendation.recommendedActionType === 'NO_ACTION') {
-      return {
-        ruleId: 'POSITIVE_EV_REQUIRED',
-        ruleName: 'Economic Value Profitability Gate',
-        passed: true,
-        severity: 'INFO',
-        reason: 'No action was recommended.',
-      };
-    }
-
     const evPaise = opportunity.expectedValue.netExpectedValuePaise;
     const isProfitable = evPaise >= config.minEvPaise;
     const evInr = (evPaise / 100).toFixed(2);
@@ -77,9 +67,9 @@ export const PositiveEvRule: PolicyRule = {
       passed: isProfitable,
       severity: 'BLOCKER',
       reason: isProfitable
-        ? `Expected value of recovery (₹${evInr}) meets minimum profitability threshold (₹${minEvInr}).`
-        : `Expected value of recovery (₹${evInr}) is below required minimum threshold (₹${minEvInr}). Suppressed.`,
-      metadata: { netExpectedValuePaise: evPaise, minEvPaise: config.minEvPaise },
+        ? `Net expected recovery value (₹${evInr}) meets minimum threshold (₹${minEvInr}). Action is economically justified.`
+        : `Net expected recovery value (₹${evInr}) is below minimum threshold (₹${minEvInr}). Negative or negligible EV.`,
+      metadata: { expectedValuePaise: evPaise, minEvPaise: config.minEvPaise },
     };
   },
 };

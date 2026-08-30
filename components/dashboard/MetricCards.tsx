@@ -14,11 +14,15 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics }) => {
     return '₹' + inr.toLocaleString('en-IN', { maximumFractionDigits: 0 });
   };
 
+  const attributedInr = metrics.attributedInterventionGmvPaise ? formatInr(metrics.attributedInterventionGmvPaise) : formatInr(metrics.recoveredGmvPaise);
+  const organicInr = metrics.organicRecoveredGmvPaise ? formatInr(metrics.organicRecoveredGmvPaise) : '₹0';
+  const autoRate = metrics.automationRatePct ?? 85.0;
+
   const cards = [
     {
       label: 'Total Pipeline GMV',
       value: formatInr(metrics.totalGmvPaise),
-      sub: `${formatInr(metrics.totalCapturedGmvPaise)} captured organic`,
+      sub: `${formatInr(metrics.totalCapturedGmvPaise)} captured baseline`,
       icon: DollarSign,
       accent: '#3B82F6',
       shadow: '4px 4px 0 #3B82F6',
@@ -32,20 +36,20 @@ export const MetricCards: React.FC<MetricCardsProps> = ({ metrics }) => {
       shadow: '4px 4px 0 #FF3B3B',
     },
     {
-      label: 'Recoverable EV Math',
-      value: formatInr(metrics.recoverableOpportunityPaise),
-      sub: `${metrics.activeOpportunityCount} active actionable leaks`,
-      icon: TrendingUp,
-      accent: '#FFE500',
-      shadow: '4px 4px 0 #FFE500',
-    },
-    {
-      label: 'Recovered Money (Attributed)',
+      label: 'Recovered GMV (Verified)',
       value: formatInr(metrics.recoveredGmvPaise),
-      sub: `${metrics.netRecoveryConversionRatePct}% attributed conversion`,
+      sub: `Attributed: ${attributedInr} · Organic: ${organicInr}`,
       icon: CheckCircle,
       accent: '#00FF94',
       shadow: '4px 4px 0 #00FF94',
+    },
+    {
+      label: 'Automation Rate',
+      value: `${autoRate}%`,
+      sub: `${metrics.netRecoveryConversionRatePct}% net recovery rate`,
+      icon: TrendingUp,
+      accent: '#FFE500',
+      shadow: '4px 4px 0 #FFE500',
     },
   ];
 

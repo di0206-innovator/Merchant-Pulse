@@ -57,7 +57,40 @@ export class GeminiStrategyProvider implements RevenueStrategyProvider {
       calculatedExpectedValueInr: opportunity.expectedValue.netExpectedValuePaise / 100,
       recoveryProbability: opportunity.expectedValue.pSuccess,
       intentScore: opportunity.evidence.intentScore,
+      knowledgeBaseContext: [] as string[],
     };
+
+    // --- RAG: Vector Search Knowledge Base ---
+    try {
+      const queryText = `Payment failed due to: ${opportunity.evidence.failureCode} - ${opportunity.evidence.failureDescription}. Action plan and relevant policies?`;
+      const embedResponse = await this.aiClient.models.embedContent({
+        model: 'text-embedding-004',
+        contents: queryText,
+      });
+
+      const embedding = embedResponse.embeddings?.[0]?.values;
+      if (embedding) {
+        const { createClient } = require('@supabase/supabase-js');
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+          process.env.SUPABASE_SECRET_KEY || ''
+        );
+
+        const { data: matchedChunks, error } = await supabase.rpc('match_knowledge_chunks', {
+          query_embedding: `[${embedding.join(',')}]`,
+          match_merchant_id: 'rzp_merchant_main',
+          match_threshold: 0.7,
+          match_count: 3
+        });
+
+        if (!error && matchedChunks && matchedChunks.length > 0) {
+          promptContext.knowledgeBaseContext = matchedChunks.map((c: any) => c.content);
+        }
+      }
+    } catch (err) {
+      console.warn('[GeminiStrategyProvider] Failed to retrieve RAG context:', err);
+    }
+    // --- End RAG ---
 
     const contextHash = hashString(JSON.stringify(promptContext));
 
@@ -65,7 +98,7 @@ export class GeminiStrategyProvider implements RevenueStrategyProvider {
 Your job is to analyze validated deterministic payment failure facts and formulate the highest-ROI, policy-compliant recovery recommendation.
 
 ABSOLUTE RULES:
-1. ONLY recommend actions from this approved list: "CREATE_PAYMENT_LINK", "SEND_PAYMENT_REMINDER", "NOTIFY_ALTERNATIVE_METHOD", "ESCALATE_TO_OPS", "NO_ACTION".
+1. ONLY recommend actions from this approved list: "CREATE_PAYMENT_LINK", "SEND_PAYMENT_REMINDER", "NOTIFY_ALTERNATIVE_METHOD", "RECONCILE_ORDER_STATE", "ESCALATE_TO_OPS", "NO_ACTION".
 2. NEVER suggest refunds, discounts, or imaginary Razorpay endpoints.
 3. Keep messaging concise, empathetic, and professional.
 4. Output STRICT JSON matching the schema below without any Markdown wrapper or extra text.`;
@@ -75,7 +108,7 @@ Generate a valid JSON object matching this schema:
 {
   "opportunityId": "${opportunity.id}",
   "diagnosis": "concise technical diagnosis of the failure (10-300 chars)",
-  "recommendedActionType": "CREATE_PAYMENT_LINK | SEND_PAYMENT_REMINDER | NOTIFY_ALTERNATIVE_METHOD | ESCALATE_TO_OPS | NO_ACTION",
+  "recommendedActionType": "CREATE_PAYMENT_LINK | SEND_PAYMENT_REMINDER | NOTIFY_ALTERNATIVE_METHOD | RECONCILE_ORDER_STATE | ESCALATE_TO_OPS | NO_ACTION",
   "actionPayload": {},
   "confidenceScore": 0.0 to 1.0,
   "rationale": "clear business and economic justification (10-500 chars)",

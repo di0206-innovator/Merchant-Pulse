@@ -34,6 +34,7 @@ describe('Financial Reconciliation Engine Unit Tests', () => {
       paymentMethod: 'upi',
       failureCode: 'BANK_TIMEOUT',
       customerLtvPaise: 1500000,
+      recentContactCount: 0,
     },
     createdAt: 1724500000,
     updatedAt: 1724500005,
@@ -64,6 +65,7 @@ describe('Financial Reconciliation Engine Unit Tests', () => {
     policyResult: {
       opportunityId: 'opp_test_recon_101',
       verdict: 'AUTO_EXECUTE',
+      riskClass: 'LOW_RISK',
       ruleResults: [],
       evaluatedAt: 1724500005,
       overrideAllowed: true,

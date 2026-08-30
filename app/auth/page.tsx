@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Activity, ArrowRight, Eye, EyeOff, Lock, Mail, Chrome } from 'lucide-react';
 import { useAuth } from '@/lib/supabase/authContext';
+import { createClient, signInWithGoogle } from '@/lib/supabase/client';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -27,14 +28,14 @@ export default function AuthPage() {
     const userEmail = email.trim();
     
     // Call Supabase auth here
-    import('@/lib/supabase/client').then(async ({ createClient }) => {
-      const supabase = createClient();
-      if (!supabase) {
-        setError('Supabase is not configured. Provide URL and Key in .env.local');
-        setLoading(false);
-        return;
-      }
-      
+    const supabase = createClient();
+    if (!supabase) {
+      setError('Supabase is not configured. Provide URL and Key in .env.local');
+      setLoading(false);
+      return;
+    }
+    
+    (async () => {
       let res;
       if (tab === 'signup') {
         res = await supabase.auth.signUp({
@@ -56,7 +57,7 @@ export default function AuthPage() {
         setLoading(false);
         router.push(tab === 'signup' ? '/onboarding/business' : '/overview');
       }
-    });
+    })();
   };
 
   return (
@@ -190,7 +191,6 @@ export default function AuthPage() {
               onClick={async () => {
                 setLoading(true);
                 try {
-                  const { signInWithGoogle } = await import('@/lib/supabase/client');
                   await signInWithGoogle();
                 } catch (e) {
                   setError('Google auth failed or is not configured.');

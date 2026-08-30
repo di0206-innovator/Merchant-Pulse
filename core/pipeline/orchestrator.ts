@@ -77,9 +77,19 @@ export class RevenuePipelineOrchestrator {
               eventId
             );
 
+            const now = Math.floor(Date.now() / 1000);
             if (reconResult.valid && reconResult.attributionType === 'ATTRIBUTED_INTERVENTION') {
               matchingOpp.status = 'RECOVERED';
-              matchingOpp.updatedAt = Math.floor(Date.now() / 1000);
+              matchingOpp.updatedAt = now;
+              matchingOpp.outcome = {
+                actionExecuted: decision.aiRecommendation.recommendedActionType,
+                executionReference: decision.executedActionId,
+                verified: true,
+                recoveredAmountPaise: reconResult.reconciledAmountPaise,
+                attributionType: 'ATTRIBUTED_INTERVENTION',
+                resolutionEventId: eventId,
+                resolvedAt: now,
+              };
               this.opportunities.set(matchingOpp.id, matchingOpp);
               if (this.storage) this.storage.opportunities.saveOpportunity(matchingOpp).catch(() => {});
 
@@ -90,13 +100,22 @@ export class RevenuePipelineOrchestrator {
               });
             } else if (reconResult.attributionType === 'ORGANIC_RECOVERY') {
               // Organic recovery without active MerchantPulse intervention
-              matchingOpp.status = 'REJECTED'; // Close without AI attribution
-              matchingOpp.updatedAt = Math.floor(Date.now() / 1000);
+              matchingOpp.status = 'RECOVERED'; // Mark recovered organically
+              matchingOpp.updatedAt = now;
+              matchingOpp.outcome = {
+                actionExecuted: 'NO_ACTION',
+                verified: true,
+                recoveredAmountPaise: reconResult.reconciledAmountPaise,
+                attributionType: 'ORGANIC_RECOVERY',
+                resolutionEventId: eventId,
+                resolvedAt: now,
+              };
               this.opportunities.set(matchingOpp.id, matchingOpp);
               if (this.storage) this.storage.opportunities.saveOpportunity(matchingOpp).catch(() => {});
 
               this.auditLedger.updateOutcome(decision.decisionId, {
-                status: 'CANCELLED',
+                status: 'RECOVERED',
+                recoveredAmountPaise: reconResult.reconciledAmountPaise,
                 resolutionEventId: eventId,
               });
             }
@@ -228,8 +247,18 @@ export class RevenuePipelineOrchestrator {
         resolutionEventId: eventId,
       });
 
+      const now = Math.floor(Date.now() / 1000);
       opportunity.status = 'RECOVERED';
-      opportunity.updatedAt = Math.floor(Date.now() / 1000);
+      opportunity.updatedAt = now;
+      opportunity.outcome = {
+        actionExecuted: decision.aiRecommendation.recommendedActionType,
+        executionReference: paymentLinkId,
+        verified: true,
+        recoveredAmountPaise: reconResult.reconciledAmountPaise,
+        attributionType: 'ATTRIBUTED_INTERVENTION',
+        resolutionEventId: eventId,
+        resolvedAt: now,
+      };
       this.opportunities.set(opportunity.id, opportunity);
 
       if (this.storage) {
