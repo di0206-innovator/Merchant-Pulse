@@ -1,76 +1,62 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { ShieldCheck, CheckCircle2, AlertTriangle, Search, Filter, Download, Lock } from 'lucide-react';
+import { DecisionAuditRecord } from '@/core/domain/audit';
+import { ShieldCheck, CheckCircle2, AlertTriangle, Search, Filter, Download, Lock, RefreshCw, FileCheck } from 'lucide-react';
 
 export default function AuditPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [auditLogs, setAuditLogs] = useState<DecisionAuditRecord[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const auditLogs = [
-    {
-      id: 'aud_001',
-      timestamp: '2026-08-25 10:45:12',
-      opportunityId: 'opp_890123',
-      actionType: 'CREATE_PAYMENT_LINK',
-      evPaise: 344000,
-      policyStatus: 'PASSED',
-      ruleEvaluated: 'EV_GREATER_THAN_THRESHOLD (₹3,440 > ₹20)',
-      razorpayRef: 'plink_Pz01928374',
-    },
-    {
-      id: 'aud_002',
-      timestamp: '2026-08-25 10:42:05',
-      opportunityId: 'opp_890124',
-      actionType: 'SEND_PAYMENT_REMINDER',
-      evPaise: 120000,
-      policyStatus: 'PASSED',
-      ruleEvaluated: 'COOLDOWN_PERIOD_VALID (24h Window)',
-      razorpayRef: 'msg_Rz99887711',
-    },
-    {
-      id: 'aud_003',
-      timestamp: '2026-08-25 10:35:50',
-      opportunityId: 'opp_890125',
-      actionType: 'ESCALATE_TO_OPS',
-      evPaise: 6500000,
-      policyStatus: 'ESCALATED',
-      ruleEvaluated: 'GMV_EXCEEDS_AUTO_EXECUTION_CAP (₹65,000 > ₹25,000)',
-      razorpayRef: 'esc_Qz55443322',
-    },
-    {
-      id: 'aud_004',
-      timestamp: '2026-08-25 10:15:30',
-      opportunityId: 'opp_890126',
-      actionType: 'NOTIFY_ALTERNATIVE_METHOD',
-      evPaise: 45000,
-      policyStatus: 'PASSED',
-      ruleEvaluated: 'GATEWAY_DEGRADATION_DETECTED (HDFC 45% failure rate)',
-      razorpayRef: 'plink_Mz11223344',
-    },
-  ];
+  const fetchAuditLogs = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/demo', { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.auditTrail && Array.isArray(data.auditTrail)) {
+          setAuditLogs(data.auditTrail);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch audit logs:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAuditLogs();
+  }, [fetchAuditLogs]);
 
   const filteredLogs = auditLogs.filter((log) => {
     const matchesSearch =
       log.opportunityId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.actionType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.ruleEvaluated.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'ALL' || log.policyStatus === statusFilter;
+      log.decisionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (log.aiRecommendation.recommendedActionType || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (log.executedActionId || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === 'ALL' ||
+      log.actionStatus === statusFilter ||
+      log.policyResult.verdict === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const exportCsv = () => {
-    const headers = ['Audit ID', 'Timestamp', 'Opportunity ID', 'Action Type', 'Net EV (Paise)', 'Policy Status', 'Rule Evaluated', 'Razorpay Ref'];
+    const headers = ['Decision ID', 'Timestamp', 'Opportunity ID', 'Recommended Action', 'Net EV (Paise)', 'Policy Verdict', 'Action Status', 'Razorpay Action ID', 'Outcome Status'];
     const rows = filteredLogs.map((log) => [
-      log.id,
-      log.timestamp,
+      log.decisionId,
+      new Date(log.timestamp * 1000).toISOString(),
       log.opportunityId,
-      log.actionType,
-      log.evPaise,
-      log.policyStatus,
-      `"${log.ruleEvaluated}"`,
-      log.razorpayRef,
+      log.aiRecommendation.recommendedActionType,
+      log.deterministicMetrics.expectedValuePaise,
+      log.policyResult.verdict,
+      log.actionStatus,
+      log.executedActionId || 'N/A',
+      log.outcome?.status || 'PENDING',
     ]);
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
@@ -82,9 +68,9 @@ export default function AuditPage() {
     document.body.removeChild(link);
   };
 
-  const statusColor = (status: string) => {
-    if (status === 'PASSED') return '#00FF94';
-    if (status === 'ESCALATED') return '#FFE500';
+  const getStatusColor = (status: string) => {
+    if (status === 'AUTO_EXECUTED' || status === 'MANUALLY_APPROVED' || status === 'PASSED') return '#00FF94';
+    if (status === 'ESCALATED' || status === 'ESCALATE_HUMAN') return '#FFE500';
     return '#FF3B3B';
   };
 
@@ -166,39 +152,43 @@ export default function AuditPage() {
               </thead>
               <tbody>
                 {filteredLogs.map((log) => {
-                  const sc = statusColor(log.policyStatus);
+                  const sc = getStatusColor(log.actionStatus);
+                  const dateStr = new Date(log.timestamp * 1000).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'medium' });
                   return (
                     <tr
-                      key={log.id}
-                      className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                      key={log.decisionId}
+                      className="border-b border-white/5 hover:bg-white/5 transition-colors font-mono text-xs"
                     >
                       <td className="nb-td">
-                        <div className="font-black text-white">{log.id}</div>
-                        <div className="text-[10px] text-[#888888]">{log.timestamp}</div>
+                        <div className="font-black text-white">{log.decisionId}</div>
+                        <div className="text-[10px] text-[#888888]">{dateStr}</div>
                       </td>
                       <td className="nb-td text-[#3B82F6] font-black">{log.opportunityId}</td>
-                      <td className="nb-td font-bold">{log.actionType}</td>
+                      <td className="nb-td font-bold text-white">{log.aiRecommendation.recommendedActionType}</td>
                       <td className="nb-td text-[#00FF94] font-black">
-                        ₹{(log.evPaise / 100).toLocaleString('en-IN')}
+                        ₹{(log.deterministicMetrics.expectedValuePaise / 100).toLocaleString('en-IN')}
                       </td>
                       <td className="nb-td">
                         <span
                           className="inline-flex items-center gap-1 border-2 px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-widest"
                           style={{ borderColor: sc, color: sc, backgroundColor: `${sc}15` }}
                         >
-                          {log.policyStatus === 'PASSED' ? (
+                          {log.actionStatus === 'AUTO_EXECUTED' || log.actionStatus === 'MANUALLY_APPROVED' ? (
                             <CheckCircle2 className="w-3 h-3" />
                           ) : (
                             <AlertTriangle className="w-3 h-3" />
                           )}
-                          {log.policyStatus}
+                          {log.actionStatus}
                         </span>
                       </td>
                       <td className="nb-td text-[#888888] text-[10px] max-w-xs truncate">
-                        {log.ruleEvaluated}
+                        {log.policyResult.ruleResults.filter(r => r.passed).length}/{log.policyResult.ruleResults.length} Rules Passed ({log.policyResult.riskClass || 'LOW_RISK'})
                       </td>
-                      <td className="nb-td text-[#888888] text-[10px]">
-                        {log.razorpayRef}
+                      <td className="nb-td text-[10px]">
+                        <div className="font-bold text-white">{log.executedActionId || 'N/A'}</div>
+                        <div className={`text-[9px] ${log.outcome?.status === 'RECOVERED' ? 'text-[#00FF94]' : 'text-[#888888]'}`}>
+                          Outcome: {log.outcome?.status || 'PENDING'}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -207,7 +197,7 @@ export default function AuditPage() {
                 {filteredLogs.length === 0 && (
                   <tr>
                     <td colSpan={7} className="py-12 text-center font-mono text-[11px] text-[#888888]">
-                      No records match your filters.
+                      {loading ? 'Loading live audit trail...' : 'No records match your filters. Run demo or webhooks to populate ledger.'}
                     </td>
                   </tr>
                 )}
