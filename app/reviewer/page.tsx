@@ -29,16 +29,29 @@ import {
 import { useAuth } from '@/lib/supabase/authContext';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 
+import { DecisionAuditRecord } from '@/core/domain/audit';
+import { RevenueOpportunity } from '@/core/domain/opportunity';
+import { MerchantRevenueMetrics } from '@/core/revenue/metrics';
+
+interface DemoTraceStep {
+  step: number;
+  title: string;
+  detail: string;
+  badge: string;
+  color: string;
+}
+
 export default function ReviewerPage() {
   const { profile } = useAuth();
   const [runningDemo, setRunningDemo] = useState(false);
   const [activeStep, setActiveStep] = useState<number>(0);
   const [activeScenario, setActiveScenario] = useState<'SCENARIO_1_AUTO' | 'SCENARIO_2_ADVERSARIAL'>('SCENARIO_1_AUTO');
-  const [demoTrace, setDemoTrace] = useState<any[]>([]);
-  const [latestAudit, setLatestAudit] = useState<any | null>(null);
-  const [latestOpportunity, setLatestOpportunity] = useState<any | null>(null);
-  const [latestMetrics, setLatestMetrics] = useState<any | null>(null);
+  const [demoTrace, setDemoTrace] = useState<DemoTraceStep[]>([]);
+  const [latestAudit, setLatestAudit] = useState<DecisionAuditRecord | null>(null);
+  const [latestOpportunity, setLatestOpportunity] = useState<RevenueOpportunity | null>(null);
+  const [latestMetrics, setLatestMetrics] = useState<MerchantRevenueMetrics | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+
 
   // System Readiness States
   const [razorpayStatus, setRazorpayStatus] = useState<{ configured: boolean; mode: string }>({

@@ -15,7 +15,7 @@ git clone https://github.com/divyanshusinha/Merchant-Pulse.git
 cd Merchant-Pulse
 npm install
 
-# 1. Run Complete Test Suite (16 test files, 65/65 passing tests)
+# 1. Run Complete Test Suite (18 test files, 85/85 passing tests)
 npm test
 
 # 2. Run Reproducible Evaluation Benchmark Suite
@@ -139,7 +139,7 @@ MerchantPulse is engineered with hard mathematical and architectural guarantees:
 
 ## 🧪 Comprehensive Test & Evaluation Suite
 
-MerchantPulse includes 16 test suites covering 65 automated tests:
+MerchantPulse includes 18 test suites covering 85+ automated tests:
 
 | Test Suite | Focus Area | Status |
 | :--- | :--- | :--- |
