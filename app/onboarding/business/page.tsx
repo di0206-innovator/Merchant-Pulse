@@ -27,10 +27,22 @@ export default function BusinessOnboardingPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [razorpayConnected, setRazorpayConnected] = useState(true);
 
   const set = (key: string, value: string) => {
     setForm(prev => ({ ...prev, [key]: value }));
     setErrors(prev => ({ ...prev, [key]: '' }));
+  };
+
+  const applyTemplate = (name: string, type: string, gmv: string, site: string) => {
+    setForm({
+      businessName: name,
+      businessType: type,
+      website: site,
+      monthlyGmv: gmv,
+      phone: '+91 98765 43210',
+    });
+    setErrors({});
   };
 
   const validate = () => {
@@ -49,7 +61,7 @@ export default function BusinessOnboardingPage() {
 
     // Store in sessionStorage for the plan page to pick up
     try {
-      sessionStorage.setItem('mp_biz', JSON.stringify(form));
+      sessionStorage.setItem('mp_biz', JSON.stringify({ ...form, razorpayConnected }));
     } catch {}
 
     setTimeout(() => {
@@ -95,6 +107,32 @@ export default function BusinessOnboardingPage() {
             <p className="mt-3 font-mono text-xs text-[#888888] max-w-md leading-6">
               This helps us calibrate your recovery benchmarks and surface the most relevant insights right away.
             </p>
+
+            {/* Quick Templates Bar */}
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="font-mono text-[10px] text-[#888888] uppercase tracking-wider">Quick Fill:</span>
+              <button
+                type="button"
+                onClick={() => applyTemplate('Zomato Delivery Pvt', 'Food & Beverage', '₹50L – ₹5Cr / month', 'https://zomato.com')}
+                className="px-2.5 py-1 border border-[#FFE500]/60 bg-[#FFE500]/10 text-[#FFE500] font-mono text-[10px] hover:bg-[#FFE500] hover:text-black transition-all"
+              >
+                Food &amp; Delivery
+              </button>
+              <button
+                type="button"
+                onClick={() => applyTemplate('Nykaa Beauty Trends', 'E-Commerce', '₹50L – ₹5Cr / month', 'https://nykaa.com')}
+                className="px-2.5 py-1 border border-[#3B82F6]/60 bg-[#3B82F6]/10 text-[#3B82F6] font-mono text-[10px] hover:bg-[#3B82F6] hover:text-black transition-all"
+              >
+                D2C E-Commerce
+              </button>
+              <button
+                type="button"
+                onClick={() => applyTemplate('Postman SaaS Hub', 'SaaS / Software', 'Above ₹5Cr / month', 'https://postman.com')}
+                className="px-2.5 py-1 border border-[#00FF94]/60 bg-[#00FF94]/10 text-[#00FF94] font-mono text-[10px] hover:bg-[#00FF94] hover:text-black transition-all"
+              >
+                B2B SaaS
+              </button>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
