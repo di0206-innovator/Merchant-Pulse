@@ -36,12 +36,12 @@ export async function POST(req: NextRequest) {
       console.warn('[Webhook Gateway]: RAZORPAY_WEBHOOK_SECRET is not configured. Ingesting event in HERMETIC_DEMO_MODE.');
     }
 
-    // 2. Idempotency check across store & ledger
+    // 2. Atomic Idempotency check & lock acquisition across store & ledger
     const dedupKey = globalIdempotencyLedger.generateKey(eventIdHeader || undefined, rawBody);
-    const isDup = globalIdempotencyLedger.isDuplicate(dedupKey) ||
-      (await storage.webhookEvents.isDuplicate(dedupKey));
+    const lockAcquired = globalIdempotencyLedger.acquireLock(dedupKey);
+    const isDupInStorage = !lockAcquired || (await storage.webhookEvents.isDuplicate(dedupKey));
 
-    if (isDup) {
+    if (!lockAcquired || isDupInStorage) {
       return NextResponse.json({
         status: 'DUPLICATE_IGNORED',
         message: 'Event has already been processed idempotently.',
@@ -62,6 +62,19 @@ export async function POST(req: NextRequest) {
         error: 'Schema validation failed for webhook event',
         details: parseResult.error.format(),
       }, { status: 400 });
+    }
+
+    // 3b. Timestamp Freshness Window (Replay & Stale Event Attack Prevention)
+    const MAX_STALE_AGE_SECONDS = 86400; // 24 hours
+    const eventCreatedAt = (parseResult.data as any)?.created_at;
+    if (typeof eventCreatedAt === 'number') {
+      const currentSeconds = Math.floor(Date.now() / 1000);
+      if (currentSeconds - eventCreatedAt > MAX_STALE_AGE_SECONDS) {
+        return NextResponse.json({
+          status: 'STALE_EVENT_REJECTED',
+          message: `Webhook event created_at (${eventCreatedAt}) exceeds 24-hour freshness window.`,
+        }, { status: 410 });
+      }
     }
 
     const domainEvent = normalizeRazorpayWebhook(parseResult.data);

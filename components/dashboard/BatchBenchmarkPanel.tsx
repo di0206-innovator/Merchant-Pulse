@@ -63,6 +63,15 @@ export function BatchBenchmarkPanel() {
             </select>
           </div>
 
+          <a
+            href="/benchmark-results.csv"
+            download="benchmark-results.csv"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono font-bold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all"
+            title="Download full 1,000-event evaluation dataset in CSV format"
+          >
+            <span>📥 CSV (1,000 Events)</span>
+          </a>
+
           <button
             onClick={runBenchmark}
             disabled={loading}

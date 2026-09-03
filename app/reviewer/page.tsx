@@ -66,6 +66,34 @@ export default function ReviewerPage() {
     configured: false,
     mode: 'IN_MEMORY_PERSISTENCE',
   });
+  const [liveTestState, setLiveTestState] = useState<{
+    loading: boolean;
+    result: any;
+    error: string | null;
+  }>({ loading: false, result: null, error: null });
+
+  const handleExecuteLiveTest = async () => {
+    setLiveTestState({ loading: true, result: null, error: null });
+    try {
+      const res = await fetch('/api/test-razorpay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amountInr: 500,
+          description: 'Reviewer Interactive Live Verification',
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setLiveTestState({ loading: false, result: data, error: null });
+        setRazorpayStatus({ configured: true, mode: 'TEST_MODE' });
+      } else {
+        setLiveTestState({ loading: false, result: null, error: data.error || 'Failed to call Razorpay API' });
+      }
+    } catch (err: any) {
+      setLiveTestState({ loading: false, result: null, error: err?.message || 'Network error' });
+    }
+  };
 
   const checkReadiness = useCallback(async () => {
     try {
@@ -89,10 +117,24 @@ export default function ReviewerPage() {
         configured: hasSupabase,
         mode: hasSupabase ? 'POSTGRES_PERSISTENCE' : 'IN_MEMORY_MODE',
       });
-      setRazorpayStatus({
-        configured: Boolean(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID),
-        mode: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ? 'TEST_MODE' : 'DETERMINISTIC_MOCK',
-      });
+
+      try {
+        const testRes = await fetch('/api/test-razorpay');
+        if (testRes.ok) {
+          const testData = await testRes.json();
+          if (testData.status === 'READY') {
+            setRazorpayStatus({
+              configured: true,
+              mode: 'TEST_MODE',
+            });
+          }
+        }
+      } catch {
+        setRazorpayStatus({
+          configured: false,
+          mode: 'DETERMINISTIC_MOCK',
+        });
+      }
       setGeminiStatus({
         configured: false,
         mode: 'DETERMINISTIC_RULES_FALLBACK',
@@ -457,6 +499,98 @@ export default function ReviewerPage() {
           })}
         </div>
 
+        {/* ── INTERACTIVE LIVE RAZORPAY API TESTER ─────────────── */}
+        <div className="nb-panel p-5 space-y-4 border-2 border-[#00FF94]/30 bg-[#00FF94]/5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#00FF94] animate-ping" />
+                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#00FF94]">
+                  Live Razorpay REST Integration Proof
+                </span>
+              </div>
+              <h3 className="text-base font-black uppercase text-white mt-1">
+                Real API Primitive: POST https://api.razorpay.com/v1/payment_links
+              </h3>
+              <p className="font-mono text-[11px] text-[#888888] mt-0.5">
+                Verify that MerchantPulse makes genuine authenticated network calls to Razorpay servers, returning verifiable <code className="text-white">plink_...</code> IDs.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Link
+                href="/docs/live-api-proof.md"
+                target="_blank"
+                className="nb-button bg-white/10 hover:bg-white/20 text-white font-mono text-xs px-3 py-2 flex items-center gap-1.5"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Proof Doc
+              </Link>
+              <button
+                onClick={handleExecuteLiveTest}
+                disabled={liveTestState.loading}
+                className="nb-button bg-[#00FF94] hover:bg-[#00FF94]/90 text-black font-black text-xs px-4 py-2 flex items-center gap-2 disabled:opacity-50"
+              >
+                {liveTestState.loading ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    Calling Razorpay...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-3.5 h-3.5" />
+                    Execute Live API Call
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {liveTestState.result && (
+            <div className="bg-black/60 border border-[#00FF94]/40 rounded p-4 space-y-3 font-mono">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#00FF94] flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#00FF94]" />
+                  HTTP 200 OK — Live Payment Link Generated on Razorpay Test Network
+                </span>
+                <span className="text-[10px] text-[#888888]">
+                  {liveTestState.result.createdAtIso}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div className="bg-white/5 p-2 rounded">
+                  <div className="text-[10px] text-[#888888] uppercase">Razorpay Link ID</div>
+                  <div className="text-[#00FF94] font-black break-all">{liveTestState.result.linkId}</div>
+                </div>
+                <div className="bg-white/5 p-2 rounded">
+                  <div className="text-[10px] text-[#888888] uppercase">Hosted Checkout URL</div>
+                  <a
+                    href={liveTestState.result.shortUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[#3B82F6] hover:underline font-bold flex items-center gap-1 break-all"
+                  >
+                    {liveTestState.result.shortUrl}
+                    <ExternalLink className="w-3 h-3 shrink-0" />
+                  </a>
+                </div>
+                <div className="bg-white/5 p-2 rounded">
+                  <div className="text-[10px] text-[#888888] uppercase">Status & Amount</div>
+                  <div className="text-white font-bold">
+                    ₹{liveTestState.result.amountInr} · <span className="text-[#00FF94] uppercase">{liveTestState.result.status}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {liveTestState.error && (
+            <div className="bg-red-950/40 border border-red-500/40 rounded p-3 text-xs font-mono text-red-400 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+              <span>Live Call Error: {liveTestState.error}</span>
+            </div>
+          )}
+        </div>
+
         {/* ── LIVE PIPELINE TRACE ──────────────────────────────── */}
         <div className="nb-panel p-6 space-y-5">
           <div className="flex items-center justify-between border-b-2 border-white/10 pb-4">
@@ -654,6 +788,20 @@ export default function ReviewerPage() {
             Operator Consoles
           </span>
           <div className="flex flex-wrap items-center gap-2">
+            <a
+              href="/benchmark-results.csv"
+              download="benchmark-results.csv"
+              className="nb-secondary-button py-2 px-4 text-[10px] text-[#FFE500] border-[#FFE500]/40 flex items-center gap-1.5"
+            >
+              📥 Benchmark CSV (1k Events)
+            </a>
+            <Link
+              href="/docs/DATABASE_SCHEMA.md"
+              target="_blank"
+              className="nb-secondary-button py-2 px-4 text-[10px] text-[#00FF94] border-[#00FF94]/40"
+            >
+              📄 SQL Audit Ledger
+            </Link>
             {[
               { href: '/dashboard', label: 'Recovery Radar & Queue', color: '#F5F5F5' },
               { href: '/benchmark', label: 'Comparative Benchmark Suite', color: '#3B82F6' },

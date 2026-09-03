@@ -37,6 +37,26 @@ export class IdempotencyLedger {
   }
 
   /**
+   * Atomically acquires an in-flight processing lock for a key.
+   * Returns true if lock was acquired (first request), false if already seen/locked (duplicate).
+   */
+  public acquireLock(key: string): boolean {
+    if (this.isDuplicate(key)) {
+      return false;
+    }
+    const now = Math.floor(Date.now() / 1000);
+    this.seenKeys.set(key, { timestamp: now });
+    return true;
+  }
+
+  /**
+   * Releases a lock if event processing failed before commit.
+   */
+  public releaseLock(key: string): void {
+    this.seenKeys.delete(key);
+  }
+
+  /**
    * Records a key in the ledger.
    */
   public record(key: string, result?: unknown): void {
