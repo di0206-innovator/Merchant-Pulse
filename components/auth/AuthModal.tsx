@@ -58,30 +58,29 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 animate-slide-up">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-slide-up">
       <div
-        className="w-full max-w-md bg-[#111111] border-2 border-white text-[#F5F5F5] p-8 space-y-6 relative"
-        style={{ boxShadow: '8px 8px 0 #FFE500' }}
+        className="w-full max-w-md bg-gradient-to-b from-[var(--nb-surface)] to-[var(--nb-surface-2)] border border-white/15 text-[#F5F5F5] p-8 space-y-6 relative rounded-2xl shadow-skeuo-card-lg"
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 border-2 border-white/30 p-1.5 text-[#888888] hover:border-white hover:text-white transition-all duration-100 hover:shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5"
+          className="absolute top-4 right-4 rounded-xl border border-white/10 bg-[var(--nb-recessed)] p-2 text-[var(--nb-text-muted)] hover:border-white/30 hover:text-white transition-all shadow-skeuo-card hover:shadow-skeuo-card-hover active:translate-y-0.5"
           aria-label="Close"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Header */}
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           <div className="nb-eyebrow">
-            <Lock className="w-3 h-3" />
+            <Lock className="w-3.5 h-3.5" />
             Secure Gateway
           </div>
-          <h2 className="text-3xl font-black uppercase text-white leading-none">
+          <h2 className="text-3xl font-black uppercase text-white leading-tight">
             {authMode === 'signin' ? 'Sign In' : 'Create Account'}
           </h2>
-          <p className="font-mono text-xs text-[#888888] leading-5">
+          <p className="font-mono text-xs text-[var(--nb-text-muted)] leading-5">
             {authMode === 'signin'
               ? 'Sign in with Google or email to access the Revenue Recovery Terminal.'
               : 'Create an account to access the AI Revenue Recovery Terminal.'}
@@ -94,7 +93,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 border-2 border-white/40 bg-transparent hover:border-white hover:bg-white/5 py-3 px-4 font-mono text-xs font-bold uppercase tracking-widest text-white transition-all duration-100 hover:shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5 disabled:opacity-40"
+            className="nb-secondary-button w-full flex items-center justify-center gap-3 py-3"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -108,8 +107,8 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
 
         {/* Divider */}
         <div className="relative flex items-center justify-center">
-          <div className="border-t-2 border-dashed border-white/10 w-full" />
-          <span className="bg-[#111111] px-3 font-mono text-[10px] uppercase tracking-widest text-[#888888] absolute">
+          <div className="border-t border-dashed border-white/10 w-full" />
+          <span className="bg-[var(--nb-surface)] px-3 font-mono text-[10px] uppercase tracking-widest text-[var(--nb-text-muted)] absolute">
             Or Email
           </span>
         </div>
@@ -141,7 +140,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888888] hover:text-white transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--nb-text-muted)] hover:text-white transition-colors"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -160,18 +159,18 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         </form>
 
         {/* Footer */}
-        <div className="flex items-center justify-between font-mono text-[10px] pt-3 border-t-2 border-white/10">
+        <div className="flex items-center justify-between font-mono text-[11px] pt-3 border-t border-white/10">
           <button
             type="button"
             onClick={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')}
-            className="text-[#FFE500] font-bold uppercase hover:underline"
+            className="text-amber-400 font-bold uppercase hover:underline"
           >
             {authMode === 'signin' ? 'Create Account' : 'Already have account?'}
           </button>
           <button
             type="button"
             onClick={() => { setEmail('founder@example.com'); setPassword('demo1234'); }}
-            className="text-[#888888] uppercase hover:text-white"
+            className="text-[var(--nb-text-muted)] uppercase hover:text-white"
           >
             Forgot Password?
           </button>

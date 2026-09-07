@@ -2,34 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Neo-Brutalist Design Tokens ──────────────────────────────────── */
+/* ─── Modern Tactile Skeuomorphic Design Tokens ───────────────────── */
 @layer base {
   :root {
-    /* Light Mode Tokens */
-    --nb-bg:      #F4F4F0;
-    --nb-surface: #FFFFFF;
-    --nb-border:  #E5E5E5;
-    --nb-stroke:  #000000;
-    --nb-yellow:  #FFE500;
-    --nb-green:   #00C853;
-    --nb-red:     #D50000;
-    --nb-blue:    #2962FF;
-    --nb-white:   #000000; /* Flips for main text */
-    --nb-muted:   #666666;
+    /* Light Mode Tokens (Machined Aluminum, Oyster & Silver) */
+    --nb-bg:          #EDF2F7;
+    --nb-surface:     #FFFFFF;
+    --nb-surface-2:   #F7FAFC;
+    --nb-border:      #E2E8F0;
+    --nb-stroke:      #CBD5E1;
+    --nb-yellow:      #D97706; /* Rich Amber Gold */
+    --nb-green:       #059669; /* Emerald */
+    --nb-red:         #DC2626; /* Crimson */
+    --nb-blue:        #1D4ED8; /* Razorpay Cobalt */
+    --nb-white:       #0F172A; /* Main text in light mode */
+    --nb-muted:       #64748B;
+    --nb-bevel:       rgba(255, 255, 255, 0.85);
+    --nb-recessed:    #E2E8F0;
+    --nb-rim-shade:   rgba(0, 0, 0, 0.08);
   }
 
   .dark {
-    /* Dark Mode Tokens */
-    --nb-bg:      #0A0A0A;
-    --nb-surface: #111111;
-    --nb-border:  #1A1A1A;
-    --nb-stroke:  #FFFFFF;
-    --nb-yellow:  #FFE500;
-    --nb-green:   #00FF94;
-    --nb-red:     #FF3B3B;
-    --nb-blue:    #3B82F6;
-    --nb-white:   #F5F5F5;
-    --nb-muted:   #888888;
+    /* Dark Mode Tokens (Obsidian Slate, Brushed Titanium & Gunmetal) */
+    --nb-bg:          #080C14;
+    --nb-surface:     #111724;
+    --nb-surface-2:   #162032;
+    --nb-border:      #1E293B;
+    --nb-stroke:      #26354D;
+    --nb-yellow:      #F59E0B; /* Warm Amber Gold */
+    --nb-green:       #10B981; /* Glowing Emerald */
+    --nb-red:         #EF4444; /* Ruby Alert */
+    --nb-blue:        #3B82F6; /* Electric Sapphire */
+    --nb-white:       #F8FAFC; /* Porcelain Slate */
+    --nb-muted:       #94A3B8;
+    --nb-bevel:       rgba(255, 255, 255, 0.12);
+    --nb-recessed:    #0A0F1A;
+    --nb-rim-shade:   rgba(0, 0, 0, 0.45);
   }
 
   * {
@@ -42,6 +50,10 @@
     background-color: var(--nb-bg);
     color: var(--nb-white);
     min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37, 99, 235, 0.08), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(245, 158, 11, 0.04), transparent 60%);
+    background-attachment: fixed;
   }
 
   body {
@@ -52,50 +64,76 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-    font-weight: 900;
-    line-height: 1.05;
+    font-weight: 800;
+    line-height: 1.1;
     letter-spacing: -0.02em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   }
 
   button, a, input, select, textarea {
     outline-color: var(--nb-yellow);
-    outline-offset: 3px;
+    outline-offset: 2px;
   }
 
-  /* Range inputs */
+  /* ── Tactile Skeuomorphic Range Slider ───────────────────────────── */
   input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
-    height: 6px;
-    background: var(--nb-border);
-    border: 2px solid var(--nb-stroke);
-    border-radius: 0;
+    height: 10px;
+    background: var(--nb-recessed);
+    border: 1px solid var(--nb-stroke);
+    border-radius: 9999px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.08);
     outline: none;
     cursor: pointer;
+    transition: all 0.15s ease;
   }
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 20px;
-    height: 20px;
-    background: var(--nb-yellow);
-    border: 2px solid #000;
-    border-radius: 0;
-    cursor: pointer;
-    box-shadow: 2px 2px 0 #000;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #FFE580 0%, #F59E0B 60%, #D97706 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
+    cursor: grab;
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.7),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.4),
+      0 3px 6px rgba(0, 0, 0, 0.4),
+      0 0 10px rgba(245, 158, 11, 0.35);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.9),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.4),
+      0 4px 10px rgba(0, 0, 0, 0.5),
+      0 0 14px rgba(245, 158, 11, 0.5);
+  }
+  input[type="range"]::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    transform: scale(1.02);
+    box-shadow:
+      inset 0 2px 3px rgba(0, 0, 0, 0.4),
+      0 1px 3px rgba(0, 0, 0, 0.4);
   }
   input[type="range"]::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    background: var(--nb-yellow);
-    border: 2px solid #000;
-    border-radius: 0;
-    cursor: pointer;
-    box-shadow: 2px 2px 0 #000;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #FFE580 0%, #F59E0B 60%, #D97706 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
+    cursor: grab;
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.7),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.4),
+      0 3px 6px rgba(0, 0, 0, 0.4);
   }
 }
 
-/* ─── Component Utilities ───────────────────────────────────────────── */
+/* ─── Skeuomorphic Component Utilities ──────────────────────────────── */
 @layer components {
 
   /* Page wrapper */
@@ -103,158 +141,302 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6;
   }
 
-  /* Core panel — hard border, no rounding, offset shadow */
+  /* Core panel — raised tactile slab with specular top line & deep ambient depth */
   .nb-panel {
-    @apply bg-nb-surface border-2 border-nb-stroke;
+    @apply rounded-2xl border text-white;
+    border-color: var(--nb-stroke);
+    background: linear-gradient(180deg, var(--nb-surface) 0%, color-mix(in srgb, var(--nb-surface) 92%, black) 100%);
+    box-shadow:
+      inset 0 1px 0 var(--nb-bevel),
+      inset 0 -1px 0 var(--nb-rim-shade),
+      0 10px 25px -5px rgba(0, 0, 0, 0.4),
+      0 4px 10px rgba(0, 0, 0, 0.2);
+    position: relative;
   }
 
-  /* Muted/secondary panel */
+  /* Muted / recessed secondary panel */
   .nb-panel-muted {
-    @apply bg-nb-border border-2 border-nb-stroke;
-    border-color: color-mix(in srgb, var(--nb-stroke) 30%, transparent);
+    @apply rounded-xl border;
+    border-color: var(--nb-stroke);
+    background: var(--nb-recessed);
+    box-shadow:
+      inset 0 2px 5px rgba(0, 0, 0, 0.4),
+      inset 0 1px 2px rgba(0, 0, 0, 0.25),
+      0 1px 0 var(--nb-bevel);
   }
 
-  /* Page header section */
+  /* Page header section — machined dashboard console */
   .nb-page-header {
-    @apply bg-nb-surface border-2 border-nb-stroke p-5 sm:p-6;
+    @apply rounded-2xl border p-5 sm:p-6;
+    border-color: var(--nb-stroke);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--nb-surface-2) 98%, white) 0%, var(--nb-surface) 100%);
+    box-shadow:
+      inset 0 1px 0 var(--nb-bevel),
+      inset 0 -1px 0 var(--nb-rim-shade),
+      0 12px 28px -6px rgba(0, 0, 0, 0.45),
+      0 4px 10px rgba(0, 0, 0, 0.25);
   }
 
-  /* Eyebrow label */
+  /* Eyebrow label — embossed micro-badge */
   .nb-eyebrow {
-    @apply inline-flex items-center gap-2 border-2 border-nb-yellow
-           px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-nb-yellow;
-    background-color: color-mix(in srgb, var(--nb-yellow) 10%, transparent);
+    @apply inline-flex items-center gap-2 rounded-full border border-amber-500/40
+           px-3.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-amber-400;
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+      0 2px 4px rgba(0, 0, 0, 0.25);
   }
 
-  /* Primary CTA button — yellow fill, black text, hard shadow */
+  /* Primary CTA button — raised tactile gold/amber push button */
   .nb-primary-button {
-    @apply inline-flex items-center justify-center gap-2
-           bg-nb-yellow border-2 border-nb-stroke
-           px-5 py-3 font-mono text-xs font-black uppercase tracking-widest text-black
-           shadow-brutal
-           transition-all duration-100
-           hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-lg
-           active:translate-x-0.5 active:translate-y-0.5 active:shadow-brutal-sm
-           disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex items-center justify-center gap-2.5 rounded-xl
+           px-5 py-3 font-mono text-xs font-black uppercase tracking-widest text-slate-950
+           cursor-pointer select-none transition-all duration-150;
+    background: linear-gradient(180deg, #FDE68A 0%, #F59E0B 50%, #D97706 100%);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.35),
+      0 4px 10px rgba(0, 0, 0, 0.35),
+      0 0 16px rgba(245, 158, 11, 0.3);
+  }
+  .nb-primary-button:hover {
+    background: linear-gradient(180deg, #FEF08A 0%, #FBBF24 50%, #D97706 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.35),
+      0 6px 16px rgba(0, 0, 0, 0.4),
+      0 0 22px rgba(245, 158, 11, 0.45);
+    transform: translateY(-1px);
+  }
+  .nb-primary-button:active {
+    transform: translateY(1.5px);
+    background: linear-gradient(180deg, #D97706 0%, #B45309 100%);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.45),
+      inset 0 1px 2px rgba(0, 0, 0, 0.3),
+      0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  .nb-primary-button:disabled {
+    @apply cursor-not-allowed opacity-50;
+    transform: none;
+    box-shadow: none;
   }
 
-  /* Secondary button — outlined, white, hard shadow */
+  /* Secondary button — machined slate/aluminum tactile button */
   .nb-secondary-button {
-    @apply inline-flex items-center justify-center gap-2
-           bg-transparent border-2 border-nb-stroke
-           px-5 py-3 font-mono text-xs font-bold uppercase tracking-widest text-nb-white
-           shadow-brutal-sm
-           transition-all duration-100
-           hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal hover:bg-nb-surface
-           active:translate-x-0.5 active:translate-y-0.5 active:shadow-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl
+           border px-5 py-3 font-mono text-xs font-bold uppercase tracking-widest text-white
+           cursor-pointer select-none transition-all duration-150;
+    border-color: var(--nb-stroke);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--nb-surface) 95%, white) 0%, var(--nb-surface) 100%);
+    box-shadow:
+      inset 0 1px 0 var(--nb-bevel),
+      inset 0 -1.5px 0 var(--nb-rim-shade),
+      0 3px 6px rgba(0, 0, 0, 0.25);
+  }
+  .nb-secondary-button:hover {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--nb-surface-2) 90%, white) 0%, var(--nb-surface-2) 100%);
+    border-color: var(--nb-stroke);
+    box-shadow:
+      inset 0 1px 0 var(--nb-bevel),
+      inset 0 -1.5px 0 var(--nb-rim-shade),
+      0 5px 12px rgba(0, 0, 0, 0.35);
+    transform: translateY(-1px);
+  }
+  .nb-secondary-button:active {
+    transform: translateY(1.5px);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.4),
+      0 1px 2px rgba(0, 0, 0, 0.15);
   }
 
-  /* Ghost / danger button */
+  /* Danger / Emergency push button */
   .nb-danger-button {
-    @apply inline-flex items-center justify-center gap-2
-           bg-nb-red border-2 border-nb-stroke
+    @apply inline-flex items-center justify-center gap-2 rounded-xl
            px-5 py-3 font-mono text-xs font-black uppercase tracking-widest text-white
-           shadow-brutal-r
-           transition-all duration-100
-           hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-lg
-           active:translate-x-0.5 active:translate-y-0.5 active:shadow-brutal-sm;
+           cursor-pointer select-none transition-all duration-150;
+    background: linear-gradient(180deg, #F87171 0%, #EF4444 50%, #DC2626 100%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+      0 4px 10px rgba(0, 0, 0, 0.35),
+      0 0 16px rgba(239, 68, 68, 0.35);
+  }
+  .nb-danger-button:hover {
+    background: linear-gradient(180deg, #FCA5A5 0%, #EF4444 50%, #B91C1C 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+      0 6px 14px rgba(0, 0, 0, 0.45),
+      0 0 22px rgba(239, 68, 68, 0.5);
+    transform: translateY(-1px);
+  }
+  .nb-danger-button:active {
+    transform: translateY(1.5px);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.45),
+      0 1px 2px rgba(0, 0, 0, 0.2);
   }
 
-  /* Status chip */
+  /* Status chip — pill badge with 3D bevel and glow */
   .nb-chip {
-    @apply inline-flex items-center gap-1.5
-           border-2 px-2.5 py-0.5
-           font-mono text-[10px] font-bold uppercase tracking-widest;
+    @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5
+           font-mono text-[10px] font-bold uppercase tracking-widest select-none;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+      0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
-  /* Yellow accent chip */
   .nb-chip-yellow {
-    @apply nb-chip border-nb-yellow text-nb-yellow;
-    background-color: color-mix(in srgb, var(--nb-yellow) 10%, transparent);
+    @apply nb-chip text-amber-400 border border-amber-500/40;
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.18) 0%, rgba(245, 158, 11, 0.06) 100%);
   }
 
-  /* Green accent chip */
   .nb-chip-green {
-    @apply nb-chip border-nb-green text-nb-green;
-    background-color: color-mix(in srgb, var(--nb-green) 10%, transparent);
+    @apply nb-chip text-emerald-400 border border-emerald-500/40;
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.06) 100%);
   }
 
-  /* Red accent chip */
   .nb-chip-red {
-    @apply nb-chip border-nb-red text-nb-red;
-    background-color: color-mix(in srgb, var(--nb-red) 10%, transparent);
+    @apply nb-chip text-rose-400 border border-rose-500/40;
+    background: linear-gradient(180deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.06) 100%);
   }
 
-  /* Blue accent chip */
   .nb-chip-blue {
-    @apply nb-chip border-nb-blue text-nb-blue;
-    background-color: color-mix(in srgb, var(--nb-blue) 10%, transparent);
+    @apply nb-chip text-blue-400 border border-blue-500/40;
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.06) 100%);
   }
 
   /* Muted text */
   .nb-muted {
-    @apply text-nb-muted font-mono text-xs;
+    @apply font-mono text-xs text-[var(--nb-text-muted)];
   }
 
-  /* Section divider */
+  /* Section divider — engraved groove */
   .nb-divider {
-    @apply border-t-2 border-nb-stroke my-4;
-    border-color: color-mix(in srgb, var(--nb-stroke) 20%, transparent);
+    @apply my-4 border-0 h-px;
+    background: linear-gradient(90deg, transparent 0%, var(--nb-stroke) 50%, transparent 100%);
+    box-shadow: 0 1px 0 var(--nb-bevel);
   }
 
-  /* Table header cell */
+  /* Table header cell — debossed track */
   .nb-th {
-    @apply border-b-2 border-nb-stroke bg-nb-border
-           px-4 py-3 text-left font-mono text-[10px] font-bold uppercase tracking-widest text-nb-muted;
-    border-color: color-mix(in srgb, var(--nb-stroke) 30%, transparent);
+    @apply border-b px-4 py-3 text-left font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--nb-text-muted)];
+    border-color: var(--nb-stroke);
+    background: linear-gradient(180deg, var(--nb-recessed) 0%, color-mix(in srgb, var(--nb-recessed) 90%, black) 100%);
   }
 
   /* Table data cell */
   .nb-td {
-    @apply border-b border-nb-stroke px-4 py-3 font-mono text-xs text-nb-white;
-    border-color: color-mix(in srgb, var(--nb-stroke) 10%, transparent);
+    @apply border-b px-4 py-3.5 font-mono text-xs text-white;
+    border-color: var(--nb-stroke);
   }
 
-  /* Input field */
+  /* Input field — recessed channel */
   .nb-input {
-    @apply w-full bg-nb-bg border-2 border-nb-stroke
-           px-4 py-3 font-mono text-sm text-nb-white
-           placeholder:text-nb-muted
-           focus:border-nb-yellow focus:outline-none
-           transition-colors duration-100;
+    @apply w-full rounded-xl border
+           px-4 py-3 font-mono text-sm text-white
+           placeholder:text-[var(--nb-text-muted)]
+           transition-all duration-150;
+    border-color: var(--nb-stroke);
+    background: var(--nb-recessed);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.4),
+      inset 0 1px 2px rgba(0, 0, 0, 0.3),
+      0 1px 0 var(--nb-bevel);
+  }
+  .nb-input:focus {
+    @apply outline-none;
+    border-color: #F59E0B;
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.4),
+      0 0 0 2px rgba(245, 158, 11, 0.25),
+      0 1px 0 var(--nb-bevel);
   }
 
   /* Section label */
   .nb-label {
     @apply block font-mono text-[10px] font-bold uppercase tracking-widest text-nb-muted mb-2;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
   }
 
   /* Stat block */
   .nb-stat {
-    @apply flex flex-col gap-1;
+    @apply flex flex-col gap-1.5;
   }
   .nb-stat-value {
     @apply font-mono text-3xl font-black tabular-nums text-nb-white leading-none;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   }
   .nb-stat-label {
     @apply font-mono text-[10px] uppercase tracking-widest text-nb-muted;
+  }
+
+  /* ── Tactile Glassy LED Indicators ───────────────────────────────── */
+  .skeuo-led {
+    @apply inline-block w-2.5 h-2.5 rounded-full border shrink-0;
+    box-shadow: 0 0 8px currentColor, inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  }
+  .skeuo-led-green {
+    @apply skeuo-led text-[#10B981] border-[#10B981]/80;
+    background: radial-gradient(circle at 35% 35%, #6EE7B7 0%, #10B981 60%, #047857 100%);
+  }
+  .skeuo-led-yellow {
+    @apply skeuo-led text-[#F59E0B] border-[#F59E0B]/80;
+    background: radial-gradient(circle at 35% 35%, #FDE68A 0%, #F59E0B 60%, #B45309 100%);
+  }
+  .skeuo-led-blue {
+    @apply skeuo-led text-[#3B82F6] border-[#3B82F6]/80;
+    background: radial-gradient(circle at 35% 35%, #93C5FD 0%, #3B82F6 60%, #1D4ED8 100%);
+  }
+  .skeuo-led-red {
+    @apply skeuo-led text-[#EF4444] border-[#EF4444]/80;
+    background: radial-gradient(circle at 35% 35%, #FCA5A5 0%, #EF4444 60%, #B91C1C 100%);
+  }
+
+  /* ── Tactile Segmented Control Switch ────────────────────────────── */
+  .skeuo-segmented-group {
+    @apply inline-flex p-1 rounded-xl gap-1;
+    border: 1px solid var(--nb-stroke);
+    background: var(--nb-recessed);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.4),
+      0 1px 0 var(--nb-bevel);
+  }
+  .skeuo-segmented-item {
+    @apply px-3.5 py-1.5 rounded-lg font-mono text-[10px] font-bold uppercase tracking-widest text-nb-muted transition-all duration-150 cursor-pointer;
+  }
+  .skeuo-segmented-item.active {
+    @apply text-slate-950 font-black;
+    background: linear-gradient(180deg, #FDE68A 0%, #F59E0B 60%, #D97706 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+      0 3px 6px rgba(0, 0, 0, 0.3);
   }
 }
 
 /* ─── Scrollbar ─────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--nb-bg);
+  background: var(--nb-recessed);
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.4);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--nb-stroke);
-  border-radius: 0;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--nb-stroke) 80%, white) 0%, var(--nb-stroke) 100%);
+  border-radius: 9999px;
+  border: 2px solid var(--nb-recessed);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--nb-yellow);
+  background: linear-gradient(180deg, #FDE68A 0%, #F59E0B 100%);
 }
 
 /* ─── Mono utility ──────────────────────────────────────────────────── */
@@ -269,15 +451,20 @@ kbd {
   font-variant-numeric: tabular-nums;
 }
 
-/* ─── Brutal hover transition helpers ──────────────────────────────── */
+/* ─── Tactile Hover Lift ────────────────────────────────────────────── */
 .nb-hover-lift {
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .nb-hover-lift:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0 #fff;
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 var(--nb-bevel),
+    0 14px 28px -4px rgba(0, 0, 0, 0.5),
+    0 6px 12px rgba(0, 0, 0, 0.3);
 }
 .nb-hover-lift:active {
-  transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 #fff;
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.2);
 }

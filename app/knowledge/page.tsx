@@ -213,22 +213,23 @@ export default function KnowledgeBasePage() {
       <div className="nb-page max-w-4xl space-y-6">
         <header className="nb-page-header">
           <div>
-            <h1 className="font-black uppercase tracking-tight text-white text-2xl">
+            <h1 className="font-black uppercase tracking-tight text-white text-3xl leading-tight">
               Multimodal Knowledge Base
             </h1>
-            <p className="font-mono text-xs text-[#888888] mt-1">
+            <p className="font-mono text-xs text-[var(--nb-text-muted)] mt-1">
               RAG Ingestion Layer · Text &amp; Speech-to-Text Vector Embeddings for Grounded Recovery Decisions
             </p>
           </div>
         </header>
 
         {/* Upload Panel */}
-        <section className="nb-panel p-6 space-y-4">
+        <section className="nb-panel p-6 space-y-5">
           <div>
-            <h2 className="font-mono text-sm font-black uppercase text-white tracking-wider">
+            <h2 className="font-mono text-sm font-black uppercase text-white tracking-wider flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-400 skeuo-led-amber inline-block" />
               Upload Business &amp; Policy Context
             </h2>
-            <p className="text-xs text-[#888888] font-mono mt-1 leading-5">
+            <p className="text-xs text-[var(--nb-text-muted)] font-mono mt-1 leading-5">
               Upload PDF refund policies, SOP manuals, or audio customer support recordings. The AI Intelligence Layer uses this via Vector RAG to ground intervention decisions in merchant-specific rules.
             </p>
           </div>
@@ -238,7 +239,9 @@ export default function KnowledgeBasePage() {
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
-            className={`border-2 border-dashed ${isDragging ? 'border-[#FFE500] bg-[#FFE500]/5' : 'border-white/20 bg-[#0A0A0A]'} p-10 text-center transition-colors relative cursor-pointer`}
+            className={`border-2 border-dashed rounded-2xl ${
+              isDragging ? 'border-amber-400 bg-amber-500/10 shadow-skeuo-gold' : 'border-white/15 bg-[var(--nb-recessed)] shadow-skeuo-inset'
+            } p-10 text-center transition-all relative cursor-pointer group`}
           >
             <input 
               type="file" 
@@ -249,11 +252,13 @@ export default function KnowledgeBasePage() {
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
             />
             <div className="flex flex-col items-center justify-center pointer-events-none">
-              <UploadCloud className={`w-10 h-10 mb-3 ${isDragging ? 'text-[#FFE500]' : 'text-[#888888]'}`} />
+              <div className="w-16 h-16 rounded-2xl bg-[var(--nb-surface)] border border-white/10 shadow-skeuo-card flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <UploadCloud className={`w-8 h-8 ${isDragging ? 'text-amber-400' : 'text-blue-400'}`} />
+              </div>
               <p className="font-mono text-sm font-bold text-white">
                 {isUploading ? 'Ingesting & Vectorizing...' : 'Drag & Drop files here or click to browse'}
               </p>
-              <p className="font-mono text-[10px] text-[#888888] mt-1">
+              <p className="font-mono text-[10px] text-[var(--nb-text-muted)] mt-1.5">
                 Supported: PDF, DOCX, MP3, WAV (Max 20MB) · Gemini text-embedding-004
               </p>
             </div>
@@ -263,15 +268,16 @@ export default function KnowledgeBasePage() {
         {/* Vector RAG Search Tester */}
         <section className="nb-panel p-6 space-y-4">
           <div>
-            <h2 className="font-mono text-sm font-black uppercase text-[#FFE500] tracking-wider flex items-center gap-2">
-              <span>🔍 Test Vector RAG Semantic Retrieval</span>
+            <h2 className="font-mono text-sm font-black uppercase text-amber-400 tracking-wider flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-400 skeuo-led-amber inline-block" />
+              Test Vector RAG Semantic Retrieval
             </h2>
-            <p className="text-xs text-[#888888] font-mono mt-1">
+            <p className="text-xs text-[var(--nb-text-muted)] font-mono mt-1">
               Verify how the AI Reasoner extracts grounded context from ingested knowledge documents.
             </p>
           </div>
 
-          <form onSubmit={handleTestRAGSearch} className="flex gap-2">
+          <form onSubmit={handleTestRAGSearch} className="flex gap-3">
             <input
               type="text"
               placeholder="e.g., What is our policy for UPI timeout refund requests?"
@@ -289,7 +295,7 @@ export default function KnowledgeBasePage() {
           </form>
 
           {searchResult && (
-            <div className="p-4 border-2 border-[#00FF94]/40 bg-[#00FF94]/5 font-mono text-xs text-[#00FF94] whitespace-pre-wrap leading-5 animate-slide-up">
+            <div className="p-4 rounded-xl border border-emerald-500/40 bg-[var(--nb-recessed)] shadow-skeuo-inset font-mono text-xs text-emerald-400 whitespace-pre-wrap leading-6 animate-slide-up">
               {searchResult}
             </div>
           )}
@@ -298,40 +304,43 @@ export default function KnowledgeBasePage() {
         {/* Ingested Documents List */}
         {files.length > 0 && (
           <section className="nb-panel p-6 space-y-4">
-            <h2 className="font-mono text-sm font-black uppercase text-white tracking-wider">
-              Active Knowledge Vectors ({files.length})
+            <h2 className="font-mono text-sm font-black uppercase text-white tracking-wider flex items-center justify-between">
+              <span>Active Knowledge Vectors</span>
+              <span className="nb-chip border-white/20 text-white bg-white/5">{files.length} Ingested</span>
             </h2>
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {files.map(file => (
-                <div key={file.id} className="border-2 border-white/10 p-3.5 flex items-center justify-between bg-[#0A0A0A]">
-                  <div className="flex items-center gap-3">
-                    {file.type === 'pdf' ? (
-                      <FileText className="w-5 h-5 text-[#3B82F6]" />
-                    ) : file.type === 'audio' ? (
-                      <FileAudio className="w-5 h-5 text-[#FFE500]" />
-                    ) : (
-                      <FileText className="w-5 h-5 text-[#888888]" />
-                    )}
+                <div key={file.id} className="border border-white/10 rounded-xl p-4 flex items-center justify-between bg-gradient-to-r from-[var(--nb-surface)] to-[var(--nb-surface-2)] shadow-skeuo-card hover:shadow-skeuo-card-hover transition-all">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--nb-recessed)] border border-white/10 shadow-skeuo-inset flex items-center justify-center shrink-0">
+                      {file.type === 'pdf' ? (
+                        <FileText className="w-5 h-5 text-blue-400" />
+                      ) : file.type === 'audio' ? (
+                        <FileAudio className="w-5 h-5 text-amber-400" />
+                      ) : (
+                        <FileText className="w-5 h-5 text-[var(--nb-text-muted)]" />
+                      )}
+                    </div>
                     <div>
                       <p className="font-mono text-xs font-bold text-white">{file.name}</p>
-                      <p className="font-mono text-[10px] text-[#888888]">{file.size}</p>
+                      <p className="font-mono text-[10px] text-[var(--nb-text-muted)]">{file.size}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-3">
                     {file.status === 'processing' ? (
-                      <span className="nb-chip border-[#FFE500] text-[#FFE500] bg-[#FFE500]/10">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#FFE500] animate-pulse" />
+                      <span className="nb-chip border-amber-500/40 text-amber-400 bg-amber-500/10 shadow-skeuo-badge">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                         Vectorizing...
                       </span>
                     ) : file.status === 'ready' ? (
-                      <span className="nb-chip border-[#00FF94] text-[#00FF94] bg-[#00FF94]/10">
-                        <CheckCircle2 className="w-3 h-3" />
+                      <span className="nb-chip border-emerald-500/40 text-emerald-400 bg-emerald-500/10 shadow-skeuo-badge">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                         Vectorized &amp; Grounded
                       </span>
                     ) : (
-                      <span className="nb-chip border-[#FF3B3B] text-[#FF3B3B] bg-[#FF3B3B]/10">
-                        <AlertCircle className="w-3 h-3" />
+                      <span className="nb-chip border-rose-500/40 text-rose-400 bg-rose-500/10 shadow-skeuo-badge">
+                        <AlertCircle className="w-3 h-3 text-rose-400" />
                         Failed
                       </span>
                     )}
@@ -339,7 +348,7 @@ export default function KnowledgeBasePage() {
                     <button 
                       onClick={() => removeFile(file.id)}
                       disabled={isUploading}
-                      className="text-[#888888] hover:text-[#FF3B3B] transition-colors disabled:opacity-50 p-1"
+                      className="text-[var(--nb-text-muted)] hover:text-rose-400 transition-colors disabled:opacity-50 p-1.5 rounded-lg hover:bg-white/5 active:translate-y-0.5"
                       aria-label={`Remove ${file.name}`}
                     >
                       <Trash2 className="w-4 h-4" />

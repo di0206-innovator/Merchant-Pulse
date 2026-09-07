@@ -92,16 +92,20 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col">
+    <div className="min-h-screen bg-[var(--nb-bg)] flex flex-col">
 
       {/* Minimal header */}
-      <header className="border-b-2 border-white/10 px-6 py-4 flex items-center gap-3">
+      <header className="border-b border-white/10 bg-[var(--nb-surface)] px-6 py-4 flex items-center justify-between shadow-skeuo-card">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 border-2 border-white bg-[#FFE500] flex items-center justify-center font-mono text-xs font-black text-black shadow-brutal transition-all group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 group-hover:shadow-brutal-lg">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-b from-amber-400 to-amber-600 flex items-center justify-center font-mono text-xs font-black text-slate-950 shadow-skeuo-gold transition-all group-hover:scale-105">
             MP
           </div>
           <span className="font-black uppercase text-sm tracking-tight text-white">MerchantPulse</span>
         </Link>
+        <span className="font-mono text-[10px] text-[var(--nb-text-muted)] uppercase tracking-wider flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 skeuo-led-emerald inline-block" />
+          Secure Auth Gateway
+        </span>
       </header>
 
       {/* Auth card */}
@@ -109,18 +113,18 @@ export default function AuthPage() {
         <div className="w-full max-w-md">
 
           {/* Card */}
-          <div className="bg-[#111111] border-2 border-white p-8" style={{ boxShadow: '8px 8px 0 #FFE500' }}>
+          <div className="bg-gradient-to-b from-[var(--nb-surface)] to-[var(--nb-surface-2)] border border-white/15 rounded-2xl p-8 shadow-skeuo-card-lg relative">
 
             {/* Tab switcher */}
-            <div className="flex border-b-2 border-white/10 mb-8">
+            <div className="p-1 bg-[var(--nb-recessed)] rounded-xl border border-white/10 shadow-skeuo-inset flex mb-8">
               {(['signin', 'signup'] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => { setTab(t); setError(''); }}
-                  className={`flex-1 pb-3 font-mono text-[11px] font-black uppercase tracking-widest transition-all border-b-2 -mb-[2px] ${
+                  className={`flex-1 py-2 font-mono text-xs font-bold uppercase tracking-wider rounded-lg transition-all duration-150 ${
                     tab === t
-                      ? 'border-[#FFE500] text-[#FFE500]'
-                      : 'border-transparent text-[#888888] hover:text-white'
+                      ? 'bg-gradient-to-b from-[#FBBF24] to-[#D97706] text-slate-950 shadow-skeuo-gold font-black'
+                      : 'text-[var(--nb-text-muted)] hover:text-white hover:bg-white/5'
                   }`}
                 >
                   {t === 'signin' ? 'Sign In' : 'Create Account'}
@@ -132,7 +136,7 @@ export default function AuthPage() {
               <h1 className="font-black uppercase text-2xl text-white leading-tight">
                 {tab === 'signin' ? 'Welcome back' : 'Get started free'}
               </h1>
-              <p className="font-mono text-xs text-[#888888]">
+              <p className="font-mono text-xs text-[var(--nb-text-muted)]">
                 {tab === 'signin'
                   ? 'Sign in to access your MerchantPulse dashboard.'
                   : 'Set up your account in under 2 minutes.'}
@@ -140,13 +144,13 @@ export default function AuthPage() {
             </div>
 
             {error && (
-              <div className="mb-4 border-2 border-[#FF3B3B] bg-[#FF3B3B]/10 px-4 py-3 font-mono text-[11px] text-[#FF3B3B]">
+              <div className="mb-5 border border-rose-500/40 bg-rose-500/10 rounded-xl px-4 py-3 font-mono text-xs text-rose-400 shadow-skeuo-inset">
                 {error}
               </div>
             )}
 
             {successMsg && (
-              <div className="mb-4 border-2 border-[#00FF94] bg-[#00FF94]/10 px-4 py-3 font-mono text-[11px] text-[#00FF94] flex items-center gap-2">
+              <div className="mb-5 border border-emerald-500/40 bg-emerald-500/10 rounded-xl px-4 py-3 font-mono text-xs text-emerald-400 flex items-center gap-2 shadow-skeuo-inset">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>{successMsg}</span>
               </div>
@@ -169,7 +173,7 @@ export default function AuthPage() {
               <div>
                 <label className="nb-label">Email Address</label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-[#888888] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Mail className="w-4 h-4 text-[var(--nb-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="email"
                     placeholder="you@yourbusiness.com"
@@ -184,7 +188,7 @@ export default function AuthPage() {
               <div>
                 <label className="nb-label">Password</label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-[#888888] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-[var(--nb-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
@@ -196,7 +200,7 @@ export default function AuthPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888888] hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--nb-text-muted)] hover:text-white transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -209,7 +213,7 @@ export default function AuthPage() {
                 className="nb-primary-button w-full mt-2"
               >
                 {loading ? (
-                  <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-none animate-spin" />
+                  <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <ArrowRight className="w-4 h-4" />
                 )}
@@ -218,48 +222,49 @@ export default function AuthPage() {
             </form>
 
             {/* Quick 1-Click Demo Persona Login */}
-            <div className="mt-6 pt-6 border-t-2 border-white/10 space-y-2.5">
+            <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-[#FFE500]">
-                  ⚡ 1-Click Demo Personas (Reviewer Ready)
+                <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-amber-400 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 skeuo-led-amber inline-block" />
+                  1-Click Demo Personas
                 </span>
-                <span className="font-mono text-[9px] text-[#888888]">Instant Role Switch</span>
+                <span className="font-mono text-[9px] text-[var(--nb-text-muted)]">Instant Role Switch</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => handleQuickLogin('admin@merchantpulse.io')}
-                  className="border-2 border-white/20 hover:border-[#FFE500] bg-black/40 p-2 text-left transition-all group hover:-translate-x-0.5 hover:-translate-y-0.5"
+                  className="rounded-xl border border-white/10 hover:border-amber-400/60 bg-[var(--nb-recessed)] p-3 text-left transition-all shadow-skeuo-card hover:shadow-skeuo-card-hover active:translate-y-0.5 group"
                 >
-                  <div className="font-mono text-[10px] font-black text-white group-hover:text-[#FFE500]">Admin / Owner</div>
-                  <div className="font-mono text-[8px] text-[#888888]">Divyanshu Sinha</div>
+                  <div className="font-mono text-[10px] font-black text-white group-hover:text-amber-400">Admin / Owner</div>
+                  <div className="font-mono text-[9px] text-[var(--nb-text-muted)]">Divyanshu Sinha</div>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleQuickLogin('ops@merchantpulse.io')}
-                  className="border-2 border-white/20 hover:border-[#3B82F6] bg-black/40 p-2 text-left transition-all group hover:-translate-x-0.5 hover:-translate-y-0.5"
+                  className="rounded-xl border border-white/10 hover:border-blue-400/60 bg-[var(--nb-recessed)] p-3 text-left transition-all shadow-skeuo-card hover:shadow-skeuo-card-hover active:translate-y-0.5 group"
                 >
-                  <div className="font-mono text-[10px] font-black text-white group-hover:text-[#3B82F6]">Ops Manager</div>
-                  <div className="font-mono text-[8px] text-[#888888]">Rahul Sharma</div>
+                  <div className="font-mono text-[10px] font-black text-white group-hover:text-blue-400">Ops Manager</div>
+                  <div className="font-mono text-[9px] text-[var(--nb-text-muted)]">Rahul Sharma</div>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleQuickLogin('auditor@merchantpulse.io')}
-                  className="border-2 border-white/20 hover:border-[#00FF94] bg-black/40 p-2 text-left transition-all group hover:-translate-x-0.5 hover:-translate-y-0.5"
+                  className="rounded-xl border border-white/10 hover:border-emerald-400/60 bg-[var(--nb-recessed)] p-3 text-left transition-all shadow-skeuo-card hover:shadow-skeuo-card-hover active:translate-y-0.5 group"
                 >
-                  <div className="font-mono text-[10px] font-black text-white group-hover:text-[#00FF94]">Auditor (Read-Only)</div>
-                  <div className="font-mono text-[8px] text-[#888888]">Neha Verma</div>
+                  <div className="font-mono text-[10px] font-black text-white group-hover:text-emerald-400">Auditor</div>
+                  <div className="font-mono text-[9px] text-[var(--nb-text-muted)]">Neha Verma</div>
                 </button>
               </div>
             </div>
 
             <div className="relative my-6 flex items-center">
-              <div className="flex-1 border-t-2 border-dashed border-white/10" />
-              <span className="px-3 bg-[#111111] font-mono text-[10px] text-[#888888] uppercase tracking-widest">or</span>
-              <div className="flex-1 border-t-2 border-dashed border-white/10" />
+              <div className="flex-1 border-t border-dashed border-white/10" />
+              <span className="px-3 bg-transparent font-mono text-[10px] text-[var(--nb-text-muted)] uppercase tracking-widest">or</span>
+              <div className="flex-1 border-t border-dashed border-white/10" />
             </div>
 
             <button
@@ -279,18 +284,18 @@ export default function AuthPage() {
               <span>Continue with Google</span>
             </button>
 
-            <p className="mt-6 text-center font-mono text-[10px] text-[#888888]">
+            <p className="mt-6 text-center font-mono text-xs text-[var(--nb-text-muted)]">
               {tab === 'signin' ? "Don't have an account? " : 'Already have an account? '}
               <button
                 onClick={() => { setTab(tab === 'signin' ? 'signup' : 'signin'); setError(''); }}
-                className="text-[#FFE500] font-bold hover:underline"
+                className="text-amber-400 font-bold hover:underline ml-1"
               >
                 {tab === 'signin' ? 'Sign up free' : 'Sign in'}
               </button>
             </p>
           </div>
 
-          <p className="mt-6 text-center font-mono text-[10px] text-[#888888]">
+          <p className="mt-6 text-center font-mono text-[10px] text-[var(--nb-text-muted)]">
             By continuing you agree to our{' '}
             <span className="text-white cursor-pointer hover:underline">Terms of Service</span>
             {' '}and{' '}

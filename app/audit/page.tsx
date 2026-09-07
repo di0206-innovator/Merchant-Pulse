@@ -69,14 +69,14 @@ export default function AuditPage() {
   };
 
   const getStatusColor = (status: string) => {
-    if (status === 'AUTO_EXECUTED' || status === 'MANUALLY_APPROVED' || status === 'PASSED') return '#00FF94';
-    if (status === 'ESCALATED' || status === 'ESCALATE_HUMAN') return '#FFE500';
-    return '#FF3B3B';
+    if (status === 'AUTO_EXECUTED' || status === 'MANUALLY_APPROVED' || status === 'PASSED') return { text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/40', shadow: 'shadow-skeuo-green', isGood: true };
+    if (status === 'ESCALATED' || status === 'ESCALATE_HUMAN') return { text: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/40', shadow: 'shadow-skeuo-gold', isGood: false };
+    return { text: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/40', shadow: 'shadow-skeuo-red', isGood: false };
   };
 
   return (
     <AppLayout>
-      <div className="nb-page">
+      <div className="nb-page space-y-6">
 
         {/* ── HEADER ─────────────────────────────────────────── */}
         <div className="nb-page-header">
@@ -86,11 +86,11 @@ export default function AuditPage() {
                 <Lock className="w-3.5 h-3.5" />
                 Tamper-Evident Audit Ledger
               </div>
-              <h1 className="mt-4 text-3xl sm:text-4xl font-black uppercase tracking-tight text-white leading-none">
-                Compliance &<br />
-                <span className="text-[#FFE500]">Policy Audit Trail</span>
+              <h1 className="mt-4 text-3xl sm:text-4xl font-black uppercase tracking-tight text-white leading-tight">
+                Compliance &amp;<br />
+                <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">Policy Audit Trail</span>
               </h1>
-              <p className="mt-3 font-mono text-xs text-[#888888] leading-6">
+              <p className="mt-3 font-mono text-xs text-[var(--nb-text-muted)] leading-6">
                 Deterministic verification of every EV decision, policy guardrail, and Razorpay API execution.
               </p>
             </div>
@@ -109,7 +109,7 @@ export default function AuditPage() {
         <div className="nb-panel p-4 flex flex-col sm:flex-row items-center gap-4">
           {/* Search */}
           <div className="relative flex-1 w-full">
-            <Search className="w-4 h-4 text-[#888888] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[var(--nb-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search opportunity ID, action type, or rule..."
@@ -121,11 +121,11 @@ export default function AuditPage() {
 
           {/* Status filter */}
           <div className="flex items-center gap-2 shrink-0">
-            <Filter className="w-4 h-4 text-[#888888]" />
+            <Filter className="w-4 h-4 text-[var(--nb-text-muted)]" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="nb-input w-auto px-3 py-2.5 text-xs cursor-pointer"
+              className="nb-input w-auto px-3.5 py-2.5 text-xs cursor-pointer"
             >
               <option value="ALL">All Statuses</option>
               <option value="PASSED">Passed</option>
@@ -137,10 +137,10 @@ export default function AuditPage() {
 
         {/* ── AUDIT TABLE ─────────────────────────────────────── */}
         <div className="nb-panel overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto shadow-skeuo-inset bg-[var(--nb-recessed)]/50">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr>
+                <tr className="bg-gradient-to-r from-[var(--nb-surface-2)] to-[var(--nb-surface)] border-b border-white/10">
                   <th className="nb-th">Audit ID / Time</th>
                   <th className="nb-th">Opportunity ID</th>
                   <th className="nb-th">Recommended Action</th>
@@ -150,30 +150,29 @@ export default function AuditPage() {
                   <th className="nb-th">Razorpay Ref</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-white/5">
                 {filteredLogs.map((log) => {
-                  const sc = getStatusColor(log.actionStatus);
+                  const style = getStatusColor(log.actionStatus);
                   const dateStr = new Date(log.timestamp * 1000).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'medium' });
                   return (
                     <tr
                       key={log.decisionId}
-                      className="border-b border-white/5 hover:bg-white/5 transition-colors font-mono text-xs"
+                      className="hover:bg-white/[0.03] transition-colors font-mono text-xs"
                     >
                       <td className="nb-td">
                         <div className="font-black text-white">{log.decisionId}</div>
-                        <div className="text-[10px] text-[#888888]">{dateStr}</div>
+                        <div className="text-[10px] text-[var(--nb-text-muted)]">{dateStr}</div>
                       </td>
-                      <td className="nb-td text-[#3B82F6] font-black">{log.opportunityId}</td>
+                      <td className="nb-td text-blue-400 font-black">{log.opportunityId}</td>
                       <td className="nb-td font-bold text-white">{log.aiRecommendation.recommendedActionType}</td>
-                      <td className="nb-td text-[#00FF94] font-black">
+                      <td className="nb-td text-emerald-400 font-black">
                         ₹{(log.deterministicMetrics.expectedValuePaise / 100).toLocaleString('en-IN')}
                       </td>
                       <td className="nb-td">
                         <span
-                          className="inline-flex items-center gap-1 border-2 px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-widest"
-                          style={{ borderColor: sc, color: sc, backgroundColor: `${sc}15` }}
+                          className={`inline-flex items-center gap-1.5 border px-2.5 py-1 rounded-md font-mono text-[9px] font-black uppercase tracking-wider ${style.text} ${style.bg} ${style.border} ${style.shadow}`}
                         >
-                          {log.actionStatus === 'AUTO_EXECUTED' || log.actionStatus === 'MANUALLY_APPROVED' ? (
+                          {style.isGood ? (
                             <CheckCircle2 className="w-3 h-3" />
                           ) : (
                             <AlertTriangle className="w-3 h-3" />
@@ -181,12 +180,12 @@ export default function AuditPage() {
                           {log.actionStatus}
                         </span>
                       </td>
-                      <td className="nb-td text-[#888888] text-[10px] max-w-xs truncate">
+                      <td className="nb-td text-[var(--nb-text-muted)] text-[10px] max-w-xs truncate">
                         {log.policyResult.ruleResults.filter(r => r.passed).length}/{log.policyResult.ruleResults.length} Rules Passed ({log.policyResult.riskClass || 'LOW_RISK'})
                       </td>
                       <td className="nb-td text-[10px]">
                         <div className="font-bold text-white">{log.executedActionId || 'N/A'}</div>
-                        <div className={`text-[9px] ${log.outcome?.status === 'RECOVERED' ? 'text-[#00FF94]' : 'text-[#888888]'}`}>
+                        <div className={`text-[9px] ${log.outcome?.status === 'RECOVERED' ? 'text-emerald-400 font-bold' : 'text-[var(--nb-text-muted)]'}`}>
                           Outcome: {log.outcome?.status || 'PENDING'}
                         </div>
                       </td>
@@ -196,7 +195,7 @@ export default function AuditPage() {
 
                 {filteredLogs.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center font-mono text-[11px] text-[#888888]">
+                    <td colSpan={7} className="py-12 text-center font-mono text-[11px] text-[var(--nb-text-muted)]">
                       {loading ? 'Loading live audit trail...' : 'No records match your filters. Run demo or webhooks to populate ledger.'}
                     </td>
                   </tr>
@@ -206,13 +205,13 @@ export default function AuditPage() {
           </div>
 
           {/* Footer */}
-          <div className="border-t-2 border-white/10 bg-[#111111] px-6 py-3 flex items-center justify-between">
-            <span className="font-mono text-[10px] text-[#888888]">
+          <div className="border-t border-white/10 bg-gradient-to-r from-[var(--nb-surface-2)] to-[var(--nb-surface)] px-6 py-3.5 flex items-center justify-between">
+            <span className="font-mono text-[10px] text-[var(--nb-text-muted)]">
               Showing <strong className="text-white">{filteredLogs.length}</strong> of {auditLogs.length} records
             </span>
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#00FF94]" />
-              <span className="font-mono text-[10px] text-[#888888]">Tamper-evident · Append-only ledger</span>
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="font-mono text-[10px] text-[var(--nb-text-muted)]">Tamper-evident · Append-only ledger</span>
             </div>
           </div>
         </div>

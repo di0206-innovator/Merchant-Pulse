@@ -94,18 +94,18 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
     const s = score ?? 75;
     const t = tier ?? (s >= 85 ? 'CRITICAL' : s >= 70 ? 'HIGH' : s >= 45 ? 'MEDIUM' : 'LOW');
 
-    let badgeStyle = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+    let badgeStyle = 'border-blue-500/40 text-blue-400 bg-blue-500/10';
     if (t === 'CRITICAL') {
-      badgeStyle = 'bg-rose-500/10 text-rose-400 border-rose-500/40';
+      badgeStyle = 'border-rose-500/50 text-rose-400 bg-rose-500/15 shadow-skeuo-red';
     } else if (t === 'HIGH') {
-      badgeStyle = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+      badgeStyle = 'border-amber-500/50 text-amber-400 bg-amber-500/15 shadow-skeuo-gold';
     } else if (t === 'LOW') {
-      badgeStyle = 'bg-slate-800 text-slate-400 border-slate-700';
+      badgeStyle = 'border-slate-700 text-slate-400 bg-slate-800/40';
     }
 
     return (
-      <span className={`px-2 py-0.5 text-[10px] font-mono font-black border rounded flex items-center gap-1 w-fit ${badgeStyle}`}>
-        <span className="text-xs font-black">{s}</span>
+      <span className={`px-2.5 py-1 text-[10px] font-mono font-black border rounded-lg flex items-center gap-1.5 w-fit shadow-skeuo-badge ${badgeStyle}`}>
+        <span className="text-xs font-black tabular-nums">{s}</span>
         <span className="text-[9px] uppercase tracking-wider">{t}</span>
       </span>
     );
@@ -115,45 +115,45 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
     if (status === 'RECOVERED') {
       if (attribution === 'ORGANIC_RECOVERY') {
         return (
-          <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1 w-fit">
-            <CheckCircle2 className="w-3 h-3" />
+          <span className="px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/40 flex items-center gap-1.5 w-fit shadow-skeuo-badge">
+            <CheckCircle2 className="w-3 h-3 text-amber-400" />
             ORGANIC
           </span>
         );
       }
       return (
-        <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-emerald-500/10 text-[#00FF94] border border-emerald-500/30 flex items-center gap-1 w-fit">
-          <CheckCircle2 className="w-3 h-3" />
+        <span className="px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/40 flex items-center gap-1.5 w-fit shadow-skeuo-green">
+          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
           VERIFIED RECOVERED
         </span>
       );
     }
     if (status === 'EXECUTED') {
       return (
-        <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-blue-500/10 text-blue-400 border border-blue-500/30 flex items-center gap-1 w-fit">
-          <ArrowUpRight className="w-3 h-3" />
+        <span className="px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/40 flex items-center gap-1.5 w-fit shadow-skeuo-blue">
+          <ArrowUpRight className="w-3 h-3 text-blue-400" />
           EXECUTED
         </span>
       );
     }
     if (status === 'ESCALATED') {
       return (
-        <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1 w-fit animate-pulse">
-          <AlertCircle className="w-3 h-3" />
+        <span className="px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/50 flex items-center gap-1.5 w-fit animate-pulse shadow-skeuo-gold">
+          <AlertCircle className="w-3 h-3 text-amber-400" />
           ESCALATED
         </span>
       );
     }
     if (status === 'REJECTED') {
       return (
-        <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center gap-1 w-fit">
+        <span className="px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/40 flex items-center gap-1 w-fit shadow-skeuo-badge">
           SUPPRESSED
         </span>
       );
     }
     return (
-      <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-white/5 text-white/60 border border-white/10 flex items-center gap-1 w-fit">
-        <Clock className="w-3 h-3" />
+      <span className="px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg bg-slate-800/40 text-slate-300 border border-nb-stroke/50 flex items-center gap-1.5 w-fit shadow-skeuo-badge">
+        <Clock className="w-3 h-3 text-nb-muted" />
         {status}
       </span>
     );
@@ -175,21 +175,26 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
   return (
     <div className="nb-panel p-5 space-y-4" role="region" aria-label="Recovery Opportunity Queue">
       {/* Controls & Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-white/10 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-nb-stroke/50 pb-4">
         <div>
-          <h2 className="text-base font-black uppercase text-white tracking-tight flex items-center gap-2 font-mono">
+          <h2 className="text-base font-black uppercase text-nb-white tracking-tight flex items-center gap-2.5 font-mono">
             <span>Recovery Opportunity Queue</span>
-            <span className="nb-chip border-[#FFE500] text-[#FFE500] text-[10px]">
+            <span className="nb-chip-yellow text-[10px]">
               {filteredItems.length} Leaks
             </span>
           </h2>
-          <p className="text-xs text-[#888888] font-mono mt-0.5">
+          <p className="text-xs text-nb-muted font-mono mt-0.5">
             Ranked deterministically by Recovery Priority Score (Net EV × Probability × Urgency × LTV)
           </p>
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 font-mono text-xs" role="toolbar" aria-label="Filter opportunities by status or priority">
+        {/* Filter Rack - Tactile Segmented Control */}
+        <div
+          className="flex items-center gap-1 p-1 rounded-xl border border-nb-stroke/60 overflow-x-auto shadow-skeuo-inset"
+          style={{ background: 'var(--nb-recessed)' }}
+          role="toolbar"
+          aria-label="Filter opportunities by status or priority"
+        >
           {[
             { key: 'ALL', label: 'All' },
             { key: 'HIGH_PRIORITY', label: 'High Priority (70+)' },
@@ -203,11 +208,19 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
               key={f.key}
               onClick={() => setFilterType(f.key)}
               aria-pressed={filterType === f.key}
-              className={`px-3 py-1 text-[10px] font-bold uppercase transition-all whitespace-nowrap border-2 ${
+              className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all whitespace-nowrap select-none ${
                 filterType === f.key
-                  ? 'border-[#FFE500] bg-[#FFE500] text-black'
-                  : 'border-white/20 bg-[#0A0A0A] text-[#888888] hover:border-white/50 hover:text-white'
+                  ? 'text-slate-950 font-black shadow-skeuo-gold'
+                  : 'text-nb-muted hover:text-nb-white hover:bg-nb-surface/60 active:translate-y-0.5'
               }`}
+              style={
+                filterType === f.key
+                  ? {
+                      background: 'linear-gradient(180deg, #FDE68A 0%, #F59E0B 55%, #D97706 100%)',
+                      border: '1px solid rgba(255, 255, 255, 0.4)',
+                    }
+                  : {}
+              }
             >
               {f.label}
             </button>
@@ -215,10 +228,18 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto border-2 border-white/10 bg-[#0A0A0A]">
+      {/* Table Chassis */}
+      <div
+        className="overflow-x-auto rounded-xl border border-nb-stroke/60 shadow-skeuo-inset"
+        style={{ background: 'var(--nb-recessed)' }}
+      >
         <table className="w-full text-left text-xs font-mono" aria-label="Recoverable revenue opportunities">
-          <thead className="bg-[#111111] text-[#888888] uppercase text-[10px] tracking-wider border-b-2 border-white/10">
+          <thead
+            className="text-nb-muted uppercase text-[10px] tracking-wider border-b border-nb-stroke/50"
+            style={{
+              background: 'linear-gradient(180deg, var(--nb-surface) 0%, var(--nb-recessed) 100%)',
+            }}
+          >
             <tr>
               <th scope="col" className="py-3 px-4">Priority</th>
               <th scope="col" className="py-3 px-4">Type / ID</th>
@@ -230,10 +251,10 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
               <th scope="col" className="py-3 px-4 text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/10 text-white">
+          <tbody className="divide-y divide-nb-stroke/30 text-nb-white">
             {filteredItems.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-8 text-center text-[#888888] font-mono">
+                <td colSpan={8} className="py-8 text-center text-nb-muted font-mono">
                   No opportunities match the selected filter.
                 </td>
               </tr>
@@ -247,8 +268,8 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
                   <tr
                     key={opportunity.id}
                     onClick={() => onSelectOpportunity(opportunity)}
-                    className={`cursor-pointer transition-all hover:bg-white/5 ${
-                      isSelected ? 'bg-[#FFE500]/10 border-l-4 border-l-[#FFE500]' : ''
+                    className={`cursor-pointer transition-all duration-150 hover:bg-nb-surface/60 ${
+                      isSelected ? 'bg-amber-500/10 border-l-4 border-l-[#F59E0B]' : ''
                     }`}
                   >
                     {/* Priority Score */}
@@ -258,37 +279,37 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
 
                     {/* Opportunity Type */}
                     <td className="py-3.5 px-4">
-                      <div className="font-black text-white">
+                      <div className="font-black text-nb-white">
                         {getTypeLabel(opportunity.type)}
                       </div>
-                      <div className="text-[10px] text-[#3B82F6] font-mono">
+                      <div className="text-[10px] text-nb-blue font-mono font-semibold">
                         {opportunity.id}
                       </div>
                     </td>
 
                     {/* Customer / Context */}
                     <td className="py-3.5 px-4 text-xs">
-                      <div className="text-[#F5F5F5] font-semibold">
+                      <div className="text-nb-white font-semibold">
                         {opportunity.customerEmail || opportunity.customerContact || 'Direct Customer'}
                       </div>
-                      <div className="text-[10px] text-[#888888]">
+                      <div className="text-[10px] text-nb-muted">
                         {opportunity.evidence.paymentMethod?.toUpperCase()} · {opportunity.evidence.failureCode || 'GATEWAY_ERROR'}
                       </div>
                     </td>
 
                     {/* GMV */}
-                    <td className="py-3.5 px-4 text-right font-black text-white">
+                    <td className="py-3.5 px-4 text-right font-black text-nb-white tabular-nums">
                       ₹{inr.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                     </td>
 
                     {/* Expected Value */}
-                    <td className="py-3.5 px-4 text-right font-black text-[#00FF94]">
+                    <td className="py-3.5 px-4 text-right font-black text-emerald-400 tabular-nums" style={{ textShadow: '0 0 8px rgba(16, 185, 129, 0.3)' }}>
                       ₹{evInr.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                     </td>
 
                     {/* P(Success) */}
                     <td className="py-3.5 px-4 text-center">
-                      <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-white font-bold text-[11px]">
+                      <span className="px-2.5 py-0.5 rounded-lg border border-nb-stroke/50 text-nb-white font-bold text-[11px] shadow-skeuo-badge" style={{ background: 'var(--nb-surface)' }}>
                         {Math.round(opportunity.expectedValue.pSuccess * 100)}%
                       </span>
                     </td>
@@ -302,7 +323,16 @@ export const OpportunityTable: React.FC<OpportunityTableProps> = ({
                     <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={(e) => handleOpenRazorpayCheckout(e, opportunity)}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-white/20 bg-white/5 hover:bg-[#FFE500] hover:text-black text-white font-bold text-[10px] uppercase transition-all"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-nb-stroke/60 hover:border-amber-400/60 font-mono font-bold text-[10px] uppercase text-nb-white hover:text-slate-950 transition-all duration-150 shadow-skeuo-button active:translate-y-0.5 active:shadow-skeuo-button-pressed"
+                        style={{
+                          background: 'linear-gradient(180deg, color-mix(in srgb, var(--nb-surface) 90%, white) 0%, var(--nb-surface) 100%)',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(180deg, #FDE68A 0%, #F59E0B 60%, #D97706 100%)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(180deg, color-mix(in srgb, var(--nb-surface) 90%, white) 0%, var(--nb-surface) 100%)';
+                        }}
                         title="Inspect or Trigger Razorpay Checkout"
                       >
                         <CreditCard className="w-3 h-3" />

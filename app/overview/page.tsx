@@ -152,8 +152,11 @@ export default function OverviewPage() {
         {/* Metric cards */}
         <MetricCards metrics={metrics} />
 
-        {/* Tab bar */}
-        <div className="flex items-center gap-1 border-b-2 border-white/10 overflow-x-auto">
+        {/* Tab bar - Tactile Segmented Rack Switch */}
+        <div
+          className="p-1.5 rounded-2xl border border-nb-stroke/60 flex items-center gap-1.5 overflow-x-auto shadow-skeuo-inset"
+          style={{ background: 'var(--nb-recessed)' }}
+        >
           {TABS.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;
             const displayLabel = id === 'RADAR'
@@ -167,16 +170,24 @@ export default function OverviewPage() {
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
-                className={`flex items-center gap-2 border-2 border-b-0 px-4 py-2.5 font-mono text-[10px] font-bold uppercase tracking-widest whitespace-nowrap transition-all duration-100 ${
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-widest whitespace-nowrap transition-all duration-150 select-none ${
                   isActive
-                    ? 'border-white bg-[#FFE500] text-black'
-                    : 'border-white/20 bg-[#0A0A0A] text-[#888888] hover:border-white/50 hover:text-white'
+                    ? 'text-slate-950 font-black shadow-skeuo-gold'
+                    : 'text-nb-muted hover:text-nb-white hover:bg-nb-surface/60 active:translate-y-0.5'
                 }`}
+                style={
+                  isActive
+                    ? {
+                        background: 'linear-gradient(180deg, #FDE68A 0%, #F59E0B 55%, #D97706 100%)',
+                        border: '1px solid rgba(255, 255, 255, 0.45)',
+                      }
+                    : {}
+                }
               >
                 <Icon className="w-3.5 h-3.5" />
                 {displayLabel}
                 {id === 'RADAR' && escalatedCount > 0 && (
-                  <span className="px-1.5 py-0.5 bg-black text-[#FFE500] font-black text-[9px] border border-[#FFE500]">
+                  <span className="px-2 py-0.5 rounded-full bg-slate-950 text-[#F59E0B] font-black text-[9px] border border-amber-400/50 shadow-skeuo-badge">
                     {escalatedCount} ESC
                   </span>
                 )}

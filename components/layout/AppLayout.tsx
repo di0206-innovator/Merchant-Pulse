@@ -59,32 +59,51 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5] flex flex-col">
+    <div className="min-h-screen bg-nb-bg text-nb-white flex flex-col transition-colors duration-200">
       {/* Skip to Main Content Link (a11y) */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#FFE500] focus:text-black focus:font-mono focus:font-bold focus:border-2 focus:border-black"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#F59E0B] focus:text-slate-950 focus:font-mono focus:font-bold focus:rounded-xl focus:shadow-skeuo-button"
       >
         Skip to main content
       </a>
 
       {/* ── Top bar ──────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 border-b-2 border-nb-stroke/10 bg-nb-bg" role="banner">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 py-3">
+      <header
+        className="sticky top-0 z-50 border-b border-nb-stroke/60 backdrop-blur-md"
+        style={{
+          background: 'linear-gradient(180deg, color-mix(in srgb, var(--nb-surface) 95%, white) 0%, var(--nb-surface) 100%)',
+          boxShadow: 'inset 0 1px 0 var(--nb-bevel), inset 0 -1px 0 var(--nb-rim-shade), 0 4px 14px rgba(0, 0, 0, 0.35)',
+        }}
+        role="banner"
+      >
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 py-2.5">
 
           {/* Logo */}
           <Link href="/overview" className="flex items-center gap-3 group shrink-0" aria-label="MerchantPulse Home">
-            <div className="w-9 h-9 border-2 border-nb-stroke bg-nb-yellow flex items-center justify-center font-mono text-xs font-black text-black shadow-brutal transition-all group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 group-hover:shadow-brutal-lg">
+            <div
+              className="w-9 h-9 rounded-xl border border-amber-300/60 flex items-center justify-center font-mono text-xs font-black text-slate-950 shadow-skeuo-gold transition-all duration-150 group-hover:scale-105 active:scale-95"
+              style={{
+                background: 'linear-gradient(180deg, #FDE68A 0%, #F59E0B 50%, #D97706 100%)',
+              }}
+            >
               MP
             </div>
             <div className="hidden sm:block">
-              <div className="font-black uppercase text-xs tracking-tight text-nb-white">MerchantPulse</div>
+              <div className="font-black uppercase text-xs tracking-tight text-nb-white drop-shadow-sm flex items-center gap-1.5">
+                MerchantPulse
+                <span className="skeuo-led-green w-2 h-2" title="Systems Nominal" />
+              </div>
               <div className="font-mono text-[9px] uppercase tracking-widest text-nb-muted">AI Recovery Intelligence</div>
             </div>
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1" aria-label="Main Navigation">
+          {/* Desktop nav - Tactile Segmented Rack */}
+          <nav
+            className="hidden md:flex items-center p-1 rounded-2xl border border-nb-stroke/60 gap-1 shadow-skeuo-inset"
+            style={{ background: 'var(--nb-recessed)' }}
+            aria-label="Main Navigation"
+          >
             {NAV.map(({ label, href, icon: Icon }) => {
               const active = pathname === href || (href !== '/overview' && pathname.startsWith(href));
               return (
@@ -92,11 +111,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   key={href}
                   href={href}
                   aria-current={active ? 'page' : undefined}
-                  className={`flex items-center gap-2 border-2 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest transition-all duration-100 ${
+                  className={`flex items-center gap-2 rounded-xl px-3.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-widest transition-all duration-150 select-none ${
                     active
-                      ? 'border-nb-yellow bg-nb-yellow text-black shadow-brutal-y'
-                      : 'border-nb-stroke/20 text-nb-muted hover:border-nb-stroke hover:text-nb-white hover:shadow-brutal-sm hover:-translate-x-0.5 hover:-translate-y-0.5'
+                      ? 'text-slate-950 font-black shadow-skeuo-gold'
+                      : 'text-nb-muted hover:text-nb-white hover:bg-nb-surface/60 active:translate-y-0.5'
                   }`}
+                  style={
+                    active
+                      ? {
+                          background: 'linear-gradient(180deg, #FDE68A 0%, #F59E0B 55%, #D97706 100%)',
+                          border: '1px solid rgba(255, 255, 255, 0.4)',
+                        }
+                      : {}
+                  }
                 >
                   <Icon className="w-3.5 h-3.5" aria-hidden="true" />
                   {label}
@@ -110,8 +137,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
             {/* Plan badge */}
             <span
-              className="hidden sm:inline-flex border-2 px-2.5 py-1 font-mono text-[9px] font-black uppercase tracking-widest"
-              style={{ borderColor: plan.color, color: plan.color }}
+              className="hidden sm:inline-flex rounded-full border px-3 py-1 font-mono text-[9px] font-black uppercase tracking-widest shadow-skeuo-badge"
+              style={{
+                borderColor: `${plan.color}60`,
+                color: plan.color,
+                background: `linear-gradient(180deg, ${plan.color}20 0%, ${plan.color}08 100%)`,
+              }}
               aria-label={`Plan: ${plan.label}`}
             >
               {plan.label}
@@ -119,7 +150,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
             {/* User avatar */}
             <div
-              className="w-8 h-8 border-2 border-nb-stroke bg-nb-surface flex items-center justify-center font-mono text-xs font-black text-nb-yellow"
+              className="w-8 h-8 rounded-xl border border-nb-stroke/80 flex items-center justify-center font-mono text-xs font-black text-nb-yellow shadow-skeuo-card"
+              style={{
+                background: 'linear-gradient(180deg, var(--nb-surface-2) 0%, var(--nb-surface) 100%)',
+              }}
               aria-label={`Logged in as ${profile.name || 'User'}`}
             >
               {(profile.name?.[0] ?? 'U').toUpperCase()}
@@ -129,7 +163,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             {mounted && (
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="border-2 border-nb-stroke/20 p-2 text-nb-muted hover:border-nb-stroke hover:text-nb-white transition-all duration-100 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-sm"
+                className="rounded-xl border border-nb-stroke/70 p-2 text-nb-muted hover:text-nb-white transition-all duration-150 hover:shadow-skeuo-button active:translate-y-0.5 active:shadow-skeuo-button-pressed"
+                style={{
+                  background: 'linear-gradient(180deg, color-mix(in srgb, var(--nb-surface) 95%, white) 0%, var(--nb-surface) 100%)',
+                }}
                 title="Toggle theme"
                 aria-label="Toggle light/dark theme"
               >
@@ -140,7 +177,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             {/* Settings */}
             <button
               onClick={() => setSettingsOpen(true)}
-              className="border-2 border-nb-stroke/20 p-2 text-nb-muted hover:border-nb-stroke hover:text-nb-white transition-all duration-100 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-sm"
+              className="rounded-xl border border-nb-stroke/70 p-2 text-nb-muted hover:text-nb-white transition-all duration-150 hover:shadow-skeuo-button active:translate-y-0.5 active:shadow-skeuo-button-pressed"
+              style={{
+                background: 'linear-gradient(180deg, color-mix(in srgb, var(--nb-surface) 95%, white) 0%, var(--nb-surface) 100%)',
+              }}
               title="Settings"
               aria-label="Open Settings"
             >
@@ -150,7 +190,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             {/* Sign out */}
             <button
               onClick={handleSignOut}
-              className="border-2 border-nb-stroke/20 p-2 text-nb-muted hover:border-nb-red hover:text-nb-red transition-all duration-100"
+              className="rounded-xl border border-nb-stroke/70 p-2 text-nb-muted hover:border-nb-red/60 hover:text-nb-red transition-all duration-150 hover:shadow-skeuo-button active:translate-y-0.5 active:shadow-skeuo-button-pressed"
+              style={{
+                background: 'linear-gradient(180deg, color-mix(in srgb, var(--nb-surface) 95%, white) 0%, var(--nb-surface) 100%)',
+              }}
               title="Sign out"
               aria-label="Sign out"
             >
@@ -163,7 +206,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               aria-expanded={mobileOpen}
               aria-controls="mobile-nav"
               aria-label={mobileOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
-              className="md:hidden border-2 border-nb-stroke/20 p-2 text-nb-muted hover:border-nb-stroke hover:text-nb-white transition-all"
+              className="md:hidden rounded-xl border border-nb-stroke/70 p-2 text-nb-muted hover:text-nb-white transition-all active:translate-y-0.5"
+              style={{
+                background: 'linear-gradient(180deg, color-mix(in srgb, var(--nb-surface) 95%, white) 0%, var(--nb-surface) 100%)',
+              }}
             >
               {mobileOpen ? <X className="w-4 h-4" aria-hidden="true" /> : <Menu className="w-4 h-4" aria-hidden="true" />}
             </button>
@@ -174,7 +220,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {mobileOpen && (
           <nav
             id="mobile-nav"
-            className="md:hidden border-t-2 border-nb-stroke/10 bg-nb-surface px-4 py-4 grid grid-cols-2 gap-2"
+            className="md:hidden border-t border-nb-stroke/60 px-4 py-4 grid grid-cols-2 gap-2 shadow-skeuo-inset"
+            style={{ background: 'var(--nb-recessed)' }}
             aria-label="Mobile Navigation"
           >
             {NAV.map(({ label, href, icon: Icon }) => {
@@ -185,11 +232,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   href={href}
                   onClick={() => setMobileOpen(false)}
                   aria-current={active ? 'page' : undefined}
-                  className={`flex items-center gap-2 border-2 px-3 py-3 font-mono text-[10px] font-bold uppercase tracking-widest transition-all duration-100 ${
+                  className={`flex items-center gap-2 rounded-xl px-3 py-3 font-mono text-[10px] font-bold uppercase tracking-widest transition-all duration-150 ${
                     active
-                      ? 'border-nb-yellow bg-nb-yellow text-black'
-                      : 'border-nb-stroke/20 text-nb-muted hover:border-nb-stroke hover:text-nb-white'
+                      ? 'text-slate-950 font-black shadow-skeuo-gold'
+                      : 'border border-nb-stroke/50 text-nb-muted hover:text-nb-white'
                   }`}
+                  style={
+                    active
+                      ? {
+                          background: 'linear-gradient(180deg, #FDE68A 0%, #F59E0B 55%, #D97706 100%)',
+                        }
+                      : {
+                          background: 'var(--nb-surface)',
+                        }
+                  }
                 >
                   <Icon className="w-4 h-4" aria-hidden="true" />
                   {label}
