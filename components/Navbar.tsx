@@ -23,28 +23,21 @@ export function Navbar({
 }: NavbarProps) {
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [merchantDropdownOpen, setMerchantDropdownOpen] = useState(false);
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'opportunities', label: 'Opportunities' },
-    { id: 'strategy', label: 'AI Strategy' },
+    { id: 'strategy', label: 'Strategy' },
     { id: 'audit', label: 'Audit Trail' },
-    { id: 'policy', label: 'Policy Engine' },
+    { id: 'policy', label: 'Policy' },
     { id: 'enterprise', label: 'Enterprise' },
-  ];
-
-  const notifications = [
-    { id: 'notif-1', title: 'HDFC UPI Switch Degraded', time: '4m ago', type: 'warning' },
-    { id: 'notif-2', title: 'Batch Recovery Settled (+₹1.42L)', time: '12m ago', type: 'success' },
-    { id: 'notif-3', title: 'RBI Pre-debit Compliance Verified', time: '35m ago', type: 'info' },
   ];
 
   return (
     <header className="os-top-navbar" role="banner">
       <div className="os-navbar-inner">
-        {/* Left: Brand Mark & System Status */}
+        {/* Left: Clean Minimalist Brand */}
         <div className="os-navbar-left">
           <button
             type="button"
@@ -54,21 +47,12 @@ export function Navbar({
           >
             <div className="os-brand-mark">
               <span className="brand-mark-letter">M</span>
-              <div className="brand-mark-pip" />
             </div>
-            <div className="os-brand-text">
-              <span className="brand-name">MerchantPulse</span>
-              <span className="brand-version-chip">OS 2.0</span>
-            </div>
+            <span className="brand-name">MerchantPulse</span>
           </button>
-
-          <div className="os-env-pill">
-            <span className="env-status-dot" />
-            <span className="env-label">Razorpay Spine v2</span>
-          </div>
         </div>
 
-        {/* Center: Navigation Links (Linear/Stripe style) */}
+        {/* Center: Clean Linear-style Navigation */}
         <nav className="os-navbar-center" aria-label="Main Navigation">
           <ul className="os-nav-list">
             {navItems.map((item) => (
@@ -80,69 +64,31 @@ export function Navbar({
                   aria-current={activeView === item.id ? 'page' : undefined}
                 >
                   <span>{item.label}</span>
-                  {activeView === item.id && <span className="os-nav-active-bar" />}
                 </button>
               </li>
             ))}
           </ul>
         </nav>
 
-        {/* Right: Search, Notifications, Theme, User Menu, Run Audit CTA */}
+        {/* Right: Restrained Actions & Controls */}
         <div className="os-navbar-right">
-          {/* Quick Search / Command Palette trigger (Cmd+K) */}
+          {/* Quick Search (Cmd+K) */}
           <button
             type="button"
             className="os-search-trigger"
             onClick={onOpenCommand}
             title="Open Command Palette (⌘K)"
-            aria-label="Open Command Menu"
+            aria-label="Search"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-            <span className="search-placeholder">Search OS...</span>
+            <span className="search-placeholder">Search</span>
             <kbd className="os-kbd-shortcut">⌘K</kbd>
           </button>
 
-          {/* Notifications Dropdown */}
-          <div className="os-notifications-wrapper">
-            <button
-              type="button"
-              className="os-icon-btn"
-              onClick={() => setNotificationsOpen(!notificationsOpen)}
-              aria-label="Notifications"
-              title="Notifications"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              <span className="notif-badge">3</span>
-            </button>
-
-            {notificationsOpen && (
-              <div className="os-dropdown-panel notif-panel">
-                <div className="dropdown-panel-header">
-                  <span className="font-semibold text-primary">System Telemetry Alerts</span>
-                  <span className="text-xs text-muted">3 Unread</span>
-                </div>
-                <div className="dropdown-list">
-                  {notifications.map((n) => (
-                    <div key={n.id} className="dropdown-item notif-item">
-                      <div className={`notif-indicator ${n.type}`} />
-                      <div className="notif-content">
-                        <div className="notif-title">{n.title}</div>
-                        <div className="notif-time">{n.time}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Light / Dark Mode Toggle */}
+          {/* Theme Toggle */}
           <button
             type="button"
             className="os-icon-btn"
@@ -151,7 +97,7 @@ export function Navbar({
             title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
           >
             {theme === 'dark' ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="5" />
                 <line x1="12" y1="1" x2="12" y2="3" />
                 <line x1="12" y1="21" x2="12" y2="23" />
@@ -163,13 +109,13 @@ export function Navbar({
                 <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
               </svg>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
               </svg>
             )}
           </button>
 
-          {/* User / Merchant Selector Menu */}
+          {/* Merchant Selector */}
           <div className="os-merchant-wrapper">
             <button
               type="button"
@@ -181,7 +127,7 @@ export function Navbar({
                 {currentMerchantName.substring(0, 1)}
               </div>
               <span className="merchant-name-text">{currentMerchantName}</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <polyline points="6 9 12 15 18 9" />
               </svg>
             </button>
@@ -236,7 +182,7 @@ export function Navbar({
             )}
           </div>
 
-          {/* Primary Action CTA: Run Audit */}
+          {/* Clean Primary Action CTA */}
           <button
             type="button"
             className="os-btn-audit"
@@ -246,7 +192,7 @@ export function Navbar({
             <span>Run Audit</span>
           </button>
 
-          {/* Mobile Menu Hamburger */}
+          {/* Mobile Menu Toggle */}
           <button
             type="button"
             className="os-mobile-toggle"
@@ -263,7 +209,7 @@ export function Navbar({
         <div className="os-mobile-drawer">
           <div className="mobile-drawer-inner">
             <div className="mobile-drawer-section">
-              <span className="mobile-section-label">OPERATING SYSTEM VIEWS</span>
+              <span className="mobile-section-label">NAVIGATION</span>
               <ul className="mobile-nav-list">
                 {navItems.map((item) => (
                   <li key={item.id}>

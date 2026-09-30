@@ -174,109 +174,54 @@ input, select, textarea {
 .os-navbar-inner {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 0 32px;
-  height: 56px;
+  padding: 0 24px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 20px;
 }
 
 @media (max-width: 768px) {
   .os-navbar-inner {
     padding: 0 16px;
-    height: 52px;
+    height: 48px;
   }
 }
 
 .os-navbar-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .os-brand-link {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   padding: 0;
   text-align: left;
 }
 
 .os-brand-mark {
-  position: relative;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
   background: var(--text-primary);
   color: var(--bg-app);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 900;
-  font-size: 15px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-.brand-mark-pip {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent-primary);
-}
-
-.os-brand-text {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: -0.02em;
 }
 
 .brand-name {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 650;
   letter-spacing: -0.02em;
   color: var(--text-primary);
-}
-
-.brand-version-chip {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--accent-primary);
-  background: var(--accent-muted);
-  padding: 2px 6px;
-  border-radius: 4px;
-  letter-spacing: 0.05em;
-}
-
-.os-env-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: 999px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-
-.env-status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--success);
-  box-shadow: 0 0 6px var(--success);
-}
-
-@media (max-width: 1024px) {
-  .os-env-pill {
-    display: none;
-  }
 }
 
 /* Center Navigation Links */
@@ -297,7 +242,7 @@ input, select, textarea {
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 4px;
+  gap: 2px;
 }
 
 .os-nav-item {
@@ -306,12 +251,12 @@ input, select, textarea {
 
 .os-nav-btn {
   position: relative;
-  padding: 8px 12px;
+  padding: 5px 10px;
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
   border-radius: 6px;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 }
 
 .os-nav-btn:hover {
@@ -321,37 +266,29 @@ input, select, textarea {
 
 .os-nav-btn.active {
   color: var(--text-primary);
+  background: var(--bg-surface-elevated);
   font-weight: 600;
-}
-
-.os-nav-active-bar {
-  position: absolute;
-  bottom: -11px;
-  left: 12px;
-  right: 12px;
-  height: 2px;
-  background: var(--text-primary);
-  border-radius: 2px;
 }
 
 /* Navbar Right */
 .os-navbar-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .os-search-trigger {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
+  gap: 6px;
+  height: 28px;
+  padding: 0 8px;
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
   border-radius: 6px;
   color: var(--text-muted);
   font-size: 12px;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 }
 
 .os-search-trigger:hover {
@@ -362,11 +299,11 @@ input, select, textarea {
 .os-kbd-shortcut {
   font-family: var(--font-mono);
   font-size: 10px;
-  padding: 1px 5px;
-  border-radius: 4px;
+  padding: 1px 4px;
+  border-radius: 3px;
   background: var(--bg-surface-sunken);
   border: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 @media (max-width: 640px) {
@@ -376,37 +313,19 @@ input, select, textarea {
 }
 
 .os-icon-btn {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 6px;
   color: var(--text-secondary);
-  transition: all 0.15s ease;
-  position: relative;
+  transition: all 0.12s ease;
 }
 
 .os-icon-btn:hover {
   color: var(--text-primary);
   background: var(--bg-surface-elevated);
-}
-
-.notif-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--accent-primary);
-  color: var(--accent-contrast);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .os-merchant-wrapper {
@@ -416,29 +335,31 @@ input, select, textarea {
 .os-merchant-pill-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 10px 4px 6px;
+  gap: 6px;
+  height: 28px;
+  padding: 0 8px 0 5px;
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
-  border-radius: 999px;
+  border-radius: 6px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 }
 
 .os-merchant-pill-btn:hover {
   border-color: var(--border-muted);
+  background: var(--bg-surface-sunken);
 }
 
 .merchant-avatar {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
   background: var(--accent-primary);
   color: var(--accent-contrast);
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 10px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -452,19 +373,23 @@ input, select, textarea {
 
 /* Primary Run Audit CTA */
 .os-btn-audit {
-  padding: 6px 14px;
+  height: 28px;
+  padding: 0 11px;
   font-size: 12px;
   font-weight: 600;
   background: var(--text-primary);
   color: var(--bg-app);
   border-radius: 6px;
-  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
   white-space: nowrap;
 }
 
 .os-btn-audit:hover {
   opacity: 0.9;
-  transform: translateY(-1px);
+  transform: translateY(-0.5px);
 }
 
 .os-mobile-toggle {
