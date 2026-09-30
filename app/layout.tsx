@@ -81,10 +81,10 @@ export default function RootLayout({
       </head>
       <body>
         <div className="swiss-ambient-atmosphere" aria-hidden="true">
-          <div className="ambient-orb orb-amber" />
-          <div className="ambient-orb orb-cyan" />
-          <div className="ambient-orb orb-indigo" />
-          <div className="ambient-orb orb-emerald" />
+          <div className="ambient-orb orb-platinum" />
+          <div className="ambient-orb orb-champagne" />
+          <div className="ambient-orb orb-silver" />
+          <div className="ambient-orb orb-graphite" />
           <div className="swiss-grid-pattern" />
         </div>
         <ThemeProvider>

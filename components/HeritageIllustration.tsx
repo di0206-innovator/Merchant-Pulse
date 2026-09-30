@@ -23,22 +23,22 @@ export const HeritageIllustration: React.FC<HeritageIllustrationProps> = ({
     >
       <defs>
         <linearGradient id="bgSky" x1="350" y1="0" x2="350" y2="740" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#0a2533" />
-          <stop offset="60%" stopColor="#0d3b4c" />
-          <stop offset="100%" stopColor="#08212d" />
+          <stop offset="0%" stopColor="#040508" />
+          <stop offset="60%" stopColor="#0C0E14" />
+          <stop offset="100%" stopColor="#020305" />
         </linearGradient>
 
         <linearGradient id="goldDomeGrad" x1="350" y1="180" x2="350" y2="300" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#FDE68A" />
-          <stop offset="35%" stopColor="#F59E0B" />
-          <stop offset="85%" stopColor="#D97706" />
-          <stop offset="100%" stopColor="#B45309" />
+          <stop offset="0%" stopColor="#FAF5EB" />
+          <stop offset="35%" stopColor="#DFC27D" />
+          <stop offset="85%" stopColor="#B89645" />
+          <stop offset="100%" stopColor="#7C6126" />
         </linearGradient>
 
         <linearGradient id="sideDomeGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FDE047" />
-          <stop offset="50%" stopColor="#EAB308" />
-          <stop offset="100%" stopColor="#CA8A04" />
+          <stop offset="0%" stopColor="#F4EBD9" />
+          <stop offset="50%" stopColor="#DFC27D" />
+          <stop offset="100%" stopColor="#9B7C37" />
         </linearGradient>
 
         <linearGradient id="buildingFacade" x1="0" y1="0" x2="1" y2="0">
@@ -49,9 +49,9 @@ export const HeritageIllustration: React.FC<HeritageIllustrationProps> = ({
         </linearGradient>
 
         <linearGradient id="taxiYellow" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FDE047" />
-          <stop offset="40%" stopColor="#EAB308" />
-          <stop offset="100%" stopColor="#CA8A04" />
+          <stop offset="0%" stopColor="#DFC27D" />
+          <stop offset="40%" stopColor="#C5A059" />
+          <stop offset="100%" stopColor="#8A6B29" />
         </linearGradient>
 
         <linearGradient id="taxiTop" x1="0" y1="0" x2="0" y2="1">
@@ -60,12 +60,12 @@ export const HeritageIllustration: React.FC<HeritageIllustrationProps> = ({
         </linearGradient>
 
         <radialGradient id="sunGlow" cx="50%" cy="28%" r="40%">
-          <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.25" />
-          <stop offset="60%" stopColor="#0d3b4c" stopOpacity="0" />
+          <stop offset="0%" stopColor="#DFC27D" stopOpacity="0.18" />
+          <stop offset="60%" stopColor="#0C0E14" stopOpacity="0" />
         </radialGradient>
 
         <filter id="domeGlow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="4" stdDeviation="12" floodColor="#F59E0B" floodOpacity="0.45" />
+          <feDropShadow dx="0" dy="4" stdDeviation="12" floodColor="#DFC27D" floodOpacity="0.35" />
         </filter>
 
         <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
@@ -93,9 +93,9 @@ export const HeritageIllustration: React.FC<HeritageIllustrationProps> = ({
       </g>
 
       {/* Central Spire & Finial */}
-      <path d="M350 170 L350 205" stroke="#FBBF24" strokeWidth="4" strokeLinecap="round" />
-      <circle cx="350" cy="168" r="6" fill="#FDE68A" filter="url(#domeGlow)" />
-      <circle cx="350" cy="180" r="3.5" fill="#F59E0B" />
+      <path d="M350 170 L350 205" stroke="#DFC27D" strokeWidth="4" strokeLinecap="round" />
+      <circle cx="350" cy="168" r="6" fill="#FAF5EB" filter="url(#domeGlow)" />
+      <circle cx="350" cy="180" r="3.5" fill="#DFC27D" />
 
       {/* MAIN GOLDEN DOME */}
       <path
@@ -104,10 +104,10 @@ export const HeritageIllustration: React.FC<HeritageIllustrationProps> = ({
         filter="url(#domeGlow)"
       />
       {/* Dome Ribs */}
-      <path d="M350 200 Q348 235 348 270" stroke="#FDE68A" strokeWidth="2" strokeOpacity="0.7" fill="none" />
-      <path d="M350 200 Q330 235 320 270" stroke="#FDE68A" strokeWidth="1.5" strokeOpacity="0.6" fill="none" />
-      <path d="M350 200 Q370 235 380 270" stroke="#B45309" strokeWidth="1.5" strokeOpacity="0.6" fill="none" />
-      <rect x="290" y="268" width="120" height="8" rx="2" fill="#FBBF24" />
+      <path d="M350 200 Q348 235 348 270" stroke="#FAF5EB" strokeWidth="2" strokeOpacity="0.7" fill="none" />
+      <path d="M350 200 Q330 235 320 270" stroke="#FAF5EB" strokeWidth="1.5" strokeOpacity="0.6" fill="none" />
+      <path d="M350 200 Q370 235 380 270" stroke="#7C6126" strokeWidth="1.5" strokeOpacity="0.6" fill="none" />
+      <rect x="290" y="268" width="120" height="8" rx="2" fill="#DFC27D" />
 
       {/* CLOCK TOWER OCTAGON / CYLINDER */}
       <path d="M305 276 L395 276 L390 345 L310 345 Z" fill="#E2E8F0" />
@@ -136,19 +136,19 @@ export const HeritageIllustration: React.FC<HeritageIllustrationProps> = ({
       {/* LEFT & RIGHT WING MINI-DOMES */}
       {/* Left Turret & Dome */}
       <path d="M125 385 C125 350 142 345 155 345 C168 345 185 350 185 385 Z" fill="url(#sideDomeGrad)" />
-      <line x1="155" y1="333" x2="155" y2="345" stroke="#FDE68A" strokeWidth="3" />
-      <circle cx="155" cy="331" r="3" fill="#FDE68A" />
-      <rect x="120" y="384" width="70" height="6" fill="#EAB308" />
+      <line x1="155" y1="333" x2="155" y2="345" stroke="#FAF5EB" strokeWidth="3" />
+      <circle cx="155" cy="331" r="3" fill="#FAF5EB" />
+      <rect x="120" y="384" width="70" height="6" fill="#DFC27D" />
       <rect x="126" y="390" width="58" height="28" fill="#E2E8F0" />
-      <path d="M142 400 C142 393 148 390 155 390 C162 390 168 393 168 400 L168 418 L142 418 Z" fill="#0F2937" />
+      <path d="M142 400 C142 393 148 390 155 390 C162 390 168 393 168 400 L168 418 L142 418 Z" fill="#0A0C12" />
 
       {/* Right Turret & Dome */}
       <path d="M515 385 C515 350 532 345 545 345 C558 345 575 350 575 385 Z" fill="url(#sideDomeGrad)" />
-      <line x1="545" y1="333" x2="545" y2="345" stroke="#FDE68A" strokeWidth="3" />
-      <circle cx="545" cy="331" r="3" fill="#FDE68A" />
-      <rect x="510" y="384" width="70" height="6" fill="#EAB308" />
+      <line x1="545" y1="333" x2="545" y2="345" stroke="#FAF5EB" strokeWidth="3" />
+      <circle cx="545" cy="331" r="3" fill="#FAF5EB" />
+      <rect x="510" y="384" width="70" height="6" fill="#DFC27D" />
       <rect x="516" y="390" width="58" height="28" fill="#E2E8F0" />
-      <path d="M532 400 C532 393 538 390 545 390 C552 390 558 393 558 400 L558 418 L532 418 Z" fill="#0F2937" />
+      <path d="M532 400 C532 393 538 390 545 390 C552 390 558 393 558 400 L558 418 L532 418 Z" fill="#0A0C12" />
 
       {/* MAIN NEOCLASSICAL FACADE */}
       <rect x="110" y="415" width="480" height="210" fill="url(#buildingFacade)" filter="url(#softShadow)" />
@@ -167,7 +167,7 @@ export const HeritageIllustration: React.FC<HeritageIllustrationProps> = ({
           <g key={`t1-${wx}`}>
             {/* Pilaster Column */}
             <rect x={wx - 10} y="428" width="6" height="58" fill="#CBD5E1" />
-            <rect x={wx - 12} y="427" width="10" height="4" fill="#D97706" />
+            <rect x={wx - 12} y="427" width="10" height="4" fill="#DFC27D" />
             {/* Arched Window with warm glow */}
             <path
               d={`M${wx} 446 C${wx} 435 ${wx + 13} 430 ${wx + 20} 430 C${wx + 27} 430 ${wx + 40} 435 ${wx + 40} 446 L${wx + 40} 482 L${wx} 482 Z`}
@@ -185,14 +185,14 @@ export const HeritageIllustration: React.FC<HeritageIllustrationProps> = ({
 
       {/* Middle Floor Balcony / Stringcourse */}
       <rect x="100" y="490" width="500" height="10" fill="#E2E8F0" />
-      <rect x="105" y="492" width="490" height="2" fill="#D97706" />
+      <rect x="105" y="492" width="490" height="2" fill="#DFC27D" />
 
       {/* MIDDLE FLOOR (Tier 2) - Tall Double Arched Windows */}
       <g>
         {[135, 185, 235, 285, 335, 385, 435, 485, 535].map((wx) => (
           <g key={`t2-${wx}`}>
             <rect x={wx - 10} y="500" width="6" height="60" fill="#CBD5E1" />
-            <rect x={wx - 12} y="499" width="10" height="4" fill="#D97706" />
+            <rect x={wx - 12} y="499" width="10" height="4" fill="#DFC27D" />
             <path
               d={`M${wx} 518 C${wx} 507 ${wx + 13} 502 ${wx + 20} 502 C${wx + 27} 502 ${wx + 40} 507 ${wx + 40} 518 L${wx + 40} 556 L${wx} 556 Z`}
               fill="#081D28"
