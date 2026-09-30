@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing & Coverage
+/coverage
+*.lcov
+
+# Next.js build output
+/.next/
+/out/
+build/
+dist/
+
+# Production & Local Environment Variables
+.env
+.env*.local
+.env.production
+.env.development
+.env.test
+!.env.example
+
+# Secrets, keys, and credentials
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+id_rsa*
+secrets.json
+
+# Local runtime databases & ledgers
+*.sqlite
+*.sqlite3
+*.db
+ledger.json
+data/*.json
+
+# Debug & system logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

@@ -1,0 +1,66 @@
+<svg viewBox="0 0 700 740" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heritage landmark illustration with golden dome and vintage yellow taxis">
+  <defs>
+    <linearGradient id="bgSky" x1="350" y1="0" x2="350" y2="740" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0a2533" />
+      <stop offset="60%" stop-color="#0d3b4c" />
+      <stop offset="100%" stop-color="#08212d" />
+    </linearGradient>
+    <linearGradient id="goldDomeGrad" x1="350" y1="180" x2="350" y2="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FDE68A" />
+      <stop offset="35%" stop-color="#F59E0B" />
+      <stop offset="85%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+    <linearGradient id="sideDomeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="50%" stop-color="#EAB308" />
+      <stop offset="100%" stop-color="#CA8A04" />
+    </linearGradient>
+    <linearGradient id="buildingFacade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#E2E8F0" />
+      <stop offset="30%" stop-color="#FFFFFF" />
+      <stop offset="70%" stop-color="#F1F5F9" />
+      <stop offset="100%" stop-color="#CBD5E1" />
+    </linearGradient>
+    <linearGradient id="taxiYellow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="40%" stop-color="#EAB308" />
+      <stop offset="100%" stop-color="#CA8A04" />
+    </linearGradient>
+    <linearGradient id="taxiTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1E293B" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="28%" r="40%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.25" />
+      <stop offset="60%" stop-color="#0d3b4c" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="700" height="740" fill="url(#bgSky)" rx="24" />
+  <circle cx="350" cy="240" r="280" fill="url(#sunGlow)" />
+  <text x="350" y="150" text-anchor="middle" font-size="110" font-weight="900" font-family="system-ui, -apple-system, sans-serif" fill="#FFFFFF" opacity="0.15" letter-spacing="4">मर्चेंट पल्स</text>
+  <path d="M350 170 L350 205" stroke="#FBBF24" stroke-width="4" stroke-linecap="round" />
+  <circle cx="350" cy="168" r="6" fill="#FDE68A" />
+  <circle cx="350" cy="180" r="3.5" fill="#F59E0B" />
+  <path d="M295 270 C295 210, 325 200, 350 200 C375 200, 405 210, 405 270 Z" fill="url(#goldDomeGrad)" />
+  <rect x="290" y="268" width="120" height="8" rx="2" fill="#FBBF24" />
+  <path d="M305 276 L395 276 L390 345 L310 345 Z" fill="#E2E8F0" />
+  <circle cx="350" cy="310" r="22" fill="#FFFFFF" stroke="#0F172A" stroke-width="4" />
+  <line x1="350" y1="310" x2="341" y2="299" stroke="#0F172A" stroke-width="3" stroke-linecap="round" />
+  <line x1="350" y1="310" x2="363" y2="303" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round" />
+  <circle cx="350" cy="310" r="3" fill="#D97706" />
+  <path d="M125 385 C125 350 142 345 155 345 C168 345 185 350 185 385 Z" fill="url(#sideDomeGrad)" />
+  <path d="M515 385 C515 350 532 345 545 345 C558 345 575 350 575 385 Z" fill="url(#sideDomeGrad)" />
+  <rect x="110" y="415" width="480" height="210" fill="url(#buildingFacade)" />
+  <rect x="95" y="415" width="510" height="12" fill="#F8FAFC" />
+  <rect x="105" y="575" width="490" height="55" fill="#B91C1C" opacity="0.85" />
+  <rect x="0" y="625" width="700" height="115" fill="#0F172A" />
+  <g transform="translate(195, 642) scale(1.05)">
+    <path d="M15 48 C20 40, 45 24, 75 22 L195 22 C230 24, 255 40, 268 48 L280 54 C285 58, 285 68, 280 72 L10 72 C5 68, 5 56, 10 52 Z" fill="url(#taxiYellow)" />
+    <path d="M75 22 L100 3 L180 3 L205 22 Z" fill="url(#taxiTop)" />
+    <circle cx="65" cy="72" r="17" fill="#0F172A" />
+    <circle cx="65" cy="72" r="9" fill="#E2E8F0" />
+    <circle cx="225" cy="72" r="17" fill="#0F172A" />
+    <circle cx="225" cy="72" r="9" fill="#E2E8F0" />
+  </g>
+</svg>
