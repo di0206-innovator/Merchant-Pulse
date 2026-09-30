@@ -1,20 +1,30 @@
 /* ==========================================================================
    MerchantPulse 2.0 — Revenue Intelligence OS
-   Institutional Intelligence · Swiss Minimalism · Bento Architecture
+   Swiss Minimalism · Precision Typography · Tactile Glassmorphism
    Stripe + Linear + Mercury + Ramp + Bloomberg Terminal Aesthetic
    ========================================================================== */
 
 :root,
 html[data-theme="dark"] {
-  /* Exact Dark Theme Color Palette */
-  --bg-app: #09090B;
-  --bg-surface: #111827;
-  --bg-surface-elevated: #182234;
-  --bg-surface-sunken: #0B0E14;
-  --bg-overlay: rgba(9, 9, 11, 0.88);
+  /* Dark Theme Color Palette */
+  --bg-app: #08090C;
+  --bg-surface: #0E121A;
+  --bg-surface-elevated: #141A24;
+  --bg-surface-sunken: #06080B;
+  --bg-overlay: rgba(8, 9, 12, 0.82);
 
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-muted: rgba(255, 255, 255, 0.14);
+  /* Glassmorphism Surface Tokens */
+  --glass-bg: rgba(14, 18, 26, 0.72);
+  --glass-bg-elevated: rgba(20, 26, 36, 0.82);
+  --glass-bg-subtle: rgba(255, 255, 255, 0.025);
+  --glass-border: rgba(255, 255, 255, 0.07);
+  --glass-border-highlight: rgba(255, 255, 255, 0.16);
+  --glass-blur: 16px;
+  --glass-specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.38);
+
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-muted: rgba(255, 255, 255, 0.12);
   --border-strong: rgba(255, 255, 255, 0.22);
   --border-accent: rgba(245, 158, 11, 0.45);
 
@@ -37,8 +47,8 @@ html[data-theme="dark"] {
   --info: #38BDF8;
   --info-muted: rgba(56, 189, 248, 0.12);
 
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-overlay: 0 16px 40px rgba(0, 0, 0, 0.7);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-overlay: 0 16px 48px rgba(0, 0, 0, 0.75);
 
   --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-hindi: 'Tiro Devanagari Hindi', serif;
@@ -48,20 +58,30 @@ html[data-theme="dark"] {
 }
 
 html[data-theme="light"] {
-  /* Exact Light Theme Color Palette */
-  --bg-app: #FAFAF9;
+  /* Light Theme Color Palette */
+  --bg-app: #F8F9FA;
   --bg-surface: #FFFFFF;
-  --bg-surface-elevated: #F4F4F5;
-  --bg-surface-sunken: #E4E4E7;
-  --bg-overlay: rgba(250, 250, 249, 0.88);
+  --bg-surface-elevated: #F3F4F6;
+  --bg-surface-sunken: #E5E7EB;
+  --bg-overlay: rgba(248, 249, 250, 0.82);
 
-  --border-subtle: #E4E4E7;
-  --border-muted: #D4D4D8;
-  --border-strong: #A1A1AA;
+  /* Glassmorphism Surface Tokens */
+  --glass-bg: rgba(255, 255, 255, 0.78);
+  --glass-bg-elevated: rgba(243, 244, 246, 0.88);
+  --glass-bg-subtle: rgba(0, 0, 0, 0.02);
+  --glass-border: rgba(0, 0, 0, 0.07);
+  --glass-border-highlight: rgba(255, 255, 255, 0.95);
+  --glass-blur: 16px;
+  --glass-specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06);
+
+  --border-subtle: #E5E7EB;
+  --border-muted: #D1D5DB;
+  --border-strong: #9CA3AF;
   --border-accent: rgba(217, 119, 6, 0.45);
 
   --text-primary: #111827;
-  --text-secondary: #6B7280;
+  --text-secondary: #4B5563;
   --text-muted: #9CA3AF;
   --text-dim: #D1D5DB;
 
@@ -79,8 +99,8 @@ html[data-theme="light"] {
   --info: #0284C7;
   --info-muted: rgba(2, 132, 199, 0.1);
 
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow-overlay: 0 16px 36px rgba(0, 0, 0, 0.14);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-overlay: 0 16px 40px rgba(0, 0, 0, 0.12);
 
   color-scheme: light;
 }
@@ -95,12 +115,23 @@ html, body {
   padding: 0;
   min-height: 100%;
   background-color: var(--bg-app);
+  background-image: 
+    radial-gradient(circle at 12% 15%, rgba(245, 158, 11, 0.035) 0%, transparent 40%),
+    radial-gradient(circle at 88% 35%, rgba(56, 189, 248, 0.03) 0%, transparent 45%),
+    radial-gradient(circle at 50% 85%, rgba(16, 185, 129, 0.02) 0%, transparent 40%);
+  background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-main);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-theme="light"] body {
+  background-image: 
+    radial-gradient(circle at 12% 15%, rgba(217, 119, 6, 0.025) 0%, transparent 40%),
+    radial-gradient(circle at 88% 35%, rgba(2, 132, 199, 0.02) 0%, transparent 45%);
 }
 
 a {
@@ -1136,14 +1167,35 @@ input, select, textarea {
 }
 
 .bento-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-muted);
-  border-radius: 10px;
-  padding: 22px;
-  box-shadow: var(--shadow-card);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--glass-specular), var(--glass-shadow);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.bento-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-border-highlight), transparent);
+  pointer-events: none;
+}
+
+.bento-card:hover {
+  border-color: var(--glass-border-highlight);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.18), 0 12px 36px 0 rgba(0, 0, 0, 0.45);
 }
 
 .bento-span-2 {
@@ -3698,17 +3750,21 @@ input, select, textarea {
   color: var(--accent-primary);
 }
 
-/* Card Primitive */
+/* Card Primitive — Swiss Glassmorphism */
 .card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
   border-radius: 12px;
-  box-shadow: var(--shadow-card);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: var(--glass-specular), var(--glass-shadow);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  position: relative;
 }
 
 .card:hover {
-  border-color: var(--border-muted);
+  border-color: var(--glass-border-highlight);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.16), 0 12px 36px 0 rgba(0, 0, 0, 0.4);
 }
 
 /* Primary / Secondary Buttons */
@@ -4764,4 +4820,263 @@ input, select, textarea {
   color: var(--text-muted);
   line-height: 1.5;
   margin: 0;
+}
+
+/* ==========================================================================
+   Swiss + Glassmorphism Master System
+   Frosted glass materials, physical specular rims, and precision Swiss grid
+   ========================================================================== */
+
+/* Universal Glass Morphism Utilities */
+.glass-surface {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-specular), var(--glass-shadow);
+}
+
+.glass-surface-elevated {
+  background: var(--glass-bg-elevated) !important;
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid var(--glass-border-highlight) !important;
+  box-shadow: var(--glass-specular), 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+/* Swiss Grid Accent Lines & Specular Rim Lights */
+.bento-card,
+.office-card,
+.form-card,
+.notfound-card,
+.confirmation-card,
+.admin-login-card,
+.receipt-box,
+.legal-contact-card,
+.admin-table-container {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-specular), var(--glass-shadow);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bento-card:hover,
+.office-card:hover,
+.form-card:hover,
+.admin-login-card:hover,
+.receipt-box:hover,
+.legal-contact-card:hover {
+  border-color: var(--glass-border-highlight);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.16), 0 12px 36px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Frosted Modal Dialogs & Command Menus */
+.modal-dialog,
+.command-palette-modal {
+  background: var(--glass-bg-elevated) !important;
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid var(--glass-border-highlight) !important;
+  box-shadow: var(--glass-specular), 0 24px 64px 0 rgba(0, 0, 0, 0.65);
+}
+
+.modal-backdrop,
+.command-palette-backdrop {
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+/* Floating Frosted Mobile Dock */
+.sticky-mobile-dock {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  background: var(--glass-bg-elevated);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  border-top: 1px solid var(--glass-border-highlight);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
+  padding: 12px 16px;
+}
+
+@media (max-width: 768px) {
+  .sticky-mobile-dock {
+    display: block;
+  }
+}
+
+.dock-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dock-stat-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dock-stat-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.dock-stat-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--danger);
+  letter-spacing: -0.02em;
+}
+
+.btn-dock-action {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  background: var(--accent-primary);
+  color: var(--accent-contrast);
+  transition: all 0.12s ease;
+  white-space: nowrap;
+}
+
+.btn-dock-action:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+/* Frosted Cookie Consent Banner */
+.cookie-banner-wrapper {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  max-width: 440px;
+  z-index: 140;
+  animation: modalScaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 640px) {
+  .cookie-banner-wrapper {
+    left: 12px;
+    right: 12px;
+    bottom: 80px;
+    max-width: none;
+  }
+}
+
+.cookie-banner-box {
+  background: var(--glass-bg-elevated);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid var(--glass-border-highlight);
+  border-radius: 14px;
+  box-shadow: var(--glass-specular), 0 20px 48px rgba(0, 0, 0, 0.45);
+  padding: 20px;
+}
+
+.cookie-banner-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-primary);
+  margin-bottom: 8px;
+}
+
+.cookie-banner-text {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.cookie-prefs-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg-surface-sunken);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.cookie-pref-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.cookie-pref-item strong {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.cookie-pref-item span {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.cookie-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cookie-btn {
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: all 0.12s ease;
+  cursor: pointer;
+}
+
+.cookie-btn-primary {
+  background: var(--text-primary);
+  color: var(--bg-app);
+}
+
+.cookie-btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-0.5px);
+}
+
+.cookie-btn-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-muted);
+}
+
+.cookie-btn-secondary:hover {
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+}
+
+.cookie-btn-link {
+  background: transparent;
+  color: var(--accent-primary);
+  padding: 7px 8px;
+}
+
+.cookie-btn-link:hover {
+  text-decoration: underline;
 }
