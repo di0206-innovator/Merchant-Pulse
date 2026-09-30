@@ -102,7 +102,7 @@ export default async function Image() {
               color: '#FDE68A',
             }}
           >
-            ⚡ Deterministic Pipeline
+            DETERMINISTIC PIPELINE
           </div>
           <div
             style={{
@@ -115,7 +115,7 @@ export default async function Image() {
               color: '#6EE7B7',
             }}
           >
-            ✓ Policy Guardrails
+            POLICY GUARDRAILS
           </div>
           <div
             style={{

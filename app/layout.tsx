@@ -1,9 +1,13 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { CookieBanner } from '@/components/CookieBanner';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const viewport: Viewport = {
-  themeColor: '#08212D',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#FFFFFF' },
+    { media: '(prefers-color-scheme: dark)', color: '#090D12' },
+  ],
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -12,11 +16,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://merchantpulse.in'),
   title: {
-    default: 'MerchantPulse · AI Revenue Intelligence for Razorpay Merchants',
+    default: 'MerchantPulse · Institutional Revenue Intelligence for Razorpay Merchants',
     template: '%s · MerchantPulse',
   },
   description:
-    'Autonomous, policy-governed revenue intelligence for modern Indian commerce. Deterministic payment analysis meets transparent AI strategy and Razorpay execution guardrails.',
+    'Production-grade fintech intelligence for Indian commerce. Deterministic payment analysis, transparent AI strategy, and policy-governed recovery pipelines.',
   keywords: [
     'Razorpay',
     'Payment Intelligence',
@@ -38,15 +42,15 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: 'https://merchantpulse.in',
     siteName: 'MerchantPulse',
-    title: 'MerchantPulse · AI Revenue Intelligence for Razorpay Merchants',
+    title: 'MerchantPulse · Institutional Revenue Intelligence for Razorpay Merchants',
     description:
-      'Deterministic facts → AI strategy → policy gate → valid payment action → measured outcome. Recover revenue lost to payment gateway timeouts and authentication failures.',
+      'Deterministic facts → AI strategy → policy gate → valid payment action → measured outcome. Financial operations platform for Indian merchants.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MerchantPulse · AI Revenue Intelligence for Razorpay Merchants',
+    title: 'MerchantPulse · Institutional Revenue Intelligence',
     description:
-      'Recover revenue lost to payment timeouts with deterministic policy gates and Razorpay integration.',
+      'Turn payment failure telemetry into policy-governed revenue recovery workflows.',
     creator: '@merchantpulse',
   },
   robots: {
@@ -61,18 +65,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('merchantpulse_theme_pref');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}else if(window.matchMedia('(prefers-color-scheme: dark)').matches){document.documentElement.setAttribute('data-theme','dark');}else{document.documentElement.setAttribute('data-theme','light');}}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`,
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Tiro+Devanagari+Hindi&family=JetBrains+Mono:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tiro+Devanagari+Hindi&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>
       <body>
-        {children}
-        <CookieBanner />
+        <ThemeProvider>
+          {children}
+          <CookieBanner />
+        </ThemeProvider>
       </body>
     </html>
   );

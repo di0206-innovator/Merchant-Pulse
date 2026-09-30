@@ -40,7 +40,7 @@ export const MERCHANT_PRESETS: MerchantPreset[] = [
   {
     id: 'mer_kolkata',
     name: 'Kolkata Artisans Co.',
-    tagline: 'Handcrafted Heritage & Textiles · Esplanade',
+    tagline: 'Handcrafted Heritage Luxury · Esplanade',
     category: 'Luxury Retail',
     profile: {
       id: 'mer_kolkata_02',
@@ -61,7 +61,7 @@ export const MERCHANT_PRESETS: MerchantPreset[] = [
   {
     id: 'mer_bengaluru',
     name: 'Bengaluru CloudStack',
-    tagline: 'Developer Infrastructure & APIs · Indiranagar',
+    tagline: 'Developer Infrastructure APIs · Indiranagar',
     category: 'Fintech SaaS',
     profile: {
       id: 'mer_bengaluru_03',
@@ -92,31 +92,33 @@ export const MerchantSwitcher: React.FC<MerchantSwitcherProps> = ({
   disabled = false,
 }) => {
   return (
-    <div className="merchant-switcher-box" role="region" aria-label="Merchant Profile Switcher">
-      <div className="switcher-header">
-        <span className="switcher-tag">DEMO SIMULATION ENVIRONMENT</span>
-        <h4 className="switcher-title">Select Merchant Profile</h4>
+    <div className="segmented-scenario-bar" role="region" aria-label="Merchant Scenario Selector">
+      <div className="scenario-label-wrap">
+        <span className="scenario-tag">SCENARIO RUNTIME</span>
+        <span className="scenario-sub">Select merchant telemetry stream:</span>
       </div>
-      <div className="switcher-options">
+
+      <div className="segmented-control" role="tablist">
         {MERCHANT_PRESETS.map((preset) => {
           const isSelected = preset.id === selectedPreset.id;
           return (
             <button
               key={preset.id}
               type="button"
-              className={`switcher-card ${isSelected ? 'active' : ''}`}
+              role="tab"
+              aria-selected={isSelected}
+              className={`segmented-tab ${isSelected ? 'active' : ''}`}
               onClick={() => onSelectPreset(preset)}
               disabled={disabled}
-              aria-pressed={isSelected}
             >
-              <div className="switcher-card-top">
-                <span className="preset-name">{preset.name}</span>
-                <span className="preset-cat">{preset.category}</span>
+              <div className="tab-primary-row">
+                <span className="tab-name">{preset.name}</span>
+                <span className="tab-category font-mono">{preset.category}</span>
               </div>
-              <p className="preset-tagline">{preset.tagline}</p>
-              <div className="preset-meta">
-                <span>GMV: ₹{(preset.profile.monthly_gmv_paise / 10000000).toFixed(2)}Cr/mo</span>
-                <span>{preset.payments.length} Payments</span>
+              <div className="tab-meta-row font-mono">
+                <span>GMV ₹{(preset.profile.monthly_gmv_paise / 10000000).toFixed(2)}Cr</span>
+                <span className="tab-sep">·</span>
+                <span>{preset.payments.length} Txns</span>
               </div>
             </button>
           );

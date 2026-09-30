@@ -6,28 +6,28 @@ export const Footer: React.FC = () => {
     <footer className="site-footer">
       <div className="shell footer-inner">
         <div className="footer-top-grid">
-          <div className="footer-brand-col">
-            <div className="footer-logo-row">
-              <div className="logo-badge sm">
+          <div className="footer-col-brand">
+            <div className="footer-brand-header">
+              <div className="brand-symbol sm">
                 <span>M</span>
               </div>
-              <span className="footer-brand-name">MerchantPulse</span>
+              <span className="brand-name">MerchantPulse</span>
+              <span className="brand-devanagari">मर्चेंट पल्स</span>
             </div>
-            <p className="footer-tagline">
-              Autonomous, policy-governed revenue intelligence for modern Indian commerce and Razorpay
-              merchants. Built on deterministic payment state transitions and transparent AI strategy.
+            <p className="footer-thesis-text">
+              Autonomous, policy-governed revenue intelligence for modern Indian commerce.
+              Engineered on deterministic payment state transitions and transparent AI strategy.
             </p>
-            <div className="footer-compliance-badges">
-              <span className="comp-badge">🔒 256-Bit TLS</span>
-              <span className="comp-badge">🛡️ HSTS Preloaded</span>
-              <span className="comp-badge">🇮🇳 DPDP Act 2023</span>
-              <span className="comp-badge">💳 Razorpay Webhook Spine</span>
+            <div className="footer-specs font-mono">
+              <span className="spec-tag">RBI COMPLIANT DATA RESIDENCY</span>
+              <span className="spec-tag">DPDP ACT 2023 READY</span>
+              <span className="spec-tag">TLS 1.3 ENFORCED</span>
             </div>
           </div>
 
-          <div className="footer-col">
-            <h4 className="footer-col-title">Architecture</h4>
-            <ul className="footer-links">
+          <div className="footer-col-nav">
+            <span className="footer-nav-heading">Platform</span>
+            <ul className="footer-link-list">
               <li>
                 <Link href="/#radar">Opportunity Radar</Link>
               </li>
@@ -35,10 +35,10 @@ export const Footer: React.FC = () => {
                 <Link href="/#strategy">AI Strategy Layer</Link>
               </li>
               <li>
-                <Link href="/#policy">Deterministic Policy Gate</Link>
+                <Link href="/#telemetry">Failure Telemetry</Link>
               </li>
               <li>
-                <Link href="/#audit">Append-Only Audit Trail</Link>
+                <Link href="/#audit">Decision Audit Trail</Link>
               </li>
               <li>
                 <Link href="/admin">Admin Control Room</Link>
@@ -46,27 +46,27 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          <div className="footer-col">
-            <h4 className="footer-col-title">Legal & Security</h4>
-            <ul className="footer-links">
+          <div className="footer-col-nav">
+            <span className="footer-nav-heading">Compliance &amp; Legal</span>
+            <ul className="footer-link-list">
               <li>
                 <Link href="/privacy">Privacy Policy</Link>
               </li>
               <li>
-                <Link href="/terms">Terms & Conditions</Link>
+                <Link href="/terms">Terms of Service</Link>
               </li>
               <li>
-                <Link href="/contact">Report Vulnerability</Link>
+                <Link href="/contact">Security Advisory</Link>
               </li>
               <li>
-                <Link href="/thank-you">Transaction Acknowledgements</Link>
+                <Link href="/thank-you">Audit Confirmation</Link>
               </li>
             </ul>
           </div>
 
-          <div className="footer-col">
-            <h4 className="footer-col-title">Registered Office</h4>
-            <address className="footer-address">
+          <div className="footer-col-nav">
+            <span className="footer-nav-heading">Registered Office</span>
+            <address className="footer-registered-address">
               <strong>MerchantPulse Technologies Pvt. Ltd.</strong>
               <br />
               4th Floor, Ballard House, Adi Marzban Path,
@@ -75,19 +75,19 @@ export const Footer: React.FC = () => {
               <br />
               Maharashtra 400001, India.
               <br />
-              <span className="footer-contact-link">CIN: U72900MH2025PTC419820</span>
+              <span className="font-mono text-muted">CIN: U72900MH2025PTC419820</span>
               <br />
-              <span className="footer-contact-link">Email: contact@merchantpulse.in</span>
+              <span className="font-mono text-muted">contact@merchantpulse.in</span>
             </address>
           </div>
         </div>
 
-        <div className="footer-bottom-bar">
-          <div className="footer-copy">
+        <div className="footer-bottom-row">
+          <div className="footer-copyright font-mono">
             © {new Date().getFullYear()} MerchantPulse Technologies Private Limited. All rights reserved.
           </div>
-          <div className="footer-thesis">
-            Thesis: Deterministic facts → AI strategy → policy gate → valid payment action → measured outcome.
+          <div className="footer-axiom font-mono">
+            Deterministic facts → AI strategy → policy gate → valid payment action → measured outcome.
           </div>
         </div>
       </div>

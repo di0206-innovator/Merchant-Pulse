@@ -4,8 +4,8 @@ import React, { useMemo, useState, useEffect } from 'react';
 import type { AnalysisResult, Opportunity } from '@/core/types';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { HeritageIllustration } from '@/components/HeritageIllustration';
 import { MerchantSwitcher, MERCHANT_PRESETS, type MerchantPreset } from '@/components/MerchantSwitcher';
+import { DataVisualizations } from '@/components/DataVisualizations';
 import { RecoveryModal } from '@/components/RecoveryModal';
 import { StickyMobileBar } from '@/components/StickyMobileBar';
 import { trackEvent } from '@/lib/analytics';
@@ -26,11 +26,11 @@ export default function Home() {
   const [auditSearch, setAuditSearch] = useState('');
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
   const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
-  const [notification, setNotification] = useState<string | null>(null);
+  const [bannerFeedback, setBannerFeedback] = useState<string | null>(null);
 
   const analyze = async (presetToUse = selectedPreset) => {
     setLoading(true);
-    setNotification(null);
+    setBannerFeedback(null);
     trackEvent('run_revenue_analysis', { merchant: presetToUse.name });
 
     try {
@@ -53,13 +53,12 @@ export default function Home() {
         setSelectedOpportunity(data.opportunities[0]);
       }
     } catch {
-      setNotification('Failed to analyze merchant payments. Please verify network status.');
+      setBannerFeedback('Failed to evaluate payment events. Ensure local services are running.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Run initial analysis automatically on mount
   useEffect(() => {
     analyze(selectedPreset);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,9 +102,8 @@ export default function Home() {
   };
 
   const handleActionExecuted = (summary: string) => {
-    setNotification(summary);
+    setBannerFeedback(summary);
     trackEvent('recovery_action_executed', { summary });
-    // Append a live execution event to local audit trail
     if (result) {
       setResult({
         ...result,
@@ -114,7 +112,7 @@ export default function Home() {
             id: `audit_live_${Date.now()}`,
             actor: 'executor',
             action: 'execute_recovery_flow',
-            metadata: { summary, status: 'dispatched_to_razorpay' },
+            metadata: { summary, channel: 'razorpay_checkout' },
             timestamp: Date.now(),
           },
           ...result.audit,
@@ -136,146 +134,182 @@ export default function Home() {
   };
 
   return (
-    <div className="page-wrapper">
+    <div className="institutional-app">
       <Navbar onRunAudit={() => analyze(selectedPreset)} loading={loading} />
 
-      <main className="shell app-main">
-        {notification && (
-          <div className="form-alert-error" role="status" style={{ marginTop: 20, borderColor: 'var(--gold-400)', background: 'rgba(245,158,11,0.1)', color: '#FDE68A' }}>
-            <span>⚡ {notification}</span>
+      <main className="shell platform-shell">
+        {bannerFeedback && (
+          <div className="system-feedback-banner" role="status">
+            <span className="feedback-glyph">⚡</span>
+            <span>{bannerFeedback}</span>
+            <button
+              type="button"
+              className="feedback-dismiss"
+              onClick={() => setBannerFeedback(null)}
+              aria-label="Dismiss message"
+            >
+              ✕
+            </button>
           </div>
         )}
 
-        {/* HERO EDITORIAL SECTION */}
-        <section className="hero-editorial">
-          <div className="hero-grid">
-            {/* Visual Heritage Poster Side */}
-            <div className="hero-visual-card">
-              <div className="poster-header-bar">
-                <div>
-                  <div className="poster-tagline">Fintech Heritage & Intelligence</div>
-                  <h2 className="poster-hindi-title">मर्चेंट पल्स</h2>
-                </div>
-                <span className="poster-badge">🇮🇳 RAZORPAY ECOSYSTEM</span>
-              </div>
-
-              <div className="poster-art-wrap">
-                <HeritageIllustration width="100%" height="auto" />
-              </div>
-
-              <div className="poster-bottom-caption">
-                <p>
-                  <strong>Autonomous Payment Intelligence</strong> · Built for Indian commerce hubs
-                  from Ballard Estate to Indiranagar. Turning raw payment drop-offs into deterministic,
-                  policy-verified recovery flows.
-                </p>
-              </div>
+        {/* INSTITUTIONAL OPERATIONAL HERO */}
+        <section className="executive-hero">
+          <div className="hero-top-strip">
+            <div className="hero-thesis-tag font-mono">
+              <span>FINANCIAL OPERATIONS // REVENUE SPINE</span>
+              <span className="strip-divider">·</span>
+              <span className="text-muted">DETERMINISTIC FACTS → AI STRATEGY → POLICY GATE → EXECUTION</span>
             </div>
 
-            {/* Right Value & KPI Column */}
-            <div className="hero-content-col">
-              <div className="card hero-main-card">
-                <div className="eyebrow-chip">Track 01 · Revenue Intelligence Engine</div>
-                <h1 className="hero-title">
-                  Find the revenue <span className="text-gradient-gold">worth acting on</span> next.
-                </h1>
-                <p className="hero-desc">
-                  MerchantPulse parses raw payment events deterministically, ranks interventions
-                  through transparent AI strategy, and enforces strict merchant policy gates before any
-                  action is executed.
-                </p>
+            <div className="hero-heritage-seal font-mono">
+              <span className="seal-emblem">🏛️</span>
+              <span className="seal-city">BALLARD ESTATE, MUMBAI</span>
+              <span className="seal-lang">मर्चेंट पल्स</span>
+            </div>
+          </div>
 
-                <div className="hero-cta-group">
-                  <button
-                    type="button"
-                    className="btn-primary"
-                    onClick={() => analyze(selectedPreset)}
-                    disabled={loading}
-                    aria-label="Run revenue analysis"
-                  >
-                    {loading ? (
-                      <>
-                        <span className="spinner-sm" /> Running Pipeline...
-                      </>
-                    ) : (
-                      <>⚡ Run Revenue Intelligence Audit</>
-                    )}
-                  </button>
+          <div className="hero-main-row">
+            <div className="hero-headline-wrap">
+              <h1 className="executive-title">
+                Automated Revenue Intelligence for Razorpay Merchants.
+              </h1>
+              <p className="executive-lead">
+                Deterministic payment parsing identifies recoverable failure patterns, an AI strategy
+                layer calculates net expected value, and explicit merchant policy boundaries verify every
+                action before live execution.
+              </p>
+            </div>
 
-                  {result?.opportunities && result.opportunities.length > 0 && (
-                    <button
-                      type="button"
-                      className="btn-secondary"
-                      onClick={() => handleOpenRecovery()}
-                    >
-                      Review Recovery Action →
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Metric KPIs */}
-              <div className="metrics-row">
-                <div className="metric-box">
-                  <span className="metric-label">Monthly GMV</span>
-                  <strong className="metric-val">
-                    {result ? formatCurrency(result.merchant.monthly_gmv_paise) : '₹1.24Cr'}
-                  </strong>
-                  <span className="metric-sub">{selectedPreset.name}</span>
-                </div>
-
-                <div className="metric-box">
-                  <span className="metric-label">Analyzed Txns</span>
-                  <strong className="metric-val text-sky">
-                    {result ? result.payments_processed : '8'}
-                  </strong>
-                  <span className="metric-sub">Event state machine</span>
-                </div>
-
-                <div className="metric-box">
-                  <span className="metric-label">Revenue at Risk</span>
-                  <strong className="metric-val text-amber">
-                    {result ? formatCurrency(revenueAtRisk) : '₹15,597'}
-                  </strong>
-                  <span className="metric-sub">Identified leakage</span>
-                </div>
-
-                <div className="metric-box">
-                  <span className="metric-label">Policy Gate</span>
-                  <strong className={`metric-val ${result?.policy.action === 'execute' ? 'text-emerald' : 'text-amber'}`}>
-                    {result ? result.policy.action.toUpperCase() : 'VERIFIED'}
-                  </strong>
-                  <span className="metric-sub">Pre-action check</span>
-                </div>
-              </div>
-
-              {/* Merchant Preset Switcher */}
-              <MerchantSwitcher
-                selectedPreset={selectedPreset}
-                onSelectPreset={handleSelectPreset}
+            <div className="hero-action-panel">
+              <button
+                type="button"
+                className="btn-institutional-primary btn-large"
+                onClick={() => analyze(selectedPreset)}
                 disabled={loading}
-              />
+                aria-label="Execute full intelligence pipeline"
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner-xs" /> Evaluating Events...
+                  </>
+                ) : (
+                  <>⚡ Evaluate Revenue Opportunities</>
+                )}
+              </button>
+
+              {result?.opportunities && result.opportunities.length > 0 && (
+                <button
+                  type="button"
+                  className="btn-institutional-secondary"
+                  onClick={() => handleOpenRecovery()}
+                >
+                  Review Staged Interventions →
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Scenario Selector Segmented Bar */}
+          <div className="scenario-bar-container">
+            <MerchantSwitcher
+              selectedPreset={selectedPreset}
+              onSelectPreset={handleSelectPreset}
+              disabled={loading}
+            />
+          </div>
+
+          {/* Precision Financial Metric Tiles */}
+          <div className="kpi-metric-strip">
+            <div className="kpi-tile">
+              <div className="kpi-tile-header font-mono">
+                <span>MONTHLY GMV</span>
+                <span className="kpi-mini-badge">ANNUALIZED</span>
+              </div>
+              <strong className="kpi-tile-value font-mono">
+                {result ? formatCurrency(result.merchant.monthly_gmv_paise) : '₹1.24Cr'}
+              </strong>
+              <span className="kpi-tile-sub">
+                Profile: <span className="font-semibold">{selectedPreset.name}</span>
+              </span>
+            </div>
+
+            <div className="kpi-tile">
+              <div className="kpi-tile-header font-mono">
+                <span>BATCH VOLUME</span>
+                <span className="kpi-mini-badge">EVENTS</span>
+              </div>
+              <strong className="kpi-tile-value font-mono">
+                {result ? `${result.payments_processed} Txns` : '8 Txns'}
+              </strong>
+              <span className="kpi-tile-sub">State machine normalized</span>
+            </div>
+
+            <div className="kpi-tile">
+              <div className="kpi-tile-header font-mono">
+                <span>IDENTIFIED LEAKAGE</span>
+                <span className="kpi-mini-badge text-amber">AT RISK</span>
+              </div>
+              <strong className="kpi-tile-value font-mono text-amber">
+                {result ? formatCurrency(revenueAtRisk) : '₹15,597'}
+              </strong>
+              <span className="kpi-tile-sub">Recoverable gateway drop-offs</span>
+            </div>
+
+            <div className="kpi-tile">
+              <div className="kpi-tile-header font-mono">
+                <span>POLICY VERDICT</span>
+                <span className={`kpi-mini-badge ${result?.policy.action === 'execute' ? 'text-emerald' : 'text-amber'}`}>
+                  {result ? result.policy.action.toUpperCase() : 'VERIFIED'}
+                </span>
+              </div>
+              <strong className={`kpi-tile-value font-mono ${result?.policy.action === 'execute' ? 'text-emerald' : 'text-amber'}`}>
+                {result ? result.policy.action.toUpperCase() : 'EXECUTE'}
+              </strong>
+              <span className="kpi-tile-sub">Automated budget &amp; risk check</span>
+            </div>
+
+            <div className="kpi-tile">
+              <div className="kpi-tile-header font-mono">
+                <span>NET EXPECTED VALUE</span>
+                <span className="kpi-mini-badge text-emerald">ROI MODEL</span>
+              </div>
+              <strong className="kpi-tile-value font-mono text-emerald">
+                {result ? formatCurrency(result.recommendation.recommendation.expected_value_paise) : '₹14,445'}
+              </strong>
+              <span className="kpi-tile-sub">
+                Est. recovery:{' '}
+                <span className="font-semibold">
+                  {result ? `${Math.round(result.recommendation.recommendation.expected_recovery_rate * 100)}%` : '69%'}
+                </span>
+              </span>
             </div>
           </div>
         </section>
 
-        {/* OPERATIONS GRID: Radar & Strategy/Policy */}
-        <section className="ops-grid" id="radar">
-          {/* Left Column: Opportunity Radar */}
-          <div className="card">
-            <div className="section-head">
-              <h3 className="section-title">Opportunity Radar</h3>
-              <p className="section-desc">
-                Deterministic failure clustering converts raw payment drops into verified commercial opportunities.
-              </p>
+        {/* DATA VISUALIZATIONS SECTION */}
+        <section id="telemetry">
+          <DataVisualizations result={result} payments={selectedPreset.payments} />
+        </section>
+
+        {/* OPERATIONS GRID: Opportunity Radar + Strategy Gate */}
+        <section className="operations-split-grid" id="radar">
+          {/* Opportunity Radar Column */}
+          <div className="institutional-panel">
+            <div className="panel-header">
+              <div className="panel-header-left">
+                <span className="panel-tag font-mono">DETECTION ENGINE</span>
+                <h2 className="panel-title">Opportunity Radar</h2>
+              </div>
+              <span className="panel-count font-mono">{filteredOpportunities.length} Qualified</span>
             </div>
 
-            <div className="radar-tabs">
+            <div className="radar-filter-bar font-mono">
               {(['all', 'recovery', 'conversion', 'retention'] as const).map((tab) => (
                 <button
                   key={tab}
                   type="button"
-                  className={`radar-tab-btn ${radarFilter === tab ? 'active' : ''}`}
+                  className={`filter-pill ${radarFilter === tab ? 'active' : ''}`}
                   onClick={() => setRadarFilter(tab)}
                 >
                   {tab.toUpperCase()}
@@ -283,132 +317,168 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="opps-list">
+            <div className="opportunities-stack">
               {filteredOpportunities.map((opp) => (
-                <div key={opp.title} className="opp-item">
-                  <div className="opp-item-top">
-                    <div>
-                      <div className="opp-item-title">{opp.title}</div>
-                      <div className="opp-item-desc">{opp.description}</div>
-                    </div>
+                <div key={opp.title} className="opportunity-entry">
+                  <div className="opp-meta-row">
                     <span
-                      className={`badge ${
+                      className={`type-indicator-badge font-mono ${
                         opp.type === 'recovery'
-                          ? 'badge-green'
+                          ? 'badge-emerald'
                           : opp.type === 'retention'
-                          ? 'badge-yellow'
-                          : 'badge-blue'
+                          ? 'badge-amber'
+                          : 'badge-sky'
                       }`}
                     >
-                      {opp.type}
+                      {opp.type.toUpperCase()}
+                    </span>
+                    <span className="opp-evidence font-mono">
+                      Confidence: {Math.round(opp.evidence_score * 100)}%
                     </span>
                   </div>
 
-                  <div className="opp-kpis">
-                    <div className="opp-kpi">
-                      <span>Revenue at Risk</span>
-                      <strong className="text-amber">{formatCurrency(opp.revenue_at_risk_paise)}</strong>
+                  <h3 className="opp-heading">{opp.title}</h3>
+                  <p className="opp-body">{opp.description}</p>
+
+                  <div className="opp-metrics-table">
+                    <div className="opp-metric-col">
+                      <span className="opp-label font-mono">REVENUE AT RISK</span>
+                      <strong className="opp-val font-mono text-amber">
+                        {formatCurrency(opp.revenue_at_risk_paise)}
+                      </strong>
                     </div>
-                    <div className="opp-kpi">
-                      <span>Affected Transactions</span>
-                      <strong>{opp.affected_transactions}</strong>
+                    <div className="opp-metric-col">
+                      <span className="opp-label font-mono">AFFECTED TXNS</span>
+                      <strong className="opp-val font-mono">{opp.affected_transactions}</strong>
                     </div>
-                    <div className="opp-kpi">
-                      <span>Evidence Confidence</span>
-                      <strong className="text-emerald">{Math.round(opp.evidence_score * 100)}%</strong>
+                    <div className="opp-metric-col">
+                      <span className="opp-label font-mono">ACTION FLOW</span>
+                      <span className="opp-action-name font-mono">
+                        {opp.recommended_action.replaceAll('_', ' ')}
+                      </span>
                     </div>
                   </div>
 
                   <button
                     type="button"
-                    className="opp-action-trigger"
+                    className="btn-trigger-action"
                     onClick={() => handleOpenRecovery(opp)}
                   >
-                    ⚡ Review & Trigger Valid Follow-up →
+                    <span>Execute Valid Follow-up</span>
+                    <span className="arrow-glyph">→</span>
                   </button>
                 </div>
               ))}
 
               {filteredOpportunities.length === 0 && (
-                <div className="opp-item">
-                  <div className="opp-item-title">No opportunities found in this filter category</div>
-                  <div className="opp-item-desc">
-                    Switch filters or select another merchant preset to simulate different failure patterns.
-                  </div>
+                <div className="empty-state-entry">
+                  <p className="empty-text">No opportunities found for the selected category.</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Right Column: AI Strategy & Policy Decision Gate */}
-          <div className="card" id="strategy">
-            <div className="section-head">
-              <h3 className="section-title">AI Strategy & Policy Decision Gate</h3>
-              <p className="section-desc">
-                AI ranks potential interventions; deterministic policy gates verify budget & risk before execution.
-              </p>
+          {/* AI Strategy & Deterministic Policy Decision Column */}
+          <div className="institutional-panel" id="strategy">
+            <div className="panel-header">
+              <div className="panel-header-left">
+                <span className="panel-tag font-mono">STRATEGY &amp; POLICY</span>
+                <h2 className="panel-title">Decision Gate</h2>
+              </div>
+              <span className={`panel-status-chip font-mono ${result?.policy.allowed ? 'status-cleared' : 'status-blocked'}`}>
+                {result?.policy.allowed ? 'POLICY CLEARED' : 'GATE ACTIVE'}
+              </span>
             </div>
 
-            <div className="strategy-body">
+            <div className="decision-content">
               {result ? (
                 <>
-                  <div className="strategy-box">
-                    <div className="eyebrow-chip">Recommended Intervention</div>
-                    <h4 style={{ fontSize: 18, fontWeight: 800, margin: '8px 0 12px' }}>
+                  <div className="strategy-recommendation-block">
+                    <span className="strategy-block-tag font-mono">PROPOSED INTERVENTION</span>
+                    <h3 className="strategy-action-title font-mono">
                       {result.recommendation.recommendation.type.replaceAll('_', ' ').toUpperCase()}
-                    </h4>
+                    </h3>
 
-                    <div className="modal-detail-box">
-                      <div className="modal-detail-row">
-                        <span className="label">Expected Recovery Rate:</span>
-                        <span className="value text-emerald">
+                    <div className="strategy-economics-grid">
+                      <div className="econ-stat">
+                        <span className="econ-label font-mono">ESTIMATED RECOVERY RATE</span>
+                        <strong className="econ-val font-mono text-emerald">
                           {Math.round(result.recommendation.recommendation.expected_recovery_rate * 100)}%
-                        </span>
+                        </strong>
                       </div>
-                      <div className="modal-detail-row">
-                        <span className="label">Net Expected Value:</span>
-                        <span className="value text-amber font-mono">
+                      <div className="econ-stat">
+                        <span className="econ-label font-mono">NET EXPECTED VALUE (EV)</span>
+                        <strong className="econ-val font-mono text-amber">
                           {formatCurrency(result.recommendation.recommendation.expected_value_paise)}
-                        </span>
+                        </strong>
                       </div>
-                      <div className="modal-detail-row">
-                        <span className="label">Strategy Model Score:</span>
-                        <span className="value font-mono">
+                      <div className="econ-stat">
+                        <span className="econ-label font-mono">STRATEGY MODEL SCORE</span>
+                        <strong className="econ-val font-mono">
                           {(result.recommendation.strategy_score * 100).toFixed(0)}/100
-                        </span>
+                        </strong>
+                      </div>
+                      <div className="econ-stat">
+                        <span className="econ-label font-mono">EXECUTION COST</span>
+                        <strong className="econ-val font-mono text-muted">
+                          {formatCurrency(result.recommendation.recommendation.execution_cost_paise)}
+                        </strong>
                       </div>
                     </div>
 
-                    <div style={{ marginTop: 14, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                      <strong>Strategic Rationale:</strong> {result.recommendation.recommendation.rationale}
+                    <div className="strategy-rationale-box">
+                      <span className="rationale-label font-mono">STRATEGY RATIONALE:</span>
+                      <p className="rationale-text">{result.recommendation.recommendation.rationale}</p>
                     </div>
 
                     {result.recommendation.assumptions.length > 0 && (
-                      <div style={{ marginTop: 10, fontSize: 12, color: 'var(--text-muted)' }}>
-                        <strong>Assumptions:</strong> {result.recommendation.assumptions.join(' · ')}
+                      <div className="strategy-assumptions-list font-mono">
+                        <span className="assumptions-heading">MODEL ASSUMPTIONS:</span>
+                        <ul>
+                          {result.recommendation.assumptions.map((asm, i) => (
+                            <li key={i}>{asm}</li>
+                          ))}
+                        </ul>
                       </div>
                     )}
                   </div>
 
-                  {/* Deterministic Policy Gate Box */}
-                  <div className={`policy-gate-card ${result.policy.action}`} id="policy">
-                    <div className="policy-gate-top">
-                      <span className="policy-title">
-                        POLICY DECISION: {result.policy.action.toUpperCase()}
+                  {/* Deterministic Policy Check Card */}
+                  <div className={`policy-decision-card ${result.policy.action}`} id="policy">
+                    <div className="policy-decision-header font-mono">
+                      <span className="policy-status-label">
+                        POLICY VERDICT: {result.policy.action.toUpperCase()}
                       </span>
-                      <span className={`badge ${result.policy.allowed ? 'badge-green' : 'badge-yellow'}`}>
-                        {result.policy.allowed ? 'PASSED GATE' : 'BLOCKED'}
+                      <span className="policy-result-badge">
+                        {result.policy.allowed ? 'PASSED ALL CHECKS' : 'MANUAL APPROVAL REQUIRED'}
                       </span>
                     </div>
-                    <p className="policy-reasons">{result.policy.reasons.join(' ')}</p>
+
+                    <ul className="policy-reasons-checklist">
+                      {result.policy.reasons.map((reason, idx) => (
+                        <li key={idx} className="policy-check-item">
+                          <span className="check-bullet">✓</span>
+                          <span>{reason}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="action-button-row">
+                    <button
+                      type="button"
+                      className="btn-institutional-primary"
+                      onClick={() => handleOpenRecovery()}
+                      disabled={!result.policy.allowed}
+                      style={{ width: '100%' }}
+                    >
+                      Trigger Policy-Approved Intervention →
+                    </button>
                   </div>
                 </>
               ) : (
-                <div className="strategy-box">
-                  <div className="opp-item-title">Strategy Engine Idle</div>
-                  <div className="opp-item-desc">
-                    Click &ldquo;Run Revenue Intelligence Audit&rdquo; to evaluate merchant transactions.
-                  </div>
+                <div className="empty-state-entry">
+                  <p className="empty-text">Click &ldquo;Evaluate Revenue Opportunities&rdquo; to begin decisioning.</p>
                 </div>
               )}
             </div>
@@ -416,64 +486,74 @@ export default function Home() {
         </section>
 
         {/* DECISION AUDIT TRAIL */}
-        <section className="card audit-section" id="audit">
-          <div className="section-head">
-            <h3 className="section-title">Append-Only Decision Audit Trail</h3>
-            <p className="section-desc">
-              Every ingestion, opportunity detection, AI ranking, and policy verification is immutably logged.
-            </p>
-          </div>
-
-          <div className="audit-toolbar">
-            <input
-              type="search"
-              placeholder="Search actors, actions, metadata..."
-              className="audit-search-input"
-              value={auditSearch}
-              onChange={(e) => setAuditSearch(e.target.value)}
-              aria-label="Filter audit events"
-            />
-
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                {filteredAuditEvents.length} events logged
-              </span>
-              <button type="button" className="btn-secondary" style={{ padding: '6px 14px', minHeight: 36, fontSize: 12 }} onClick={exportAuditJson}>
+        <section className="institutional-panel audit-panel-container" id="audit">
+          <div className="panel-header">
+            <div className="panel-header-left">
+              <span className="panel-tag font-mono">IMMUTABLE LOG</span>
+              <h2 className="panel-title">Decision Audit Trail</h2>
+            </div>
+            <div className="audit-header-actions font-mono">
+              <span className="text-muted">{filteredAuditEvents.length} Recorded Events</span>
+              <button type="button" className="btn-institutional-secondary btn-sm" onClick={exportAuditJson}>
                 📥 Export JSON
               </button>
             </div>
           </div>
 
-          <div className="audit-list">
-            {filteredAuditEvents.map((ev) => (
-              <div key={ev.id} className="audit-row">
-                <div className="audit-time">
-                  {new Date(ev.timestamp).toLocaleTimeString('en-IN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                  })}
-                </div>
-                <div className="audit-actor text-amber">{ev.actor}</div>
-                <div>
-                  <span className="audit-action-tag">{ev.action}</span>
-                </div>
-                <div className="audit-meta-json" title={JSON.stringify(ev.metadata)}>
-                  {JSON.stringify(ev.metadata)}
-                </div>
-              </div>
-            ))}
+          <div className="audit-search-bar">
+            <input
+              type="search"
+              placeholder="Filter audit events by actor, action, or metadata..."
+              className="institutional-search-input font-mono"
+              value={auditSearch}
+              onChange={(e) => setAuditSearch(e.target.value)}
+              aria-label="Filter audit events"
+            />
+          </div>
 
-            {filteredAuditEvents.length === 0 && (
-              <div className="opp-item">
-                <div className="opp-item-desc">No matching audit events found.</div>
-              </div>
-            )}
+          <div className="audit-table-wrapper">
+            <table className="audit-data-table font-mono">
+              <thead>
+                <tr>
+                  <th style={{ width: '110px' }}>TIMESTAMP</th>
+                  <th style={{ width: '90px' }}>ACTOR</th>
+                  <th style={{ width: '180px' }}>ACTION</th>
+                  <th>STRUCTURED METADATA</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredAuditEvents.map((ev) => (
+                  <tr key={ev.id}>
+                    <td className="text-muted">
+                      {new Date(ev.timestamp).toLocaleTimeString('en-IN', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                      })}
+                    </td>
+                    <td>
+                      <span className={`actor-tag actor-${ev.actor}`}>{ev.actor}</span>
+                    </td>
+                    <td className="action-cell">{ev.action}</td>
+                    <td className="metadata-cell" title={JSON.stringify(ev.metadata)}>
+                      {JSON.stringify(ev.metadata)}
+                    </td>
+                  </tr>
+                ))}
+
+                {filteredAuditEvents.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="empty-table-cell">
+                      No matching audit records found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </section>
       </main>
 
-      {/* RECOVERY ACTION MODAL */}
       <RecoveryModal
         isOpen={isRecoveryModalOpen}
         onClose={() => setIsRecoveryModalOpen(false)}
@@ -483,7 +563,6 @@ export default function Home() {
         onActionExecuted={handleActionExecuted}
       />
 
-      {/* STICKY MOBILE CTA BAR */}
       <StickyMobileBar
         onRunAudit={() => analyze(selectedPreset)}
         loading={loading}

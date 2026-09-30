@@ -22,7 +22,7 @@ export const RecoveryModal: React.FC<RecoveryModalProps> = ({
 }) => {
   const [executing, setExecuting] = useState(false);
   const [executed, setExecuted] = useState(false);
-  const [copyStatus, setCopyStatus] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   if (!isOpen || !opportunity) return null;
 
@@ -30,112 +30,134 @@ export const RecoveryModal: React.FC<RecoveryModalProps> = ({
 
   const handleExecute = async () => {
     setExecuting(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 600));
     setExecuting(false);
     setExecuted(true);
-    onActionExecuted(`Executed ${opportunity.recommended_action} for ₹${Math.round(opportunity.revenue_at_risk_paise / 100).toLocaleString('en-IN')}`);
+    onActionExecuted(
+      `Dispatched follow-up order for ₹${Math.round(opportunity.revenue_at_risk_paise / 100).toLocaleString('en-IN')} via Razorpay Orders API`
+    );
   };
 
   const copyLink = () => {
     navigator.clipboard.writeText(recoveryLink);
-    setCopyStatus(true);
-    setTimeout(() => setCopyStatus(false), 2000);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div className="modal-card">
-        <div className="modal-header">
-          <div className="modal-title-wrap">
-            <span className="modal-tag">⚡ VALIDATED EXECUTION GATE</span>
-            <h3 id="modal-title" className="modal-title">
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-action-title">
+      <div className="modal-dialog">
+        <div className="modal-header-institutional">
+          <div className="modal-title-group">
+            <span className="modal-badge-system font-mono">POLICY GATEWAY // ACTION DISPATCH</span>
+            <h3 id="modal-action-title" className="modal-heading">
               {opportunity.title}
             </h3>
           </div>
-          <button type="button" className="modal-close-btn" onClick={onClose} aria-label="Close modal">
+          <button type="button" className="btn-modal-close" onClick={onClose} aria-label="Close dialog">
             ✕
           </button>
         </div>
 
-        <div className="modal-body">
-          <div className="modal-kpi-grid">
-            <div className="modal-kpi-item">
-              <span>Revenue At Risk</span>
-              <strong className="text-amber">
+        <div className="modal-body-content">
+          {/* Top Key Performance Metrics */}
+          <div className="modal-spec-grid">
+            <div className="spec-tile">
+              <span className="spec-tile-label">REVENUE AT RISK</span>
+              <span className="spec-tile-val font-mono text-amber">
                 ₹{(opportunity.revenue_at_risk_paise / 100).toLocaleString('en-IN')}
-              </strong>
+              </span>
             </div>
-            <div className="modal-kpi-item">
-              <span>Expected Recovery</span>
-              <strong className="text-emerald">
-                {recommendation ? `${Math.round(recommendation.recommendation.expected_recovery_rate * 100)}%` : '65%'}
-              </strong>
+
+            <div className="spec-tile">
+              <span className="spec-tile-label">ESTIMATED RECOVERY</span>
+              <span className="spec-tile-val font-mono text-emerald">
+                {recommendation
+                  ? `${Math.round(recommendation.recommendation.expected_recovery_rate * 100)}%`
+                  : '65%'}
+              </span>
             </div>
-            <div className="modal-kpi-item">
-              <span>Policy Status</span>
-              <strong className={policy?.action === 'execute' ? 'text-emerald' : 'text-amber'}>
+
+            <div className="spec-tile">
+              <span className="spec-tile-label">POLICY VERIFICATION</span>
+              <span className={`spec-tile-val font-mono ${policy?.action === 'execute' ? 'text-emerald' : 'text-amber'}`}>
                 {policy ? policy.action.toUpperCase() : 'VERIFIED'}
-              </strong>
+              </span>
             </div>
           </div>
 
-          <div className="modal-detail-box">
-            <div className="modal-detail-row">
-              <span className="label">Recommended Action:</span>
-              <span className="value font-mono">{opportunity.recommended_action.replaceAll('_', ' ')}</span>
-            </div>
-            <div className="modal-detail-row">
-              <span className="label">Deterministic Rationale:</span>
-              <span className="value">{opportunity.description}</span>
-            </div>
-            {policy && (
-              <div className="modal-detail-row">
-                <span className="label">Policy Verification:</span>
-                <span className="value text-muted">{policy.reasons.join(' ')}</span>
-              </div>
-            )}
+          {/* Structured Parameter Table */}
+          <div className="modal-table-wrap">
+            <table className="modal-data-table">
+              <tbody>
+                <tr>
+                  <td className="table-spec-label">Execution Channel</td>
+                  <td className="table-spec-val font-mono">Razorpay Orders &amp; Hosted Checkout</td>
+                </tr>
+                <tr>
+                  <td className="table-spec-label">Recommended Action</td>
+                  <td className="table-spec-val font-mono">{opportunity.recommended_action.replaceAll('_', ' ')}</td>
+                </tr>
+                <tr>
+                  <td className="table-spec-label">Deterministic Evidence</td>
+                  <td className="table-spec-val">{opportunity.description}</td>
+                </tr>
+                {policy && (
+                  <tr>
+                    <td className="table-spec-label">Policy Constraints</td>
+                    <td className="table-spec-val text-muted">{policy.reasons.join(' ')}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
 
           {executed ? (
-            <div className="modal-success-box">
-              <div className="success-icon">✓</div>
-              <div>
-                <strong>Recovery Follow-up Generated!</strong>
-                <p>
-                  A verified follow-up payment link has been staged for the affected customer. The
-                  system will listen for Razorpay payment webhooks to measure outcome.
+            <div className="modal-confirmation-banner">
+              <div className="confirm-icon">✓</div>
+              <div className="confirm-text-wrap">
+                <strong className="confirm-title">Follow-up Recovery Link Generated</strong>
+                <p className="confirm-body">
+                  A compliant follow-up payment link has been created and staged. When the customer
+                  completes payment, the Razorpay webhook listener will measure and reconcile the outcome.
                 </p>
-                <div className="copy-link-bar">
-                  <input type="text" readOnly value={recoveryLink} className="link-input" />
-                  <button type="button" onClick={copyLink} className="copy-btn">
-                    {copyStatus ? 'Copied!' : 'Copy Link'}
+                <div className="checkout-link-container font-mono">
+                  <input type="text" readOnly value={recoveryLink} className="checkout-input font-mono" />
+                  <button type="button" onClick={copyLink} className="btn-copy-checkout">
+                    {copied ? 'Copied ✓' : 'Copy Link'}
                   </button>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="modal-info-note">
-              <span className="info-icon">ℹ</span>
+            <div className="modal-notice-banner">
+              <span className="notice-icon">ℹ</span>
               <span>
-                MerchantPulse adheres strictly to Razorpay's integration principle: we initiate a
-                valid follow-up order rather than triggering arbitrary blind retries.
+                <strong>Razorpay Ecosystem Principle:</strong> MerchantPulse initiates a valid follow-up order
+                flow rather than issuing arbitrary retry API calls.
               </span>
             </div>
           )}
         </div>
 
-        <div className="modal-footer">
-          <button type="button" className="btn-secondary" onClick={onClose}>
-            {executed ? 'Done' : 'Cancel'}
+        <div className="modal-footer-institutional">
+          <button type="button" className="btn-institutional-secondary" onClick={onClose}>
+            {executed ? 'Close' : 'Cancel'}
           </button>
           {!executed && (
             <button
               type="button"
-              className="btn-primary"
+              className="btn-institutional-primary"
               onClick={handleExecute}
               disabled={executing || policy?.action === 'reject'}
             >
-              {executing ? 'Executing Action...' : 'Confirm & Execute Follow-up'}
+              {executing ? (
+                <>
+                  <span className="spinner-xs" /> Dispatched...
+                </>
+              ) : (
+                'Confirm & Execute Flow →'
+              )}
             </button>
           )}
         </div>

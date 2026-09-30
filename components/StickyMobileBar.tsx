@@ -18,38 +18,38 @@ export const StickyMobileBar: React.FC<StickyMobileBarProps> = ({
   hasRecoveryAction = false,
 }) => {
   return (
-    <div className="sticky-mobile-bar" role="region" aria-label="Quick action bar">
-      <div className="sticky-mobile-content">
-        <div className="sticky-mobile-info">
-          <span className="sticky-label">Revenue at Risk</span>
-          <span className="sticky-val">
+    <div className="sticky-mobile-dock" role="region" aria-label="Mobile quick action bar">
+      <div className="dock-inner">
+        <div className="dock-stat-group">
+          <span className="dock-stat-label font-mono">REVENUE AT RISK</span>
+          <span className="dock-stat-val font-mono">
             {revenueAtRisk > 0
               ? `₹${Math.round(revenueAtRisk / 100).toLocaleString('en-IN')}`
               : '₹15,597'}
           </span>
         </div>
 
-        <div className="sticky-mobile-btn-group">
+        <div className="dock-action-group">
           {hasRecoveryAction && onOpenRecovery ? (
             <button
               type="button"
-              className="sticky-action-btn primary"
+              className="btn-dock-action primary"
               onClick={onOpenRecovery}
               aria-label="Execute payment recovery flow"
             >
-              ⚡ Recover Now
+              ⚡ Recover Flow
             </button>
           ) : (
             <button
               type="button"
-              className="sticky-action-btn primary"
+              className="btn-dock-action primary"
               onClick={onRunAudit}
               disabled={loading}
               aria-label="Run revenue audit"
             >
               {loading ? (
                 <>
-                  <span className="spinner-xs" /> Analyzing...
+                  <span className="spinner-xs" /> Running...
                 </>
               ) : (
                 <>⚡ Run Audit</>
