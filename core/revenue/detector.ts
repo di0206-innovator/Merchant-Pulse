@@ -1,4 +1,4 @@
-import { hashString, generateRandomHex } from '@/lib/cryptoUtils';
+import { hashString } from '@/lib/cryptoUtils';
 import { PaymentEntity, OrderEntity } from '../domain/payment';
 import { RevenueOpportunity, OpportunityType, OpportunityEvidence } from '../domain/opportunity';
 import { calculateExpectedValue } from './expectedValue';
@@ -6,6 +6,8 @@ import { calculatePriorityScore } from './prioritizer';
 import { RevenueFactStore } from './factStore';
 
 export class RevenueOpportunityDetector {
+  private sequence = 0;
+
   constructor(private factStore: RevenueFactStore) {}
 
   /**
@@ -16,14 +18,19 @@ export class RevenueOpportunityDetector {
     eventId: string,
     merchantId: string = 'rzp_merchant_main'
   ): RevenueOpportunity | null {
-    // Basic criteria: payment must be in failed status and have positive amount
-    if (payment.status !== 'failed' || payment.amountPaise <= 0) {
+    // Basic criteria: payment must be in failed status and have positive safe integer amount
+    if (
+      !payment ||
+      payment.status !== 'failed' ||
+      !Number.isSafeInteger(payment.amountPaise) ||
+      payment.amountPaise <= 0
+    ) {
       return null;
     }
 
     const customerKey = payment.contact || payment.email || '';
     const customer = customerKey ? this.factStore.getCustomer(customerKey) : undefined;
-    const consecutiveFailures = customer ? customer.failedOrders : 1;
+    const consecutiveFailures = customer ? Math.max(1, customer.failedOrders) : 1;
     const customerLtvPaise = customer ? customer.ltvPaise : 0;
 
     // Check gateway degradation for this payment's method/bank
@@ -80,7 +87,8 @@ export class RevenueOpportunityDetector {
       createdAtSeconds: now,
     });
 
-    const hash = hashString(`${payment.id}_${now}`);
+    const seq = this.sequence++;
+    const hash = hashString(`${payment.id}_${eventId}_${now}_${seq}`).slice(0, 12);
     const opportunityId = `opp_${hash}`;
 
     return {
@@ -114,7 +122,12 @@ export class RevenueOpportunityDetector {
     customerContact?: string,
     merchantId: string = 'rzp_merchant_main'
   ): RevenueOpportunity | null {
-    if (order.status !== 'created' || order.amountPaise <= 0) {
+    if (
+      !order ||
+      order.status !== 'created' ||
+      !Number.isSafeInteger(order.amountPaise) ||
+      order.amountPaise <= 0
+    ) {
       return null;
     }
 
@@ -148,7 +161,8 @@ export class RevenueOpportunityDetector {
       createdAtSeconds: now,
     });
 
-    const hash = hashString(`${order.id}_${now}`);
+    const seq = this.sequence++;
+    const hash = hashString(`${order.id}_${eventId}_${now}_${seq}`).slice(0, 12);
     const opportunityId = `opp_${hash}`;
 
     return {
@@ -181,11 +195,15 @@ export class RevenueOpportunityDetector {
     eventId: string,
     merchantId: string = 'rzp_merchant_main'
   ): RevenueOpportunity | null {
+    if (!payment || !Number.isSafeInteger(payment.amountPaise) || payment.amountPaise <= 0) {
+      return null;
+    }
+
     // Only applies if payment is financially successful (captured/authorized) but order is missing or not marked paid
     const isPaymentSuccess = payment.status === 'captured' || payment.status === 'authorized';
     const isOrderMissingOrUnpaid = !order || order.status !== 'paid';
 
-    if (!isPaymentSuccess || !isOrderMissingOrUnpaid || payment.amountPaise <= 0) {
+    if (!isPaymentSuccess || !isOrderMissingOrUnpaid) {
       return null;
     }
 
@@ -219,7 +237,8 @@ export class RevenueOpportunityDetector {
       createdAtSeconds: now,
     });
 
-    const hash = hashString(`${payment.id}_mismatch_${now}`);
+    const seq = this.sequence++;
+    const hash = hashString(`${payment.id}_mismatch_${eventId}_${now}_${seq}`).slice(0, 12);
     const opportunityId = `opp_${hash}`;
 
     return {

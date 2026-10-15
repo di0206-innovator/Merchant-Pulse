@@ -28,35 +28,78 @@ export const PRESET_USERS: Record<string, UserProfile> = {
   },
 };
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_ACTIVE_SESSIONS = 5000;
+const MAX_API_KEYS = 500;
+
 export class AuthManager {
   private apiKeys: Map<string, ApiKey> = new Map();
   private activeSessions: Map<string, { user: UserProfile; expiresAt: number }> = new Map();
 
   constructor() {
-    // Seed default demo API key
-    this.createApiKey('Production Razorpay Bridge Key', 'OWNER', 'mp_live_k8j7h6g5f4e3d2c1');
+    // Seed default demo API key in non-production environments
+    if (process.env.NODE_ENV !== 'production') {
+      this.createApiKey('Production Razorpay Bridge Key', 'OWNER', 'mp_live_k8j7h6g5f4e3d2c1');
+    }
   }
 
-  public authenticateSession(token: string): UserProfile | null {
-    const session = this.activeSessions.get(token);
-    if (!session) {
-      // Default to Owner in demo sandbox mode if token is empty
-      return PRESET_USERS['admin@merchantpulse.io'];
-    }
+  public authenticateSession(token?: string | null): UserProfile | null {
+    const trimmedToken = typeof token === 'string' ? token.trim() : '';
 
-    if (Date.now() > session.expiresAt) {
-      this.activeSessions.delete(token);
+    if (!trimmedToken) {
+      // Allow sandbox owner fallback only outside strict production
+      if (process.env.NODE_ENV !== 'production') {
+        return PRESET_USERS['admin@merchantpulse.io'];
+      }
       return null;
     }
 
-    return session.user;
+    const session = this.activeSessions.get(trimmedToken);
+    if (session) {
+      if (Date.now() > session.expiresAt) {
+        this.activeSessions.delete(trimmedToken);
+        return null;
+      }
+      return session.user;
+    }
+
+    // Also allow authenticating via a valid merchant API key
+    const verifiedKey = this.verifyApiKey(trimmedToken);
+    if (verifiedKey) {
+      return {
+        id: `usr_key_${verifiedKey.id}`,
+        name: verifiedKey.name,
+        email: `${verifiedKey.role.toLowerCase()}@merchantpulse.io`,
+        role: verifiedKey.role,
+        merchantId: verifiedKey.merchantId,
+        permissions: ROLE_PERMISSIONS[verifiedKey.role] || ROLE_PERMISSIONS.AUDITOR,
+      };
+    }
+
+    // Non-empty invalid or forged token must always be rejected
+    return null;
   }
 
   public createSession(email: string): { token: string; user: UserProfile } | null {
-    const user = PRESET_USERS[email] || {
-      id: `usr_${hashString(email)}`,
-      name: email.split('@')[0],
-      email,
+    if (typeof email !== 'string') {
+      return null;
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (
+      !normalizedEmail ||
+      normalizedEmail.length > 254 ||
+      !EMAIL_REGEX.test(normalizedEmail)
+    ) {
+      return null;
+    }
+
+    this.pruneSessionsIfNeeded();
+
+    const user = PRESET_USERS[normalizedEmail] || {
+      id: `usr_${hashString(normalizedEmail)}`,
+      name: normalizedEmail.split('@')[0].replace(/[^a-zA-Z0-9._-]/g, '') || 'Merchant User',
+      email: normalizedEmail,
       role: 'OPS_MANAGER' as UserRole,
       merchantId: 'rzp_merchant_pulse',
       permissions: ROLE_PERMISSIONS.OPS_MANAGER,
@@ -69,19 +112,46 @@ export class AuthManager {
     return { token, user };
   }
 
+  private pruneSessionsIfNeeded(): void {
+    if (this.activeSessions.size < MAX_ACTIVE_SESSIONS) {
+      return;
+    }
+    const now = Date.now();
+    for (const [key, session] of this.activeSessions.entries()) {
+      if (now > session.expiresAt) {
+        this.activeSessions.delete(key);
+      }
+    }
+    while (this.activeSessions.size >= MAX_ACTIVE_SESSIONS) {
+      const oldestKey = this.activeSessions.keys().next().value;
+      if (!oldestKey) break;
+      this.activeSessions.delete(oldestKey);
+    }
+  }
+
   public createApiKey(name: string, role: UserRole = 'OWNER', customKey?: string): { apiKey: ApiKey; secret: string } {
-    const secret = customKey || `mp_${role === 'OWNER' ? 'live' : 'test'}_${generateRandomHex(24)}`;
+    const safeName = (typeof name === 'string' && name.trim())
+      ? name.trim().slice(0, 128)
+      : 'Merchant API Key';
+    const validRole: UserRole = ROLE_PERMISSIONS[role] ? role : 'AUDITOR';
+
+    if (this.apiKeys.size >= MAX_API_KEYS) {
+      const oldestKey = this.apiKeys.keys().next().value;
+      if (oldestKey) this.apiKeys.delete(oldestKey);
+    }
+
+    const secret = customKey || `mp_${validRole === 'OWNER' ? 'live' : 'test'}_${generateRandomHex(24)}`;
     const hashedKey = hashString(secret);
     const id = `key_${generateRandomHex(12)}`;
 
     const apiKey: ApiKey = {
       id,
-      name,
+      name: safeName,
       keyPrefix: `${secret.slice(0, 10)}...`,
       hashedKey,
       merchantId: 'rzp_merchant_pulse',
       createdAt: Math.floor(Date.now() / 1000),
-      role,
+      role: validRole,
     };
 
     this.apiKeys.set(hashedKey, apiKey);
@@ -89,7 +159,10 @@ export class AuthManager {
   }
 
   public verifyApiKey(secret: string): ApiKey | null {
-    const hashed = hashString(secret);
+    if (typeof secret !== 'string' || !secret.trim()) {
+      return null;
+    }
+    const hashed = hashString(secret.trim());
     const key = this.apiKeys.get(hashed);
     if (!key) return null;
 
@@ -102,7 +175,10 @@ export class AuthManager {
     return Array.from(this.apiKeys.values());
   }
 
-  public hasPermission(user: UserProfile, permission: string): boolean {
+  public hasPermission(user: UserProfile | null | undefined, permission: string): boolean {
+    if (!user || !Array.isArray(user.permissions) || typeof permission !== 'string') {
+      return false;
+    }
     return user.permissions.includes(permission) || user.role === 'OWNER';
   }
 }

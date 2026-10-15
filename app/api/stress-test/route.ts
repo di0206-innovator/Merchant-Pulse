@@ -10,10 +10,12 @@ export async function POST(req: NextRequest) {
     let count = 500;
     try {
       const body = await req.json();
-      if (body.count && typeof body.count === 'number') {
-        count = Math.min(1000, Math.max(50, body.count));
+      if (body && typeof body.count === 'number' && Number.isFinite(body.count)) {
+        count = Math.min(1000, Math.max(50, Math.floor(body.count)));
       }
-    } catch {}
+    } catch {
+      // Default to 500 if body is empty or malformed
+    }
 
     const pipeline = getGlobalPipeline();
     const concurrentEngine = new ConcurrentEventEngine(pipeline);
@@ -29,7 +31,7 @@ export async function POST(req: NextRequest) {
       const method = methods[i % methods.length];
       const bank = method === 'netbanking' ? banks[i % banks.length] : undefined;
       const isFailure = i % 3 !== 0; // 66% failure rate to stress test detector & EV math
-      const amountPaise = (Math.floor(Math.random() * 450) + 20) * 10000; // ₹2,000 to ₹47,000
+      const amountPaise = (((i * 37) % 450) + 20) * 10000; // ₹2,000 to ₹47,000
 
       const payment: PaymentEntity = {
         id: `pay_stress_${now}_${i.toString().padStart(4, '0')}`,
@@ -65,6 +67,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'Stress test execution failed' }, { status: 500 });
+    console.error('[Stress Test API Error]:', err);
+    return NextResponse.json({ error: 'Stress test execution failed' }, { status: 500 });
   }
 }

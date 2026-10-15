@@ -38,23 +38,44 @@ export const INTERVENTION_COSTS = {
  * between 0.05 and 0.95 based on objective payment and customer facts.
  */
 export function calculateRecoveryProbability(factors: ProbabilityFactors): number {
-  let baseP = factors.failureCode && BASE_RECOVERY_PROBABILITIES[factors.failureCode]
-    ? BASE_RECOVERY_PROBABILITIES[factors.failureCode]
+  const safeFactors = factors || {};
+  const hasKnownCode =
+    typeof safeFactors.failureCode === 'string' &&
+    Object.prototype.hasOwnProperty.call(BASE_RECOVERY_PROBABILITIES, safeFactors.failureCode);
+
+  let baseP = hasKnownCode
+    ? BASE_RECOVERY_PROBABILITIES[safeFactors.failureCode!]
     : BASE_RECOVERY_PROBABILITIES.DEFAULT;
 
-  // Repeat loyal customer boost (+0.08 if LTV > ₹10,000)
-  if (factors.customerLtvPaise && factors.customerLtvPaise >= 1000000) {
+  // Repeat loyal customer boost (+0.08 if LTV >= ₹10,000)
+  if (
+    typeof safeFactors.customerLtvPaise === 'number' &&
+    Number.isFinite(safeFactors.customerLtvPaise) &&
+    safeFactors.customerLtvPaise >= 1000000
+  ) {
     baseP += 0.08;
   }
 
   // Consecutive failure penalty (-0.10 for each failure beyond the 1st)
-  if (factors.consecutiveFailures && factors.consecutiveFailures > 1) {
-    baseP -= Math.min(0.25, (factors.consecutiveFailures - 1) * 0.10);
+  if (
+    typeof safeFactors.consecutiveFailures === 'number' &&
+    Number.isFinite(safeFactors.consecutiveFailures) &&
+    safeFactors.consecutiveFailures > 1
+  ) {
+    baseP -= Math.min(0.25, (safeFactors.consecutiveFailures - 1) * 0.10);
   }
 
-  // Intent modifier
-  if (factors.intentScore !== undefined) {
-    baseP = baseP * (0.8 + (0.4 * factors.intentScore));
+  // Intent modifier (bounded to [0, 1])
+  if (
+    typeof safeFactors.intentScore === 'number' &&
+    Number.isFinite(safeFactors.intentScore)
+  ) {
+    const clampedIntent = Math.min(1, Math.max(0, safeFactors.intentScore));
+    baseP = baseP * (0.8 + (0.4 * clampedIntent));
+  }
+
+  if (!Number.isFinite(baseP)) {
+    baseP = BASE_RECOVERY_PROBABILITIES.DEFAULT;
   }
 
   // Bound probability between 5% and 95%
@@ -70,19 +91,24 @@ export function calculateExpectedValue(
   factors: ProbabilityFactors,
   includeFatiguePenalty: boolean = true
 ): ExpectedValueMetrics {
+  const safeAmountPaise =
+    typeof amountPaise === 'number' && Number.isFinite(amountPaise) && amountPaise > 0
+      ? Math.min(Number.MAX_SAFE_INTEGER, Math.round(amountPaise))
+      : 0;
+
   const pSuccess = calculateRecoveryProbability(factors);
-  
+
   const estimatedCost = INTERVENTION_COSTS.SMS_NOTIFICATION_PAISE +
     INTERVENTION_COSTS.EMAIL_NOTIFICATION_PAISE +
     INTERVENTION_COSTS.RAZORPAY_LINK_OVERHEAD_PAISE;
 
   const fatiguePenalty = includeFatiguePenalty ? INTERVENTION_COSTS.FATIGUE_PENALTY_PAISE : 0;
 
-  const grossExpectedRecoveryPaise = Math.round(amountPaise * pSuccess);
+  const grossExpectedRecoveryPaise = Math.round(safeAmountPaise * pSuccess);
   const netExpectedValuePaise = grossExpectedRecoveryPaise - estimatedCost - fatiguePenalty;
 
   return {
-    recoverableGmvPaise: amountPaise,
+    recoverableGmvPaise: safeAmountPaise,
     pSuccess,
     estimatedInterventionCostPaise: estimatedCost,
     customerFatiguePenaltyPaise: fatiguePenalty,

@@ -1,3 +1,4 @@
+import { hashString } from '@/lib/cryptoUtils';
 import { PaymentEntity, OrderEntity, CustomerProfile } from '../domain/payment';
 
 export interface MethodHealthStats {
@@ -17,10 +18,20 @@ export class RevenueFactStore {
   private processedEventIds: Set<string> = new Set();
 
   /**
-   * Registers a payment and updates related customer and order stats.
+   * Registers a payment and updates related customer and order stats idempotently.
    */
   public recordPayment(payment: PaymentEntity): void {
+    if (!payment || typeof payment.id !== 'string' || !payment.id.trim()) {
+      return;
+    }
+
+    const previous = this.payments.get(payment.id);
+    const isDuplicateSameStatus = previous && previous.status === payment.status;
     this.payments.set(payment.id, payment);
+
+    if (isDuplicateSameStatus) {
+      return;
+    }
 
     // Update customer stats if contact/email present
     const customerKey = payment.contact || payment.email;
@@ -28,7 +39,7 @@ export class RevenueFactStore {
       let customer = this.customers.get(customerKey);
       if (!customer) {
         customer = {
-          id: `cust_${Buffer.from(customerKey).toString('hex').slice(0, 12)}`,
+          id: `cust_${hashString(customerKey).slice(0, 12)}`,
           email: payment.email,
           contact: payment.contact,
           totalOrders: 0,
@@ -37,9 +48,13 @@ export class RevenueFactStore {
         };
       }
 
+      const safeAmount = Number.isFinite(payment.amountPaise) && payment.amountPaise > 0
+        ? Math.round(payment.amountPaise)
+        : 0;
+
       if (payment.status === 'captured') {
         customer.totalOrders += 1;
-        customer.ltvPaise += payment.amountPaise;
+        customer.ltvPaise += safeAmount;
       } else if (payment.status === 'failed') {
         customer.failedOrders += 1;
       }
@@ -49,6 +64,9 @@ export class RevenueFactStore {
   }
 
   public recordOrder(order: OrderEntity): void {
+    if (!order || typeof order.id !== 'string' || !order.id.trim()) {
+      return;
+    }
     this.orders.set(order.id, order);
   }
 
@@ -108,7 +126,7 @@ export class RevenueFactStore {
     const stats: MethodHealthStats[] = [];
     for (const b of buckets.values()) {
       const failureRatePct = b.total > 0 ? Number(((b.failed / b.total) * 100).toFixed(1)) : 0;
-      // Mark degraded if >= 4 attempts and failure rate > 30%
+      // Mark degraded if >= 4 attempts and failure rate >= 30%
       const isDegraded = b.total >= 4 && failureRatePct >= 30;
 
       stats.push({

@@ -21,8 +21,20 @@ export interface PrioritizationInput {
  *            (0.20 * CustomerValueScore) + (0.15 * UrgencyScore) - FatiguePenalty
  */
 export function calculatePriorityScore(input: PrioritizationInput): PriorityMetrics {
-  const { expectedValue, evidence, amountPaise } = input;
-  const netEvInr = Math.max(0, expectedValue.netExpectedValuePaise / 100);
+  const expectedValue = input?.expectedValue || {
+    recoverableGmvPaise: 0,
+    pSuccess: 0.5,
+    estimatedInterventionCostPaise: 130,
+    customerFatiguePenaltyPaise: 500,
+    netExpectedValuePaise: 0,
+    isProfitable: false,
+  };
+  const evidence = input?.evidence || ({} as OpportunityEvidence);
+
+  const safeNetEvPaise = Number.isFinite(expectedValue.netExpectedValuePaise)
+    ? expectedValue.netExpectedValuePaise
+    : 0;
+  const netEvInr = Math.max(0, safeNetEvPaise / 100);
 
   // 1. Economic Value Score (0 - 100)
   // Maps Net EV: ₹0 -> 0, ₹1,000 -> 50, ₹5,000 -> 75, ₹25,000 -> 90, ₹50,000+ -> 100
@@ -42,10 +54,16 @@ export function calculatePriorityScore(input: PrioritizationInput): PriorityMetr
   }
 
   // 2. Recovery Probability Score (0 - 100)
-  const probabilityScore = Math.round(expectedValue.pSuccess * 100);
+  const safePSuccess = Number.isFinite(expectedValue.pSuccess)
+    ? Math.min(1, Math.max(0, expectedValue.pSuccess))
+    : 0.5;
+  const probabilityScore = Math.round(safePSuccess * 100);
 
   // 3. Customer Value / Loyalty Score (0 - 100)
-  const ltvInr = (evidence.customerLtvPaise || 0) / 100;
+  const safeLtvPaise = Number.isFinite(evidence.customerLtvPaise) && evidence.customerLtvPaise > 0
+    ? evidence.customerLtvPaise
+    : 0;
+  const ltvInr = safeLtvPaise / 100;
   let customerScore = 40; // baseline for new customer
   if (ltvInr >= 50000) {
     customerScore = 100;
@@ -59,8 +77,10 @@ export function calculatePriorityScore(input: PrioritizationInput): PriorityMetr
 
   // 4. Urgency Score (0 - 100)
   // Highest urgency when failure is fresh (< 30 min), decaying as age increases
-  let ageMinutes = evidence.checkoutAgeMinutes ?? 10;
-  if (input.createdAtSeconds) {
+  let ageMinutes = Number.isFinite(evidence.checkoutAgeMinutes) && (evidence.checkoutAgeMinutes as number) >= 0
+    ? (evidence.checkoutAgeMinutes as number)
+    : 10;
+  if (typeof input?.createdAtSeconds === 'number' && Number.isFinite(input.createdAtSeconds) && input.createdAtSeconds > 0) {
     const elapsedSeconds = Math.max(0, Math.floor(Date.now() / 1000) - input.createdAtSeconds);
     ageMinutes = Math.floor(elapsedSeconds / 60);
   }
@@ -78,8 +98,10 @@ export function calculatePriorityScore(input: PrioritizationInput): PriorityMetr
     urgencyScore = 30;
   }
 
-  // 5. Contact Fatigue Penalty (0 - 30 deduction)
-  const recentContacts = evidence.recentContactCount || 0;
+  // 5. Contact Fatigue Penalty (0 - 35 deduction)
+  const recentContacts = Number.isFinite(evidence.recentContactCount) && evidence.recentContactCount > 0
+    ? evidence.recentContactCount
+    : 0;
   const fatiguePenalty = Math.min(35, recentContacts * 15);
 
   // Weighted aggregation
@@ -90,10 +112,12 @@ export function calculatePriorityScore(input: PrioritizationInput): PriorityMetr
     0.15 * urgencyScore -
     fatiguePenalty;
 
+  const safeRawScore = Number.isFinite(rawScore) ? rawScore : 0;
+
   // If Net EV is negative or zero, cap priority score at 20
   const finalScore = !expectedValue.isProfitable
-    ? Math.min(20, Math.max(0, Math.round(rawScore * 0.2)))
-    : Math.min(100, Math.max(5, Math.round(rawScore)));
+    ? Math.min(20, Math.max(0, Math.round(safeRawScore * 0.2)))
+    : Math.min(100, Math.max(5, Math.round(safeRawScore)));
 
   let tier: PriorityTier = 'LOW';
   if (finalScore >= 85) {

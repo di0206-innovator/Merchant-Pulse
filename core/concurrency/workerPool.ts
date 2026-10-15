@@ -25,6 +25,12 @@ export class ConcurrentEventEngine {
     events: Array<{ payment: PaymentEntity; eventId: string }>,
     concurrencyLimit: number = 500
   ): Promise<ConcurrencyMetrics> {
+    const safeEvents = Array.isArray(events) ? events : [];
+    const safeConcurrencyLimit =
+      typeof concurrencyLimit === 'number' && Number.isFinite(concurrencyLimit) && concurrencyLimit > 0
+        ? Math.min(2000, Math.max(1, Math.floor(concurrencyLimit)))
+        : 500;
+
     const startTime = performance.now();
     const latencies: number[] = [];
     let successfulRequests = 0;
@@ -32,8 +38,8 @@ export class ConcurrentEventEngine {
 
     // Worker pool execution
     const chunks: Array<Array<{ payment: PaymentEntity; eventId: string }>> = [];
-    for (let i = 0; i < events.length; i += concurrencyLimit) {
-      chunks.push(events.slice(i, i + concurrencyLimit));
+    for (let i = 0; i < safeEvents.length; i += safeConcurrencyLimit) {
+      chunks.push(safeEvents.slice(i, i + safeConcurrencyLimit));
     }
 
     for (const chunk of chunks) {
@@ -63,21 +69,21 @@ export class ConcurrentEventEngine {
     };
 
     const throughputRps = totalDurationMs > 0
-      ? Number(((events.length / (totalDurationMs / 1000))).toFixed(1))
+      ? Number(((safeEvents.length / (totalDurationMs / 1000))).toFixed(1))
       : 0;
 
     return {
-      totalRequests: events.length,
+      totalRequests: safeEvents.length,
       successfulRequests,
       failedRequests,
-      concurrencyLevel: concurrencyLimit,
+      concurrencyLevel: safeConcurrencyLimit,
       totalDurationMs: Number(totalDurationMs.toFixed(2)),
       throughputRps,
       latencyP50Ms: getPercentile(50),
       latencyP95Ms: getPercentile(95),
       latencyP99Ms: getPercentile(99),
       maxLatencyMs: latencies.length > 0 ? Number(latencies[latencies.length - 1].toFixed(2)) : 0,
-      zeroDropGuarantee: failedRequests === 0 && successfulRequests === events.length,
+      zeroDropGuarantee: failedRequests === 0 && successfulRequests === safeEvents.length,
     };
   }
 }

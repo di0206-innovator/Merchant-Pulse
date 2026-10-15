@@ -1,3 +1,4 @@
+import { hashString } from '@/lib/cryptoUtils';
 import { RazorpayClientAdapter } from '../../integrations/razorpay/client';
 import { RevenueOpportunity } from '../domain/opportunity';
 import { StrategyRecommendation } from '../domain/strategy';
@@ -12,6 +13,7 @@ import { ExecutionIntentStore } from '../storage/interfaces';
 export class ActionDispatcher {
   private inFlightPromises: Map<string, Promise<ExecutionRecord>> = new Map();
   private inMemoryIntents: Map<string, ExecutionIntent> = new Map();
+  private executionSequence = 0;
 
   constructor(
     private razorpayClient: RazorpayClientAdapter,
@@ -53,7 +55,21 @@ export class ActionDispatcher {
     recommendation: StrategyRecommendation,
     intentKey: string
   ): Promise<ExecutionRecord> {
+    // Check persistent intent store if available before executing external side effects
+    if (this.intentStore) {
+      try {
+        const persisted = await this.intentStore.getIntent(intentKey);
+        if (persisted && persisted.state === 'EXECUTION_SUCCEEDED' && persisted.record) {
+          this.inMemoryIntents.set(intentKey, persisted);
+          return persisted.record;
+        }
+      } catch (err) {
+        console.warn('[ActionDispatcher] Persistent intent lookup warning:', err);
+      }
+    }
+
     const now = Math.floor(Date.now() / 1000);
+    const seq = this.executionSequence++;
 
     // Register initial IN_FLIGHT intent
     const initialIntent: ExecutionIntent = {
@@ -72,7 +88,7 @@ export class ActionDispatcher {
       });
     }
 
-    const executionId = `exec_${Buffer.from(`${opportunity.id}_${now}`).toString('hex').slice(0, 14)}`;
+    const executionId = `exec_${hashString(`${opportunity.id}_${now}_${seq}`).slice(0, 14)}`;
 
     if (recommendation.recommendedActionType === 'NO_ACTION' || recommendation.recommendedActionType === 'ESCALATE_TO_OPS') {
       const record = ExecutionRecordSchema.parse({
@@ -94,7 +110,7 @@ export class ActionDispatcher {
         recommendation.recommendedActionType === 'SEND_PAYMENT_REMINDER' ||
         recommendation.recommendedActionType === 'NOTIFY_ALTERNATIVE_METHOD'
       ) {
-        const referenceId = `mp_rec_${opportunity.id.slice(4)}`;
+        const referenceId = `mp_rec_${opportunity.id.replace(/^opp_/, '').slice(0, 28)}`;
         const amountInr = (opportunity.amountPaise / 100).toFixed(2);
         const description = recommendation.customerMessaging?.smsText
           ? `Order Recovery: ₹${amountInr}`

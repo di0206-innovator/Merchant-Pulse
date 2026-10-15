@@ -1,16 +1,16 @@
 import { createBrowserClient } from '@supabase/ssr';
 import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
 export function isSupabaseConfigured(): boolean {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return false;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) return false;
   if (
-    SUPABASE_URL.includes('your-project') ||
-    SUPABASE_URL.includes('example.supabase.co') ||
-    SUPABASE_ANON_KEY.includes('your_supabase_anon_key') ||
-    SUPABASE_ANON_KEY === 'dummy_anon_key_for_demo'
+    supabaseUrl.includes('your-project') ||
+    supabaseUrl.includes('example.supabase.co') ||
+    supabaseAnonKey.includes('your_supabase_anon_key') ||
+    supabaseAnonKey === 'dummy_anon_key_for_demo'
   ) {
     return false;
   }
@@ -26,10 +26,13 @@ export function createClient(): SupabaseClient | null {
     return null;
   }
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
   if (typeof window !== 'undefined') {
-    return createBrowserClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
+    return createBrowserClient(supabaseUrl, supabaseAnonKey);
   }
-  return createSupabaseClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
+  return createSupabaseClient(supabaseUrl, supabaseAnonKey);
 }
 
 export async function signInWithGoogle(redirectTo?: string) {
@@ -40,7 +43,18 @@ export async function signInWithGoogle(redirectTo?: string) {
   }
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
-  const targetRedirect = redirectTo || `${origin}/auth/callback`;
+  let targetRedirect = `${origin}/auth/callback`;
+
+  if (redirectTo && typeof redirectTo === 'string') {
+    try {
+      const parsed = new URL(redirectTo, origin);
+      if (parsed.origin === origin) {
+        targetRedirect = parsed.toString();
+      }
+    } catch {
+      // Fallback to default callback URL on invalid redirectTo
+    }
+  }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
