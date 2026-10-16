@@ -26,7 +26,7 @@ export class ConcurrentEventEngine {
     concurrencyLimit: number = 500
   ): Promise<ConcurrencyMetrics> {
     const safeEvents = Array.isArray(events) ? events : [];
-    const safeConcurrencyLimit =
+    const safeLimit =
       typeof concurrencyLimit === 'number' && Number.isFinite(concurrencyLimit) && concurrencyLimit > 0
         ? Math.min(2000, Math.max(1, Math.floor(concurrencyLimit)))
         : 500;
@@ -38,8 +38,8 @@ export class ConcurrentEventEngine {
 
     // Worker pool execution
     const chunks: Array<Array<{ payment: PaymentEntity; eventId: string }>> = [];
-    for (let i = 0; i < safeEvents.length; i += safeConcurrencyLimit) {
-      chunks.push(safeEvents.slice(i, i + safeConcurrencyLimit));
+    for (let i = 0; i < safeEvents.length; i += safeLimit) {
+      chunks.push(safeEvents.slice(i, i + safeLimit));
     }
 
     for (const chunk of chunks) {
@@ -76,7 +76,7 @@ export class ConcurrentEventEngine {
       totalRequests: safeEvents.length,
       successfulRequests,
       failedRequests,
-      concurrencyLevel: safeConcurrencyLimit,
+      concurrencyLevel: safeLimit,
       totalDurationMs: Number(totalDurationMs.toFixed(2)),
       throughputRps,
       latencyP50Ms: getPercentile(50),

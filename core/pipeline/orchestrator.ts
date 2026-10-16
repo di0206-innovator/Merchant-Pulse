@@ -36,7 +36,6 @@ export class RevenuePipelineOrchestrator {
   private policyConfig: MerchantPolicyConfig;
   private reconciliationEngine: FinancialReconciliationEngine;
   private storage?: StorageRepositories;
-  private decisionSequence = 0;
 
   private opportunities: Map<string, RevenueOpportunity> = new Map();
   private recommendations: Map<string, StrategyRecommendation> = new Map();
@@ -58,10 +57,6 @@ export class RevenuePipelineOrchestrator {
    * Primary ingestion handler for payment events (e.g. payment.failed, payment.captured)
    */
   public async handlePaymentEvent(payment: PaymentEntity, eventId: string): Promise<RevenueOpportunity | null> {
-    if (!payment || typeof payment.id !== 'string') {
-      return null;
-    }
-
     // 1. Ingest payment facts into Fact Store
     this.factStore.recordPayment(payment);
 
@@ -154,8 +149,7 @@ export class RevenuePipelineOrchestrator {
 
     // 6. Action Execution or Escalation Router
     const now = Math.floor(Date.now() / 1000);
-    const seq = this.decisionSequence++;
-    const hash = hashString(`${opportunity.id}_${now}_${seq}`).slice(0, 12);
+    const hash = hashString(`${opportunity.id}_${now}`).slice(0, 14);
     const decisionId = `dec_${hash}`;
     let actionStatus: DecisionAuditRecord['actionStatus'] = 'REJECTED';
     let executedActionId: string | undefined;
@@ -231,11 +225,9 @@ export class RevenuePipelineOrchestrator {
     if (!opportunity) return false;
 
     if (status === 'paid') {
-      // Preserve explicit 0 or negative amounts so reconciliation rejects them instead of defaulting
       const actualPaidPaise = amountPaise !== undefined
         ? amountPaise
         : decision.deterministicMetrics.amountPaise;
-
       const reconResult = this.reconciliationEngine.reconcileRecovery(
         decision,
         opportunity,

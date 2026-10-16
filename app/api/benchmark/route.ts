@@ -4,31 +4,25 @@ import { BatchRunner } from '@/core/evaluation/batchRunner';
 export const dynamic = 'force-dynamic';
 
 const MIN_BATCH_SIZE = 10;
-const MAX_BATCH_SIZE = 5000;
-const DEFAULT_BATCH_SIZE = 1000;
-const DEFAULT_SEED = 20260825;
+const MAX_BATCH_SIZE = 10000;
 
-function parseBoundedSize(raw: unknown): number {
-  const num = Number(raw);
-  if (!Number.isFinite(num) || num <= 0) {
-    return DEFAULT_BATCH_SIZE;
-  }
-  return Math.min(MAX_BATCH_SIZE, Math.max(MIN_BATCH_SIZE, Math.floor(num)));
+function sanitizeBatchSize(raw: unknown): number {
+  const parsed = typeof raw === 'number' ? raw : parseInt(String(raw || '1000'), 10);
+  if (!Number.isFinite(parsed)) return 1000;
+  return Math.min(MAX_BATCH_SIZE, Math.max(MIN_BATCH_SIZE, Math.floor(parsed)));
 }
 
-function parseBoundedSeed(raw: unknown): number {
-  const num = Number(raw);
-  if (!Number.isFinite(num) || num <= 0) {
-    return DEFAULT_SEED;
-  }
-  return Math.floor(num);
+function sanitizeSeed(raw: unknown): number {
+  const parsed = typeof raw === 'number' ? raw : parseInt(String(raw || '20260825'), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return 20260825;
+  return Math.floor(parsed);
 }
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const seed = parseBoundedSeed(searchParams.get('seed'));
-    const size = parseBoundedSize(searchParams.get('size'));
+    const seed = sanitizeSeed(searchParams.get('seed'));
+    const size = sanitizeBatchSize(searchParams.get('size'));
     const useGeminiAi = searchParams.get('ai') === 'true';
 
     const runner = new BatchRunner();
@@ -49,19 +43,10 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    let body: Record<string, unknown> = {};
-    try {
-      const parsed = await req.json();
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        body = parsed as Record<string, unknown>;
-      }
-    } catch {
-      // Use defaults if empty body
-    }
-
-    const size = parseBoundedSize(body.totalEvents ?? body.batchSize);
-    const seed = parseBoundedSeed(body.seed);
-    const useGeminiAi = Boolean(body.useGeminiAi);
+    const body = await req.json();
+    const size = sanitizeBatchSize(body?.totalEvents ?? body?.batchSize ?? 1000);
+    const seed = sanitizeSeed(body?.seed ?? 20260825);
+    const useGeminiAi = Boolean(body?.useGeminiAi);
 
     const runner = new BatchRunner();
     const results = await runner.runBenchmark({

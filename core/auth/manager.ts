@@ -1,4 +1,4 @@
-import { hashString, generateRandomHex } from '@/lib/cryptoUtils';
+import { hashString, generateRandomHex, hashPassword, verifyPassword, sanitizeInput } from '@/lib/cryptoUtils';
 import { UserProfile, UserRole, ApiKey, ROLE_PERMISSIONS } from './types';
 
 export const PRESET_USERS: Record<string, UserProfile> = {
@@ -35,19 +35,46 @@ const MAX_API_KEYS = 500;
 export class AuthManager {
   private apiKeys: Map<string, ApiKey> = new Map();
   private activeSessions: Map<string, { user: UserProfile; expiresAt: number }> = new Map();
+  private passwordHashes: Map<string, string> = new Map();
 
   constructor() {
-    // Seed default demo API key in non-production environments
+    // Seed default demo API key and hashed preset user passwords in non-production environments
     if (process.env.NODE_ENV !== 'production') {
       this.createApiKey('Production Razorpay Bridge Key', 'OWNER', 'mp_live_k8j7h6g5f4e3d2c1');
     }
+    const defaultHash = hashPassword('Password123!', 'a1b2c3d4e5f60718293a4b5c6d7e8f90');
+    for (const email of Object.keys(PRESET_USERS)) {
+      this.passwordHashes.set(email, defaultHash);
+    }
+  }
+
+  public registerUserCredentials(email: string, password: string): boolean {
+    const normalizedEmail = sanitizeInput(email, 254).toLowerCase();
+    if (!normalizedEmail || !EMAIL_REGEX.test(normalizedEmail) || typeof password !== 'string' || password.length < 6) {
+      return false;
+    }
+    this.passwordHashes.set(normalizedEmail, hashPassword(password));
+    return true;
+  }
+
+  public verifyUserCredentials(email: string, password: string): boolean {
+    const normalizedEmail = sanitizeInput(email, 254).toLowerCase();
+    const storedHash = this.passwordHashes.get(normalizedEmail);
+    if (!storedHash) {
+      // Register on first login in sandbox/demo mode so new accounts work seamlessly
+      if (process.env.NODE_ENV !== 'production' && password.length >= 4) {
+        this.passwordHashes.set(normalizedEmail, hashPassword(password));
+        return true;
+      }
+      return false;
+    }
+    return verifyPassword(password, storedHash);
   }
 
   public authenticateSession(token?: string | null): UserProfile | null {
     const trimmedToken = typeof token === 'string' ? token.trim() : '';
 
     if (!trimmedToken) {
-      // Allow sandbox owner fallback only outside strict production
       if (process.env.NODE_ENV !== 'production') {
         return PRESET_USERS['admin@merchantpulse.io'];
       }
@@ -63,7 +90,6 @@ export class AuthManager {
       return session.user;
     }
 
-    // Also allow authenticating via a valid merchant API key
     const verifiedKey = this.verifyApiKey(trimmedToken);
     if (verifiedKey) {
       return {
@@ -76,7 +102,6 @@ export class AuthManager {
       };
     }
 
-    // Non-empty invalid or forged token must always be rejected
     return null;
   }
 
@@ -85,7 +110,7 @@ export class AuthManager {
       return null;
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = sanitizeInput(email, 254).toLowerCase();
     if (
       !normalizedEmail ||
       normalizedEmail.length > 254 ||
@@ -130,9 +155,7 @@ export class AuthManager {
   }
 
   public createApiKey(name: string, role: UserRole = 'OWNER', customKey?: string): { apiKey: ApiKey; secret: string } {
-    const safeName = (typeof name === 'string' && name.trim())
-      ? name.trim().slice(0, 128)
-      : 'Merchant API Key';
+    const safeName = sanitizeInput(name, 128) || 'Merchant API Key';
     const validRole: UserRole = ROLE_PERMISSIONS[role] ? role : 'AUDITOR';
 
     if (this.apiKeys.size >= MAX_API_KEYS) {

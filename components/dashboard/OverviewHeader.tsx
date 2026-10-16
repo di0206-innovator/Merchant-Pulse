@@ -1,18 +1,20 @@
 'use client';
 
 import React from 'react';
-import { Activity, Play, RefreshCw } from 'lucide-react';
+import { Activity, Play, RefreshCw, Timer } from 'lucide-react';
 
 interface OverviewHeaderProps {
   onRunDemo: () => Promise<void>;
   loading: boolean;
   lastUpdated: Date;
+  refreshCountdown?: number;
 }
 
 export const OverviewHeader: React.FC<OverviewHeaderProps> = ({
   onRunDemo,
   loading,
   lastUpdated,
+  refreshCountdown,
 }) => {
   return (
     <header className="nb-page-header flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
@@ -50,6 +52,26 @@ export const OverviewHeader: React.FC<OverviewHeaderProps> = ({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
+        {/* Auto-refresh countdown */}
+        {refreshCountdown !== undefined && (
+          <div
+            className="hidden sm:flex items-center gap-1.5 font-mono px-3 py-1.5 rounded-xl border border-nb-stroke/50 shadow-skeuo-inset"
+            style={{ background: 'var(--nb-recessed)' }}
+            title="Auto-refreshes every 60 seconds"
+          >
+            <Timer className="w-3 h-3 text-amber-400" />
+            <div className="font-mono text-[9px] font-bold uppercase tracking-widest text-nb-muted">
+              Next Sync
+            </div>
+            <div
+              className="font-mono text-xs font-black tabular-nums"
+              style={{ color: refreshCountdown <= 10 ? '#EF4444' : '#F59E0B' }}
+            >
+              {refreshCountdown}s
+            </div>
+          </div>
+        )}
+
         {/* Last updated plate */}
         <div
           className="text-right hidden sm:block font-mono px-3 py-1.5 rounded-xl border border-nb-stroke/50 shadow-skeuo-inset"

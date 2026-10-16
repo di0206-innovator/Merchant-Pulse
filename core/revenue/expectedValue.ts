@@ -38,39 +38,35 @@ export const INTERVENTION_COSTS = {
  * between 0.05 and 0.95 based on objective payment and customer facts.
  */
 export function calculateRecoveryProbability(factors: ProbabilityFactors): number {
-  const safeFactors = factors || {};
-  const hasKnownCode =
-    typeof safeFactors.failureCode === 'string' &&
-    Object.prototype.hasOwnProperty.call(BASE_RECOVERY_PROBABILITIES, safeFactors.failureCode);
+  const hasKnownFailureCode =
+    typeof factors.failureCode === 'string' &&
+    Object.prototype.hasOwnProperty.call(BASE_RECOVERY_PROBABILITIES, factors.failureCode);
 
-  let baseP = hasKnownCode
-    ? BASE_RECOVERY_PROBABILITIES[safeFactors.failureCode!]
+  let baseP = hasKnownFailureCode
+    ? BASE_RECOVERY_PROBABILITIES[factors.failureCode!]
     : BASE_RECOVERY_PROBABILITIES.DEFAULT;
 
   // Repeat loyal customer boost (+0.08 if LTV >= ₹10,000)
   if (
-    typeof safeFactors.customerLtvPaise === 'number' &&
-    Number.isFinite(safeFactors.customerLtvPaise) &&
-    safeFactors.customerLtvPaise >= 1000000
+    typeof factors.customerLtvPaise === 'number' &&
+    Number.isFinite(factors.customerLtvPaise) &&
+    factors.customerLtvPaise >= 1000000
   ) {
     baseP += 0.08;
   }
 
   // Consecutive failure penalty (-0.10 for each failure beyond the 1st)
   if (
-    typeof safeFactors.consecutiveFailures === 'number' &&
-    Number.isFinite(safeFactors.consecutiveFailures) &&
-    safeFactors.consecutiveFailures > 1
+    typeof factors.consecutiveFailures === 'number' &&
+    Number.isFinite(factors.consecutiveFailures) &&
+    factors.consecutiveFailures > 1
   ) {
-    baseP -= Math.min(0.25, (safeFactors.consecutiveFailures - 1) * 0.10);
+    baseP -= Math.min(0.25, (factors.consecutiveFailures - 1) * 0.10);
   }
 
   // Intent modifier (bounded to [0, 1])
-  if (
-    typeof safeFactors.intentScore === 'number' &&
-    Number.isFinite(safeFactors.intentScore)
-  ) {
-    const clampedIntent = Math.min(1, Math.max(0, safeFactors.intentScore));
+  if (typeof factors.intentScore === 'number' && Number.isFinite(factors.intentScore)) {
+    const clampedIntent = Math.min(1, Math.max(0, factors.intentScore));
     baseP = baseP * (0.8 + (0.4 * clampedIntent));
   }
 

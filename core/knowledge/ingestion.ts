@@ -1,71 +1,53 @@
 import { GoogleGenAI } from '@google/genai';
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@/lib/supabase/server';
 
-const MAX_KNOWLEDGE_FILE_BYTES = 20 * 1024 * 1024; // 20 MB
+const MAX_KNOWLEDGE_FILE_BYTES = 20 * 1024 * 1024; // 20 MB limit
 const MAX_CHUNKS_PER_DOCUMENT = 200;
-const MAX_CHUNK_CHAR_LENGTH = 5000;
+const MAX_CHUNK_CHAR_LENGTH = 4000;
 
-const getSupabase = () => {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '';
-  if (!url || !serviceKey) {
-    throw new Error('Supabase server credentials are not configured.');
-  }
-  return createClient(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-};
-
-const getAiClient = (): GoogleGenAI | null => {
-  const key = process.env.GEMINI_API_KEY?.trim();
-  if (!key || key === 'YourGeminiApiKeyHere' || key.length < 20) {
+function getAiClient(): GoogleGenAI | null {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'YourGeminiApiKeyHere' || apiKey.length < 25) {
     return null;
   }
-  return new GoogleGenAI({ apiKey: key });
-};
+  return new GoogleGenAI({ apiKey: apiKey.trim() });
+}
 
-/**
- * Validates storagePath to prevent path traversal or unauthorized bucket access.
- */
-export function validateStoragePath(storagePath: string): string {
+function validateStoragePath(storagePath: string): string {
   if (typeof storagePath !== 'string' || !storagePath.trim()) {
-    throw new Error('Invalid storagePath: must be a non-empty string.');
+    throw new Error('Invalid storagePath');
   }
-  const clean = storagePath.trim();
+  const normalized = storagePath.trim();
   if (
-    clean.includes('..') ||
-    clean.startsWith('/') ||
-    clean.startsWith('\\') ||
-    /[\x00-\x1F\x7F]/.test(clean)
+    normalized.includes('..') ||
+    normalized.startsWith('/') ||
+    normalized.startsWith('\\') ||
+    /[\x00-\x1F\x7F]/.test(normalized)
   ) {
-    throw new Error('Invalid storagePath: path traversal or control characters detected.');
+    throw new Error('Rejected unsafe storagePath');
   }
-  return clean;
+  return normalized;
 }
 
 /**
  * Process a file from Supabase storage, extract text using Gemini,
  * chunk it, and store embeddings in pgvector.
  */
-export async function processKnowledgeFile(
-  merchantId: string,
-  documentId: string,
-  storagePath: string
-): Promise<void> {
-  if (typeof merchantId !== 'string' || !merchantId.trim() || merchantId.length > 64) {
-    throw new Error('Invalid merchantId.');
+export async function processKnowledgeFile(merchantId: string, documentId: string, storagePath: string) {
+  if (!merchantId || typeof merchantId !== 'string' || !documentId || typeof documentId !== 'string') {
+    throw new Error('Missing valid merchantId or documentId.');
   }
-  if (typeof documentId !== 'string' || !documentId.trim() || documentId.length > 128) {
-    throw new Error('Invalid documentId.');
-  }
-  const safePath = validateStoragePath(storagePath);
 
+  const safePath = validateStoragePath(storagePath);
   const aiClient = getAiClient();
   if (!aiClient) {
     throw new Error('GEMINI_API_KEY is missing or unconfigured. Cannot process AI knowledge base.');
   }
 
-  const supabase = getSupabase();
+  const supabase = createServerClient();
+  if (!supabase) {
+    throw new Error('Supabase server credentials (SUPABASE_SERVICE_ROLE_KEY) are not configured.');
+  }
 
   try {
     // 1. Download file from Supabase
@@ -75,19 +57,16 @@ export async function processKnowledgeFile(
       .download(safePath);
 
     if (downloadError || !fileData) {
-      throw new Error(`Failed to download file from storage: ${downloadError?.message || 'Empty file'}`);
+      throw new Error(`Failed to download file from storage: ${downloadError?.message || 'File not found'}`);
     }
 
     if (fileData.size > MAX_KNOWLEDGE_FILE_BYTES) {
-      throw new Error(`File exceeds maximum allowed size of 20MB (${fileData.size} bytes).`);
+      throw new Error(`File exceeds maximum allowed size of ${MAX_KNOWLEDGE_FILE_BYTES} bytes.`);
     }
 
     // 2. Prepare file for Gemini
     const mimeType = fileData.type || 'application/octet-stream';
     const arrayBuffer = await fileData.arrayBuffer();
-    if (arrayBuffer.byteLength > MAX_KNOWLEDGE_FILE_BYTES) {
-      throw new Error('File buffer exceeds maximum allowed size of 20MB.');
-    }
     const base64Data = Buffer.from(arrayBuffer).toString('base64');
 
     // 3. Extract semantic text/transcript using Gemini
@@ -148,14 +127,15 @@ No markdown, no wrapping, ONLY the JSON array.
       }
 
       const safeEmbedding = embedding.filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
+
       const { error: insertError } = await supabase
         .from('knowledge_chunks')
         .insert({
-          document_id: documentId.trim(),
-          merchant_id: merchantId.trim(),
+          document_id: documentId,
+          merchant_id: merchantId,
           chunk_index: chunkIndex,
           content: chunk,
-          embedding: `[${safeEmbedding.join(',')}]`, // pgvector format
+          embedding: `[${safeEmbedding.join(',')}]`,
         });
 
       if (insertError) {
@@ -167,20 +147,18 @@ No markdown, no wrapping, ONLY the JSON array.
     // 5. Update document status to READY
     await supabase
       .from('knowledge_documents')
-      .update({ status: 'READY', error_message: null, updated_at: new Date().toISOString() })
-      .eq('id', documentId.trim())
-      .eq('merchant_id', merchantId.trim());
+      .update({ status: 'READY', error_message: null })
+      .eq('id', documentId)
+      .eq('merchant_id', merchantId);
   } catch (err: any) {
-    // Ensure document does not remain stuck in PROCESSING state on failure
     await supabase
       .from('knowledge_documents')
       .update({
         status: 'ERROR',
-        error_message: (err?.message || 'Processing failed').slice(0, 500),
-        updated_at: new Date().toISOString(),
+        error_message: (err?.message || 'Knowledge processing error').slice(0, 500),
       })
-      .eq('id', documentId.trim())
-      .eq('merchant_id', merchantId.trim());
+      .eq('id', documentId)
+      .eq('merchant_id', merchantId);
     throw err;
   }
 }

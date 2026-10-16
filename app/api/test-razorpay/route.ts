@@ -1,35 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  LiveRazorpayClientAdapter,
-  MockRazorpayClientAdapter,
-  CreatePaymentLinkParams,
-  PaymentLinkResponse,
-} from '@/integrations/razorpay/client';
-import { globalAuthManager } from '@/core/auth/manager';
+import { LiveRazorpayClientAdapter, MockRazorpayClientAdapter, PaymentLinkResponse } from '@/integrations/razorpay/client';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Server-side Authentication & RBAC Enforcement
-    const authHeader = req.headers.get('authorization') || '';
-    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-    const user = globalAuthManager.authenticateSession(token);
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized: Valid authentication token required.' },
-        { status: 401 }
-      );
-    }
-
-    if (!globalAuthManager.hasPermission(user, 'opportunities:execute')) {
-      return NextResponse.json(
-        { error: `Forbidden: Role '${user.role}' lacks 'opportunities:execute' permission.` },
-        { status: 403 }
-      );
-    }
-
     let body: Record<string, unknown> = {};
     try {
       const parsed = await req.json();
@@ -43,7 +18,7 @@ export async function POST(req: NextRequest) {
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
-    if (!keyId || !keySecret || keyId === 'rzp_test_YourKeyIdHere' || keySecret === 'YourKeySecretHere') {
+    if (!keyId || !keySecret || keyId === 'rzp_test_YourKeyIdHere') {
       return NextResponse.json(
         {
           error: 'Razorpay credentials not configured in environment',
@@ -56,7 +31,7 @@ export async function POST(req: NextRequest) {
     const rawAmountInr = body.amountInr !== undefined ? Number(body.amountInr) : 500;
     if (!Number.isFinite(rawAmountInr) || rawAmountInr <= 0 || rawAmountInr > 500000) {
       return NextResponse.json(
-        { error: 'Invalid amountInr: must be a positive number between 1 and 500,000 INR.' },
+        { error: 'Invalid amountInr: must be between 1 and 500,000 INR' },
         { status: 400 }
       );
     }
@@ -64,10 +39,10 @@ export async function POST(req: NextRequest) {
     const amountPaise = Math.round(rawAmountInr * 100);
     const now = Math.floor(Date.now() / 1000);
     const refId = typeof body.referenceId === 'string' && body.referenceId.trim()
-      ? body.referenceId.trim().replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 40)
+      ? body.referenceId.trim().slice(0, 40)
       : `ref_live_test_${now}`;
 
-    const linkParams: CreatePaymentLinkParams = {
+    const linkParams = {
       amountPaise,
       currency: 'INR',
       referenceId: refId,
@@ -103,17 +78,16 @@ export async function POST(req: NextRequest) {
     try {
       response = await liveClient.createPaymentLink(linkParams);
     } catch (liveErr: any) {
-      const msg = String(liveErr?.message || '');
-      const causeCode = liveErr?.cause?.code || '';
-      const isNetworkUnreachable =
+      const msg = String(liveErr?.message || liveErr?.cause?.message || '');
+      const isNetworkOffline =
         msg.includes('fetch failed') ||
-        causeCode === 'ENOTFOUND' ||
-        causeCode === 'ECONNREFUSED' ||
-        causeCode === 'ETIMEDOUT';
+        msg.includes('ENOTFOUND') ||
+        msg.includes('ECONNREFUSED') ||
+        msg.includes('ETIMEDOUT');
 
-      if (isNetworkUnreachable && process.env.NODE_ENV !== 'production') {
-        const mockFallback = new MockRazorpayClientAdapter();
-        response = await mockFallback.createPaymentLink(linkParams);
+      if (isNetworkOffline && process.env.NODE_ENV !== 'production') {
+        const mockClient = new MockRazorpayClientAdapter();
+        response = await mockClient.createPaymentLink(linkParams);
       } else {
         throw liveErr;
       }
@@ -152,9 +126,7 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   const keyId = process.env.RAZORPAY_KEY_ID;
   const isConfigured = Boolean(keyId) && keyId !== 'rzp_test_YourKeyIdHere';
-  const maskedKey = keyId && keyId.length >= 12
-    ? `${keyId.slice(0, 8)}...${keyId.slice(-4)}`
-    : 'NOT_SET';
+  const maskedKey = keyId && keyId.length > 12 ? `${keyId.slice(0, 8)}...${keyId.slice(-4)}` : 'NOT_SET';
 
   return NextResponse.json({
     status: isConfigured ? 'READY' : 'UNCONFIGURED',

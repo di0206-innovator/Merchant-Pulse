@@ -7,7 +7,7 @@ import { isSupabaseConfigured } from '@/lib/supabase/client';
  * Prevents Open Redirect vulnerabilities by ensuring the redirect target
  * is a strictly relative path on the same origin.
  */
-export function sanitizeRedirectPath(nextParam: string | null, origin: string): string {
+function sanitizeRedirectPath(nextParam: string | null, origin: string): string {
   const fallback = '/dashboard';
   if (!nextParam || typeof nextParam !== 'string') {
     return fallback;

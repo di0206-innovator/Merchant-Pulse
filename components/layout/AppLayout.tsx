@@ -16,6 +16,7 @@ import {
   Moon,
   Sun,
   Database,
+  Zap,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/lib/supabase/authContext';
@@ -259,6 +260,34 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <main id="main-content" className="flex-1 pb-12" role="main">
         {children}
       </main>
+
+      {/* Status footer */}
+      <footer
+        className="border-t border-nb-stroke/40 py-2.5 px-4 sm:px-6"
+        style={{
+          background: 'linear-gradient(180deg, var(--nb-surface) 0%, var(--nb-recessed) 100%)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+        }}
+        role="contentinfo"
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="skeuo-led-green w-2 h-2" title="All systems nominal" />
+            <span className="font-mono text-[9px] uppercase tracking-widest text-nb-muted">
+              MerchantPulse · All Systems Nominal
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="hidden sm:flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-nb-muted">
+              <Zap className="w-2.5 h-2.5 text-amber-400" />
+              Gemini 2.5 Flash · Razorpay SDK v1.0
+            </span>
+            <span className="font-mono text-[9px] uppercase tracking-widest text-nb-muted">
+              v{process.env.NEXT_PUBLIC_APP_VERSION ?? '1.0.0'}
+            </span>
+          </div>
+        </div>
+      </footer>
 
       <SettingsDrawer
         isOpen={settingsOpen}

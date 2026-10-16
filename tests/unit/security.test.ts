@@ -1,13 +1,28 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import crypto from 'crypto';
 import { verifyRazorpayWebhookSignature } from '@/integrations/razorpay/signature';
 import { globalAuthManager } from '@/core/auth/manager';
 import { calculateExpectedValue } from '@/core/revenue/expectedValue';
 import { calculatePriorityScore, PrioritizationInput } from '@/core/revenue/prioritizer';
 import { globalIdempotencyLedger } from '@/core/events/idempotency';
+import {
+  hashPassword,
+  verifyPassword,
+  sanitizeInput,
+  maskApiKey,
+} from '@/lib/cryptoUtils';
+import {
+  checkRateLimit,
+  resetRateLimiter,
+  validateEnv,
+} from '@/lib/env';
 
 describe('Security & Zero-Trust Invariants Test Suite', () => {
   const SECRET = 'sec_rzp_live_test_secret_key_12345';
+
+  beforeEach(() => {
+    resetRateLimiter();
+  });
 
   describe('Webhook Cryptographic Signature Verification', () => {
     it('verifies valid HMAC-SHA256 signature generated with matching secret', () => {
@@ -33,7 +48,7 @@ describe('Security & Zero-Trust Invariants Test Suite', () => {
 
       const tamperedPayload = JSON.stringify({
         event: 'payment.failed',
-        payload: { payment: { entity: { id: 'pay_sec_101', amount: 50000 } } }, // Amount altered
+        payload: { payment: { entity: { id: 'pay_sec_101', amount: 50000 } } },
       });
 
       const signature = crypto
@@ -64,7 +79,7 @@ describe('Security & Zero-Trust Invariants Test Suite', () => {
     });
   });
 
-  describe('RBAC & Authorization Matrix Enforcement', () => {
+  describe('RBAC, Forged Token Rejection & Password Hashing', () => {
     it('restricts AUDITOR role to read-only access and blocks execution actions', () => {
       const session = globalAuthManager.createSession('auditor@merchantpulse.io');
       expect(session).not.toBeNull();
@@ -76,6 +91,11 @@ describe('Security & Zero-Trust Invariants Test Suite', () => {
       expect(globalAuthManager.hasPermission(user!, 'opportunities:execute')).toBe(false);
       expect(globalAuthManager.hasPermission(user!, 'policy:write')).toBe(false);
       expect(globalAuthManager.hasPermission(user!, 'opportunities:read')).toBe(true);
+    });
+
+    it('rejects non-empty forged or invalid session tokens', () => {
+      const forgedUser = globalAuthManager.authenticateSession('sess_forged_invalid_token_99999');
+      expect(forgedUser).toBeNull();
     });
 
     it('permits ADMIN/OWNER and OPS_MANAGER roles to execute approved opportunities', () => {
@@ -103,6 +123,45 @@ describe('Security & Zero-Trust Invariants Test Suite', () => {
       expect(verified?.role).toBe('AUDITOR');
 
       expect(globalAuthManager.verifyApiKey('mp_invalid_fake_key_123')).toBeNull();
+    });
+
+    it('salts and hashes passwords with PBKDF2-SHA256 and verifies in constant time', () => {
+      const hashed = hashPassword('SuperSecret#2026');
+      expect(hashed).toMatch(/^pbkdf2_v1\$/);
+      expect(verifyPassword('SuperSecret#2026', hashed)).toBe(true);
+      expect(verifyPassword('WrongPassword#2026', hashed)).toBe(false);
+    });
+  });
+
+  describe('XSS Input Sanitization, Secret Masking & Rate Limiting', () => {
+    it('strips XSS script tags, event handlers, and javascript: URIs from form input', () => {
+      const malicious = '<script>alert("xss")</script><img src=x onerror="steal()">javascript:evil()Safe Brand Name';
+      const cleaned = sanitizeInput(malicious);
+      expect(cleaned).not.toContain('<script>');
+      expect(cleaned).not.toContain('onerror');
+      expect(cleaned).not.toContain('javascript:');
+      expect(cleaned).toContain('Safe Brand Name');
+    });
+
+    it('masks sensitive API keys and validates environment schema safely', () => {
+      expect(maskApiKey('rzp_test_TUHSBfjPgODDOy')).toBe('rzp_tes••••DDOy');
+      expect(maskApiKey('')).toBe('NOT_SET');
+
+      const report = validateEnv();
+      expect(report).toHaveProperty('environment');
+      expect(report.maskedKeys.razorpayKeyId).not.toContain('TUHSBfjPg');
+    });
+
+    it('enforces sliding-window rate limits and emits X-RateLimit-* headers', () => {
+      const r1 = checkRateLimit('192.0.2.1:/api/login', 2, 60_000);
+      const r2 = checkRateLimit('192.0.2.1:/api/login', 2, 60_000);
+      const r3 = checkRateLimit('192.0.2.1:/api/login', 2, 60_000);
+
+      expect(r1.allowed).toBe(true);
+      expect(r2.allowed).toBe(true);
+      expect(r3.allowed).toBe(false);
+      expect(r3.remaining).toBe(0);
+      expect(r3.headers['Retry-After']).toBeDefined();
     });
   });
 
@@ -134,9 +193,9 @@ describe('Security & Zero-Trust Invariants Test Suite', () => {
       expect(result.score).toBeLessThanOrEqual(100);
     });
 
-    it('deterministic EV calculates integer paise values without floating point drift', () => {
+    it('deterministic EV calculates integer paise values and blocks Object.prototype lookup', () => {
       const ev = calculateExpectedValue(850000, {
-        failureCode: 'BANK_TIMEOUT',
+        failureCode: 'toString', // Prototype pollution / lookup attempt
         paymentMethod: 'upi',
         consecutiveFailures: 0,
         customerLtvPaise: 0,
@@ -150,7 +209,7 @@ describe('Security & Zero-Trust Invariants Test Suite', () => {
   });
 
   describe('Idempotency & Replay Protection', () => {
-    it('detects duplicate webhook re-deliveries and prevents double processing', () => {
+    it('detects duplicate webhook re-deliveries and releases uncommitted locks cleanly', () => {
       const rawPayload = JSON.stringify({
         id: 'evt_recon_dup_test_001',
         event: 'payment.failed',
@@ -160,9 +219,11 @@ describe('Security & Zero-Trust Invariants Test Suite', () => {
       const key = globalIdempotencyLedger.generateKey('evt_recon_dup_test_001', rawPayload);
       expect(globalIdempotencyLedger.isDuplicate(key)).toBe(false);
 
-      globalIdempotencyLedger.record(key, { processedAt: Date.now(), domainEventId: 'evt_recon_dup_test_001' });
+      expect(globalIdempotencyLedger.acquireLock(key)).toBe(true);
+      globalIdempotencyLedger.releaseLock(key);
+      expect(globalIdempotencyLedger.isDuplicate(key)).toBe(false);
 
-      // Immediate replay of the identical webhook event
+      globalIdempotencyLedger.record(key, { processedAt: Date.now(), domainEventId: 'evt_recon_dup_test_001' });
       expect(globalIdempotencyLedger.isDuplicate(key)).toBe(true);
     });
   });

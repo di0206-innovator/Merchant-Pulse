@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { processKnowledgeFile, validateStoragePath } from '@/core/knowledge/ingestion';
-import { globalAuthManager } from '@/core/auth/manager';
+import { processKnowledgeFile } from '@/core/knowledge/ingestion';
+import { globalAuthManager } from '@/core/auth';
 
 export const maxDuration = 60; // Allow up to 60 seconds for processing
 
-const KnowledgeProcessRequestSchema = z.object({
-  documentId: z.string().trim().min(1).max(128),
-  storagePath: z.string().trim().min(1).max(512),
-  merchantId: z.string().trim().min(1).max(64).regex(/^[a-zA-Z0-9_-]+$/),
-});
-
 export async function POST(req: NextRequest) {
   try {
-    // 1. Server-side Authentication & RBAC Check
+    // 1. Authenticate session & verify write permissions
     const authHeader = req.headers.get('authorization') || '';
     const token = authHeader.replace(/^Bearer\s+/i, '').trim();
     const user = globalAuthManager.authenticateSession(token);
@@ -25,39 +18,43 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (
-      !globalAuthManager.hasPermission(user, 'policy:write') &&
-      !globalAuthManager.hasPermission(user, 'opportunities:execute')
-    ) {
+    if (!globalAuthManager.hasPermission(user, 'policy:write')) {
       return NextResponse.json(
-        { error: `Forbidden: Role '${user.role}' cannot ingest knowledge documents.` },
+        { error: `Forbidden: Role '${user.role}' lacks permission to ingest knowledge documents.` },
         { status: 403 }
       );
     }
 
     const body = await req.json();
-    const parsed = KnowledgeProcessRequestSchema.safeParse(body);
+    const { documentId, storagePath, merchantId } = body || {};
 
-    if (!parsed.success) {
+    if (
+      typeof documentId !== 'string' || !documentId.trim() ||
+      typeof storagePath !== 'string' || !storagePath.trim() ||
+      typeof merchantId !== 'string' || !merchantId.trim()
+    ) {
       return NextResponse.json(
-        { error: 'Invalid or missing required fields: documentId, storagePath, merchantId' },
+        { error: 'Missing required fields: documentId, storagePath, merchantId' },
         { status: 400 }
       );
     }
 
-    const { documentId, storagePath, merchantId } = parsed.data;
-    const safeStoragePath = validateStoragePath(storagePath);
+    if (storagePath.includes('..') || storagePath.startsWith('/') || storagePath.startsWith('\\')) {
+      return NextResponse.json(
+        { error: 'Invalid storagePath format' },
+        { status: 400 }
+      );
+    }
 
-    // 2. Process the file (Extract text/transcript, chunk, embed, store)
-    await processKnowledgeFile(merchantId, documentId, safeStoragePath);
+    // Process the file (Extract text/transcript, chunk, embed, store)
+    await processKnowledgeFile(merchantId.trim(), documentId.trim(), storagePath.trim());
 
     return NextResponse.json({ success: true, status: 'READY' });
   } catch (error: any) {
     console.error('Error in /api/knowledge/process:', error);
-    const message = typeof error?.message === 'string' && error.message.startsWith('Invalid ')
-      ? error.message
-      : 'Knowledge base processing failed';
-    const status = message.startsWith('Invalid ') ? 400 : 500;
-    return NextResponse.json({ error: message }, { status });
+    return NextResponse.json(
+      { error: 'Failed to process knowledge document' },
+      { status: 500 }
+    );
   }
 }

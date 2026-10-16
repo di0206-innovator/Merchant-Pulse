@@ -32,30 +32,21 @@ export class FinancialReconciliationEngine {
     paymentId?: string,
     resolutionEventId?: string
   ): ReconciliationResult {
-    // 1. Validate paid amount is a positive integer within eligible GMV bounds
+    // 0. Validate amount integrity (must be positive finite integer paise)
     if (
       typeof actualPaidAmountPaise !== 'number' ||
-      !Number.isSafeInteger(actualPaidAmountPaise) ||
+      !Number.isFinite(actualPaidAmountPaise) ||
       actualPaidAmountPaise <= 0
     ) {
       return {
         valid: false,
         attributionType: 'AMOUNT_MISMATCH',
         reconciledAmountPaise: 0,
-        reason: `AMOUNT_MISMATCH: Invalid or non-positive recovered amount (${actualPaidAmountPaise} paise).`,
+        reason: `AMOUNT_MISMATCH: Paid amount (${actualPaidAmountPaise}) must be a positive amount in paise.`,
       };
     }
 
-    if (actualPaidAmountPaise > opportunity.amountPaise) {
-      return {
-        valid: false,
-        attributionType: 'AMOUNT_MISMATCH',
-        reconciledAmountPaise: 0,
-        reason: `AMOUNT_MISMATCH: Recovered amount (₹${actualPaidAmountPaise / 100}) exceeds original eligible GMV (₹${opportunity.amountPaise / 100}).`,
-      };
-    }
-
-    // 2. Zero double-counting check (Decision ID level)
+    // 1. Zero double-counting check (Decision ID level)
     if (this.reconciledDecisionIds.has(decision.decisionId)) {
       return {
         valid: false,
@@ -65,7 +56,7 @@ export class FinancialReconciliationEngine {
       };
     }
 
-    // 3. Zero double-counting check (Payment ID level)
+    // 2. Zero double-counting check (Payment ID level)
     if (paymentId && this.reconciledPaymentIds.has(paymentId)) {
       return {
         valid: false,
@@ -75,43 +66,36 @@ export class FinancialReconciliationEngine {
       };
     }
 
+    // 3. Recovered amount validation: cannot exceed original failed/eligible opportunity amount
+    if (actualPaidAmountPaise > opportunity.amountPaise) {
+      return {
+        valid: false,
+        attributionType: 'AMOUNT_MISMATCH',
+        reconciledAmountPaise: 0,
+        reason: `AMOUNT_MISMATCH: Recovered amount (₹${actualPaidAmountPaise / 100}) exceeds original eligible GMV (₹${opportunity.amountPaise / 100}).`,
+      };
+    }
+
     // 4. Must link to an active executed intervention
     const isExecutedIntervention =
       Boolean(decision.executedActionId) &&
       (decision.actionStatus === 'AUTO_EXECUTED' || decision.actionStatus === 'MANUALLY_APPROVED');
 
     if (!isExecutedIntervention) {
-      // Mark organic recovery so the same decision/payment cannot be double-counted organically
       this.reconciledDecisionIds.add(decision.decisionId);
       if (paymentId) {
         this.reconciledPaymentIds.add(paymentId);
       }
-
-      if (this.store) {
-        this.store.recordOutcome({
-          decisionId: decision.decisionId,
-          opportunityId: opportunity.id,
-          merchantId: opportunity.merchantId,
-          attributionType: 'ORGANIC_RECOVERY',
-          status: 'RECOVERED',
-          reconciledAmountPaise: actualPaidAmountPaise,
-          resolutionEventId,
-          reconciledPaymentId: paymentId,
-          reconciledAt: Math.floor(Date.now() / 1000),
-        }).catch(err => {
-          console.error('[ReconciliationStore] Record organic outcome error:', err);
-        });
-      }
-
       return {
         valid: false,
         attributionType: 'ORGANIC_RECOVERY',
-        reconciledAmountPaise: actualPaidAmountPaise,
+        reconciledAmountPaise: Math.round(actualPaidAmountPaise),
         reason: 'ORGANIC_RECOVERY: Outcome occurred without an active executed MerchantPulse intervention.',
       };
     }
 
     // 5. Successful Intervention Attribution
+    const roundedPaidPaise = Math.round(actualPaidAmountPaise);
     this.reconciledDecisionIds.add(decision.decisionId);
     if (paymentId) {
       this.reconciledPaymentIds.add(paymentId);
@@ -124,7 +108,7 @@ export class FinancialReconciliationEngine {
         merchantId: opportunity.merchantId,
         attributionType: 'ATTRIBUTED_INTERVENTION',
         status: 'RECOVERED',
-        reconciledAmountPaise: actualPaidAmountPaise,
+        reconciledAmountPaise: roundedPaidPaise,
         resolutionEventId,
         reconciledPaymentId: paymentId,
         reconciledAt: Math.floor(Date.now() / 1000),
@@ -136,7 +120,7 @@ export class FinancialReconciliationEngine {
     return {
       valid: true,
       attributionType: 'ATTRIBUTED_INTERVENTION',
-      reconciledAmountPaise: actualPaidAmountPaise,
+      reconciledAmountPaise: roundedPaidPaise,
     };
   }
 

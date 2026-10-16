@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { OverviewHeader } from '@/components/dashboard/OverviewHeader';
 import { MetricCards } from '@/components/dashboard/MetricCards';
@@ -37,6 +37,8 @@ export default function OverviewPage() {
   const [stressLoading, setStressLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState<TabId>('RADAR');
+  const [refreshCountdown, setRefreshCountdown] = useState(60);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [metrics, setMetrics] = useState<MerchantRevenueMetrics>({
     totalGmvPaise: 0,
@@ -76,6 +78,21 @@ export default function OverviewPage() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Auto-refresh every 60 seconds
+  useEffect(() => {
+    setRefreshCountdown(60);
+    intervalRef.current = setInterval(() => {
+      setRefreshCountdown(prev => {
+        if (prev <= 1) {
+          fetchData();
+          return 60;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [fetchData]);
 
   const handleRunDemo = async () => {
     setLoading(true);
@@ -147,7 +164,7 @@ export default function OverviewPage() {
       <div className="nb-page">
 
         {/* Header */}
-        <OverviewHeader onRunDemo={handleRunDemo} loading={loading} lastUpdated={lastUpdated} />
+        <OverviewHeader onRunDemo={handleRunDemo} loading={loading} lastUpdated={lastUpdated} refreshCountdown={refreshCountdown} />
 
         {/* Metric cards */}
         <MetricCards metrics={metrics} />

@@ -20,6 +20,7 @@
     --nb-bevel:       rgba(255, 255, 255, 0.85);
     --nb-recessed:    #E2E8F0;
     --nb-rim-shade:   rgba(0, 0, 0, 0.08);
+    --nb-text-muted:  #64748B; /* alias for nb-muted */
   }
 
   .dark {
@@ -38,6 +39,7 @@
     --nb-bevel:       rgba(255, 255, 255, 0.12);
     --nb-recessed:    #0A0F1A;
     --nb-rim-shade:   rgba(0, 0, 0, 0.45);
+    --nb-text-muted:  #94A3B8; /* alias for nb-muted */
   }
 
   * {
@@ -467,4 +469,22 @@ kbd {
   box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.4),
     0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ─── Slide-up animation (for result panels) ────────────────────────── */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out both;
+}
+
+/* ─── Fade-in animation ─────────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out both;
 }

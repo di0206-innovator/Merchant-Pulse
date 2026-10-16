@@ -126,7 +126,8 @@ export default function KnowledgeBasePage() {
       setFiles(prev => prev.map(f => f.id === uiId ? { ...f, id: documentId } : f));
 
       // 2. Upload to storage
-      const storagePath = `documents/${documentId}-${fileObj.name}`;
+      const safeName = fileObj.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 200);
+      const storagePath = `documents/${documentId}-${safeName}`;
       const { error: storageError } = await supabase.storage
         .from('knowledge_base')
         .upload(storagePath, fileObj);
@@ -169,8 +170,8 @@ export default function KnowledgeBasePage() {
       alert('Some files were ignored because they exceed the 20MB limit.');
     }
 
-    const initialFiles: UploadedFile[] = validFiles.map(f => ({
-      id: Math.random().toString(36).substring(7),
+    const initialFiles: UploadedFile[] = validFiles.map((f, i) => ({
+      id: `tmp_${Date.now()}_${String(i)}`,
       name: f.name,
       type: f.type.includes('pdf') ? 'pdf' : (f.type.includes('audio') ? 'audio' : 'other'),
       status: 'processing',

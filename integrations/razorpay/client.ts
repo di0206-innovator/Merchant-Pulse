@@ -66,6 +66,23 @@ function validatePaymentLinkId(paymentLinkId: string): string {
   return encodeURIComponent(paymentLinkId.trim());
 }
 
+async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number = REQUEST_TIMEOUT_MS): Promise<Response> {
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutHandle = setTimeout(() => {
+      reject(new Error(`[LiveRazorpayClientAdapter] Request timed out after ${timeoutMs}ms (ETIMEDOUT)`));
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([fetch(url, init), timeoutPromise]);
+  } finally {
+    if (timeoutHandle !== undefined) {
+      clearTimeout(timeoutHandle);
+    }
+  }
+}
+
 export class MockRazorpayClientAdapter implements RazorpayClientAdapter {
   public readonly name = 'MockRazorpayClientAdapter';
   private links: Map<string, PaymentLinkResponse> = new Map();
@@ -146,13 +163,6 @@ export class LiveRazorpayClientAdapter implements RazorpayClientAdapter {
     return `Basic ${base64}`;
   }
 
-  private getTimeoutSignal(): AbortSignal | undefined {
-    if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
-      return AbortSignal.timeout(REQUEST_TIMEOUT_MS);
-    }
-    return undefined;
-  }
-
   public async createPaymentLink(params: CreatePaymentLinkParams): Promise<PaymentLinkResponse> {
     validatePaymentLinkParams(params);
 
@@ -182,14 +192,13 @@ export class LiveRazorpayClientAdapter implements RazorpayClientAdapter {
       callback_url: params.callbackUrl,
     };
 
-    const res = await fetch(`${this.baseUrl}/payment_links`, {
+    const res = await fetchWithTimeout(`${this.baseUrl}/payment_links`, {
       method: 'POST',
       headers: {
         'Authorization': this.getAuthHeader(),
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
-      signal: this.getTimeoutSignal(),
     });
 
     if (!res.ok) {
@@ -213,12 +222,11 @@ export class LiveRazorpayClientAdapter implements RazorpayClientAdapter {
   public async cancelPaymentLink(paymentLinkId: string): Promise<{ success: boolean; id: string; status: string }> {
     const safeId = validatePaymentLinkId(paymentLinkId);
 
-    const res = await fetch(`${this.baseUrl}/payment_links/${safeId}/cancel`, {
+    const res = await fetchWithTimeout(`${this.baseUrl}/payment_links/${safeId}/cancel`, {
       method: 'POST',
       headers: {
         'Authorization': this.getAuthHeader(),
       },
-      signal: this.getTimeoutSignal(),
     });
 
     if (!res.ok) {
@@ -236,12 +244,11 @@ export class LiveRazorpayClientAdapter implements RazorpayClientAdapter {
       throw new Error('[LiveRazorpayClientAdapter] Invalid notification medium.');
     }
 
-    const res = await fetch(`${this.baseUrl}/payment_links/${safeId}/notify_by/${medium}`, {
+    const res = await fetchWithTimeout(`${this.baseUrl}/payment_links/${safeId}/notify_by/${medium}`, {
       method: 'POST',
       headers: {
         'Authorization': this.getAuthHeader(),
       },
-      signal: this.getTimeoutSignal(),
     });
 
     if (!res.ok) {

@@ -2,249 +2,197 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Building2, Globe, Phone, TrendingUp, ChevronRight } from 'lucide-react';
-
-const BUSINESS_TYPES = [
-  'E-Commerce', 'SaaS / Software', 'Retail', 'Food & Beverage',
-  'Education', 'Healthcare', 'Travel & Hospitality', 'Other',
-];
-
-const GMV_RANGES = [
-  'Under ₹10L / month',
-  '₹10L – ₹50L / month',
-  '₹50L – ₹5Cr / month',
-  'Above ₹5Cr / month',
-];
+import Link from 'next/link';
+import { ShieldCheck, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useOnboarding, Plan } from '@/lib/onboardingContext';
+import { sanitizeInput } from '@/lib/cryptoUtils';
+import { trackAnalyticsEvent } from '@/lib/env';
 
 export default function BusinessOnboardingPage() {
   const router = useRouter();
-  const [form, setForm] = useState({
-    businessName: '',
-    businessType: '',
-    website: '',
-    monthlyGmv: '',
-    phone: '',
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { completeOnboarding } = useOnboarding();
+  const [businessName, setBusinessName] = useState('');
+  const [businessType, setBusinessType] = useState('D2C E-Commerce');
+  const [website, setWebsite] = useState('');
+  const [monthlyGmv, setMonthlyGmv] = useState('₹50L – ₹5Cr');
+  const [phone, setPhone] = useState('');
+  const [selectedPlan, setSelectedPlan] = useState<Plan>('pro');
   const [loading, setLoading] = useState(false);
-  const [razorpayConnected, setRazorpayConnected] = useState(true);
+  const [error, setError] = useState('');
 
-  const set = (key: string, value: string) => {
-    setForm(prev => ({ ...prev, [key]: value }));
-    setErrors(prev => ({ ...prev, [key]: '' }));
-  };
-
-  const applyTemplate = (name: string, type: string, gmv: string, site: string) => {
-    setForm({
-      businessName: name,
-      businessType: type,
-      website: site,
-      monthlyGmv: gmv,
-      phone: '+91 98765 43210',
-    });
-    setErrors({});
-  };
-
-  const validate = () => {
-    const e: Record<string, string> = {};
-    if (!form.businessName.trim()) e.businessName = 'Business name is required';
-    if (!form.businessType) e.businessType = 'Select your business type';
-    if (!form.monthlyGmv) e.monthlyGmv = 'Select your GMV range';
-    return e;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
+    setError('');
+
+    const cleanName = sanitizeInput(businessName, 100);
+    const cleanWeb = sanitizeInput(website, 150);
+    const cleanPhone = sanitizeInput(phone, 20);
+
+    if (cleanName.length < 2) {
+      setError('Please enter a valid business name (at least 2 characters).');
+      return;
+    }
+    if (cleanWeb && !/^https?:\/\/[^\s$.?#].[^\s]*$/i.test(cleanWeb)) {
+      setError('Please enter a valid website URL starting with https:// or http://.');
+      return;
+    }
+    if (!/^\+?[0-9\s-]{8,16}$/.test(cleanPhone)) {
+      setError('Please enter a valid business contact phone number.');
+      return;
+    }
+
     setLoading(true);
+    await new Promise(r => setTimeout(r, 400));
 
-    // Store in sessionStorage for the plan page to pick up
-    try {
-      sessionStorage.setItem('mp_biz', JSON.stringify({ ...form, razorpayConnected }));
-    } catch {}
+    completeOnboarding(selectedPlan, {
+      businessName: cleanName,
+      businessType: sanitizeInput(businessType, 64),
+      website: cleanWeb || 'https://merchantpulse.io',
+      monthlyGmv: sanitizeInput(monthlyGmv, 64),
+      phone: cleanPhone,
+    });
 
-    setTimeout(() => {
-      setLoading(false);
-      router.push('/onboarding/plan');
-    }, 400);
+    trackAnalyticsEvent('onboarding_completed', {
+      plan: selectedPlan,
+      businessType,
+      monthlyGmv,
+    });
+
+    setLoading(false);
+    router.push('/thank-you');
   };
 
   return (
-    <div className="min-h-screen bg-[var(--nb-bg)] flex flex-col">
-
-      {/* Progress header */}
-      <header className="border-b border-white/10 bg-[var(--nb-surface)] px-6 py-4 flex items-center justify-between shadow-skeuo-card">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-b from-amber-400 to-amber-600 flex items-center justify-center font-mono text-xs font-black text-slate-950 shadow-skeuo-gold">
-            MP
-          </div>
-          <span className="font-black uppercase text-sm tracking-tight text-white">MerchantPulse</span>
-        </div>
-
-        {/* Steps indicator */}
-        <div className="flex items-center gap-2 font-mono text-[10px]">
-          <span className="rounded-lg bg-gradient-to-b from-amber-400 to-amber-600 text-slate-950 px-3 py-1.5 font-black shadow-skeuo-gold">01 Business</span>
-          <ChevronRight className="w-3 h-3 text-[var(--nb-text-muted)]" />
-          <span className="rounded-lg border border-white/15 bg-[var(--nb-recessed)] text-[var(--nb-text-muted)] px-3 py-1.5 shadow-skeuo-inset">02 Plan</span>
-          <ChevronRight className="w-3 h-3 text-[var(--nb-text-muted)]" />
-          <span className="rounded-lg border border-white/15 bg-[var(--nb-recessed)] text-[var(--nb-text-muted)] px-3 py-1.5 shadow-skeuo-inset">03 Dashboard</span>
-        </div>
-      </header>
-
-      <main className="flex-1 flex items-start justify-center p-4 py-12">
-        <div className="w-full max-w-2xl">
-
-          <div className="mb-8">
-            <div className="nb-eyebrow mb-4">
-              <Building2 className="w-3.5 h-3.5" />
-              Step 1 of 2 — Business Setup
-            </div>
-            <h1 className="font-black uppercase text-3xl sm:text-4xl text-white leading-tight">
-              Tell us about<br />
-              <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">your business</span>
+    <main className="min-h-screen bg-nb-bg text-nb-white flex items-center justify-center p-4 sm:p-6 pb-24">
+      <div className="w-full max-w-xl nb-panel p-8 sm:p-10 space-y-6 shadow-skeuo-card-lg">
+        <div className="flex items-center justify-between border-b border-nb-stroke/50 pb-4">
+          <div>
+            <span className="nb-eyebrow">Merchant Activation</span>
+            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white mt-1">
+              Configure Your Workspace
             </h1>
-            <p className="mt-3 font-mono text-xs text-[var(--nb-text-muted)] max-w-md leading-6">
-              This helps us calibrate your recovery benchmarks and surface the most relevant insights right away.
-            </p>
+          </div>
+          <ShieldCheck className="w-8 h-8 text-amber-400 shrink-0" aria-hidden="true" />
+        </div>
 
-            {/* Quick Templates Bar */}
-            <div className="mt-5 flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[10px] text-[var(--nb-text-muted)] uppercase tracking-wider">Quick Fill:</span>
-              <button
-                type="button"
-                onClick={() => applyTemplate('Zomato Delivery Pvt', 'Food & Beverage', '₹50L – ₹5Cr / month', 'https://zomato.com')}
-                className="px-3 py-1.5 rounded-lg border border-amber-500/30 bg-[var(--nb-recessed)] text-amber-400 font-mono text-[10px] hover:border-amber-400/80 shadow-skeuo-card active:translate-y-0.5 transition-all"
+        {error && (
+          <div role="alert" className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 font-mono text-xs text-rose-400 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4 font-mono text-xs" noValidate>
+          <div>
+            <label htmlFor="biz-name" className="nb-label">Registered Business Name *</label>
+            <input
+              id="biz-name"
+              type="text"
+              required
+              placeholder="Acme Retail Pvt. Ltd."
+              value={businessName}
+              onChange={e => setBusinessName(e.target.value)}
+              className="nb-input"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="biz-type" className="nb-label">Industry Segment</label>
+              <select
+                id="biz-type"
+                value={businessType}
+                onChange={e => setBusinessType(e.target.value)}
+                className="nb-input"
               >
-                Food &amp; Delivery
-              </button>
-              <button
-                type="button"
-                onClick={() => applyTemplate('Nykaa Beauty Trends', 'E-Commerce', '₹50L – ₹5Cr / month', 'https://nykaa.com')}
-                className="px-3 py-1.5 rounded-lg border border-blue-500/30 bg-[var(--nb-recessed)] text-blue-400 font-mono text-[10px] hover:border-blue-400/80 shadow-skeuo-card active:translate-y-0.5 transition-all"
+                <option value="D2C E-Commerce">D2C E-Commerce</option>
+                <option value="SaaS & Subscriptions">SaaS &amp; Subscriptions</option>
+                <option value="Fintech & EdTech">Fintech &amp; EdTech</option>
+                <option value="Marketplace">Marketplace</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="biz-gmv" className="nb-label">Monthly Razorpay GMV</label>
+              <select
+                id="biz-gmv"
+                value={monthlyGmv}
+                onChange={e => setMonthlyGmv(e.target.value)}
+                className="nb-input"
               >
-                D2C E-Commerce
-              </button>
-              <button
-                type="button"
-                onClick={() => applyTemplate('Postman SaaS Hub', 'SaaS / Software', 'Above ₹5Cr / month', 'https://postman.com')}
-                className="px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-[var(--nb-recessed)] text-emerald-400 font-mono text-[10px] hover:border-emerald-400/80 shadow-skeuo-card active:translate-y-0.5 transition-all"
-              >
-                B2B SaaS
-              </button>
+                <option value="Up to ₹50L">Up to ₹50L</option>
+                <option value="₹50L – ₹5Cr">₹50L – ₹5Cr</option>
+                <option value="₹5Cr – ₹25Cr">₹5Cr – ₹25Cr</option>
+                <option value="₹25Cr+">₹25Cr+</option>
+              </select>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-
-            {/* Business name */}
-            <div className="nb-panel p-6 space-y-3">
-              <label className="nb-label text-xs text-white">Business / Brand Name *</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="biz-web" className="nb-label">Storefront URL</label>
               <input
-                type="text"
-                placeholder="Acme Pvt. Ltd."
-                value={form.businessName}
-                onChange={e => set('businessName', e.target.value)}
-                className={`nb-input ${errors.businessName ? 'border-rose-500' : ''}`}
+                id="biz-web"
+                type="url"
+                placeholder="https://yourstore.in"
+                value={website}
+                onChange={e => setWebsite(e.target.value)}
+                className="nb-input"
               />
-              {errors.businessName && (
-                <p className="mt-1.5 font-mono text-[10px] text-rose-400">{errors.businessName}</p>
-              )}
             </div>
-
-            {/* Business type */}
-            <div className="nb-panel p-6 space-y-3">
-              <label className="nb-label text-xs text-white">Business Type *</label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-2">
-                {BUSINESS_TYPES.map(type => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => set('businessType', type)}
-                    className={`rounded-xl px-3 py-2.5 font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-150 text-center ${
-                      form.businessType === type
-                        ? 'border border-blue-500/60 bg-blue-500/15 text-blue-400 shadow-skeuo-blue font-black'
-                        : 'border border-white/10 bg-[var(--nb-recessed)] text-[var(--nb-text-muted)] hover:border-white/25 hover:text-white shadow-skeuo-card'
-                    }`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-              {errors.businessType && (
-                <p className="mt-2 font-mono text-[10px] text-rose-400">{errors.businessType}</p>
-              )}
+            <div>
+              <label htmlFor="biz-phone" className="nb-label">Ops Alert Phone *</label>
+              <input
+                id="biz-phone"
+                type="tel"
+                required
+                placeholder="+91 98765 43210"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                className="nb-input"
+              />
             </div>
+          </div>
 
-            {/* Monthly GMV */}
-            <div className="nb-panel p-6 space-y-3">
-              <label className="nb-label text-xs text-white">Estimated Monthly GMV *</label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2">
-                {GMV_RANGES.map(range => (
-                  <button
-                    key={range}
-                    type="button"
-                    onClick={() => set('monthlyGmv', range)}
-                    className={`rounded-xl px-4 py-3 font-mono text-[11px] font-bold uppercase tracking-wider transition-all duration-150 text-left flex items-center gap-2.5 ${
-                      form.monthlyGmv === range
-                        ? 'border border-emerald-500/60 bg-emerald-500/15 text-emerald-400 shadow-skeuo-green font-black'
-                        : 'border border-white/10 bg-[var(--nb-recessed)] text-[var(--nb-text-muted)] hover:border-white/25 hover:text-white shadow-skeuo-card'
-                    }`}
-                  >
-                    <TrendingUp className="w-4 h-4 shrink-0" />
-                    {range}
-                  </button>
-                ))}
-              </div>
-              {errors.monthlyGmv && (
-                <p className="mt-2 font-mono text-[10px] text-rose-400">{errors.monthlyGmv}</p>
-              )}
+          <div>
+            <span className="nb-label">Select Recovery Plan</span>
+            <div className="grid grid-cols-3 gap-2.5 mt-1">
+              {([
+                { id: 'base', label: 'Base', sub: 'Free · <₹5L GMV' },
+                { id: 'pro', label: 'Pro', sub: '₹4,999/mo + 1.5%' },
+                { id: 'max', label: 'Max', sub: 'Enterprise SLA' },
+              ] as const).map(tier => (
+                <button
+                  key={tier.id}
+                  type="button"
+                  onClick={() => setSelectedPlan(tier.id)}
+                  className={`p-3 rounded-xl border text-left transition-all ${
+                    selectedPlan === tier.id
+                      ? 'border-amber-400 bg-amber-500/15 text-white shadow-skeuo-gold'
+                      : 'border-white/10 bg-[var(--nb-recessed)] text-nb-muted hover:text-white'
+                  }`}
+                >
+                  <div className="font-black uppercase text-xs flex items-center justify-between">
+                    {tier.label}
+                    {selectedPlan === tier.id && <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />}
+                  </div>
+                  <div className="text-[10px] text-nb-muted mt-1">{tier.sub}</div>
+                </button>
+              ))}
             </div>
+          </div>
 
-            {/* Optional fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="nb-label">Website (optional)</label>
-                <div className="relative">
-                  <Globe className="w-4 h-4 text-[var(--nb-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="url"
-                    placeholder="https://yoursite.com"
-                    value={form.website}
-                    onChange={e => set('website', e.target.value)}
-                    className="nb-input pl-10"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="nb-label">Phone (optional)</label>
-                <div className="relative">
-                  <Phone className="w-4 h-4 text-[var(--nb-text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="tel"
-                    placeholder="+91 98765 43210"
-                    value={form.phone}
-                    onChange={e => set('phone', e.target.value)}
-                    className="nb-input pl-10"
-                  />
-                </div>
-              </div>
-            </div>
+          <button type="submit" disabled={loading} className="nb-primary-button w-full py-3.5 justify-center">
+            <span>{loading ? 'Provisioning Guardrails...' : 'Complete Activation'}</span>
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
+          </button>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="nb-primary-button w-full mt-2"
-            >
-              {loading
-                ? <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                : <ArrowRight className="w-4 h-4" />
-              }
-              <span>{loading ? 'Saving...' : 'Continue to Plan Selection'}</span>
-            </button>
-          </form>
-        </div>
-      </main>
-    </div>
+          <div className="text-center pt-2">
+            <Link href="/overview" className="text-[11px] text-nb-muted hover:text-white underline">
+              Skip to sandbox console
+            </Link>
+          </div>
+        </form>
+      </div>
+    </main>
   );
 }
